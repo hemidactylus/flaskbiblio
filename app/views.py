@@ -14,9 +14,9 @@ from app.database.models import (
 # global static init lists and db
 db=dbGetDatabase()
 languages=list(dbGetAll('language'))
-languagesDict=dbMakeDict(languages)
+languagesDict=dbMakeDict(languages,'tag')
 booktypes=list(dbGetAll('booktype'))
-booktypesDict=dbMakeDict(booktypes)
+booktypesDict=dbMakeDict(booktypes,'tag')
 
 @app.route('/')
 @app.route('/index')
@@ -53,6 +53,39 @@ def ep_booktypes():
                                 "booktypes.html",
                                 user=user,
                                 booktypes=booktypes,
+                            )
+
+@app.route('/authors')
+def ep_authors():
+    user = {'nickname': 'Miguel'}  # fake user
+    authors=list(dbGetAll('author'))
+    return render_template  (
+                                "authors.html",
+                                user=user,
+                                authors=authors,
+                            )
+
+def resolveParams():
+    # refresh authors list
+    authors=list(dbGetAll('author'))
+    authorsDict=dbMakeDict(authors)
+    # pack the rest
+    return {
+                'authors': authorsDict,
+                'languages': languagesDict,
+                'booktypes': booktypesDict
+            }
+
+@app.route('/books')
+def ep_books():
+    user = {'nickname': 'Miguel'}  # fake user
+    # perform live query
+    books=dbGetAll('book',resolve=True, resolveParams=resolveParams())
+    # authors={},languages={},booktypes={}
+    return render_template  (
+                                "books.html",
+                                user=user,
+                                books=books,
                             )
 
 @app.route('/login', methods=['GET', 'POST'])

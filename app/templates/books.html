@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Hi, {{ user.nickname }}!</h1>
+    <ul>
+    {% for book in books %}
+        <li>
+            {{ book.title }}
+            [
+                {% for auth in book.resAuthors %}
+                    {{ auth.firstname }} {{ auth.lastname }}
+                {% endfor %}
+            ]
+            {{ book.resInhouse }}
+            <i>{{ book.notes }}</i>
+            [
+                {% for lang in book.resLanguages %}
+                    {{ lang.name }}
+                {% endfor %}
+            ]
+            {{ book.resBooktype.name }}
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

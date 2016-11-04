@@ -14,6 +14,12 @@ class Book(AutoModel):
     languages=str
     lasteditor=int
 
+    def resolveReferences(self,authors={},languages={},booktypes={}):
+        self.resAuthors=[authors[int(aID)] for aID in self.authors.split(',') if int(aID) in authors]
+        self.resLanguages=[languages[lID] for lID in self.languages.split(',') if lID in languages]
+        self.resBooktype=booktypes.get(self.booktype,'')
+        return self
+
 class User(AutoModel):
     name=str
     passwordhash=str
