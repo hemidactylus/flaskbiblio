@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Hi, {{ user.nickname }}!</h1>
+    {% for language in languages %}
+        <div><p>{{ language.tag }}: <b>{{ language.name }}</b></p></div>
+    {% endfor %}
+{% endblock %}
