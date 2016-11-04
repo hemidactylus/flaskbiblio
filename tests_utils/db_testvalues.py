@@ -1,25 +1,14 @@
 # db test values to populate (minimally) the DB
 
-'''
-            [id]
-    title         VARCHAR,
-    authorid      INTEGER,
-    type          INTEGER,
-    inhouse       BOOLEAN,
-    notes         VARCHAR,
-    languages     VARCHAR,
-    lasteditor    INTEGER
-'''
-
 # tablename -> list-of-rows
 _testvalues={
-    'users': [
+    'user': [
                 {
                     'name': 'Stefano',
                     'passwordhash': '123',
                 },
             ],
-    'authors': [
+    'author': [
                 {
                     'firstname': 'Jose',
                     'lastname': 'Saramago',
@@ -29,43 +18,43 @@ _testvalues={
                     'lastname': 'Tolstoj',
                 },
             ],
-    'languages': [
+    'language': [
                 {
-                    'id': 'IT',
+                    'tag': 'IT',
                     'name': 'Italian',
                 },
                 {
-                    'id': 'EN',
+                    'tag': 'EN',
                     'name': 'English',
                 },
                 {
-                    'id': 'DE',
+                    'tag': 'DE',
                     'name': 'German',
                 },
             ],
-    'booktypes': [
+    'booktype': [
                 {
-                    'id': 'DIZ',
+                    'tag': 'DIZ',
                     'name': 'Dictionary',
                 },
                 {
-                    'id': 'BKT',
+                    'tag': 'BKT',
                     'name': 'Booklet',
                 },
                 {
-                    'id': 'FIC',
+                    'tag': 'FIC',
                     'name': 'Fiction',
                 },
                 {
-                    'id': 'SAG',
+                    'tag': 'ESS',
                     'name': 'Essay',
                 },
             ],
-    'books': [
+    'book': [
                 {
                     'title':         'Tutti i nomi',
                     'authors':       '1',
-                    'type':          2,
+                    'booktype':      'FIC',
                     'inhouse':       True,
                     'notes':         'Carino',
                     'languages':     'PT,IT',
@@ -74,7 +63,7 @@ _testvalues={
                 {
                     'title':         'Guida alle bucce',
                     'authors':       '3',
-                    'type':          -2,
+                    'booktype':      'ESS',
                     'inhouse':       False,
                     'notes':         'Mediocre',
                     'languages':     'IT',

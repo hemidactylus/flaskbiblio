@@ -5,12 +5,22 @@ import sys
 import sqlite3 as lite
 from operator import itemgetter
 
+from orm import Model, Database
+
 import env
 
 from config import DB_DIRECTORY, DB_NAME
 from app.utils.interactive import ask_for_confirmation
-from app.database.db_description import tableDesc
 from db_testvalues import _testvalues
+
+from app.database.models import (
+                                    tableToModel, 
+                                    User,
+                                    Author,
+                                    Language,
+                                    Booktype,
+                                    Book,
+                                )
 
 def clearToProceed(dbfilename):
     '''
@@ -30,35 +40,26 @@ def clearToProceed(dbfilename):
     else:
         return True
 
-def generate_db(dbfilename):
+def generate_db(dbFile):
     '''
-        Creates a standard database file, using table descriptors in /database
+        returns an orm Database object
     '''
-    with lite.connect(dbfilename) as dbcon:
-        cur=dbcon.cursor()
-        # automated table creation
-        for tableName, tableFields in tableDesc.items():
-            creationCommand='CREATE TABLE %s (%s)' % (
-                    tableName,
-                    ','.join(['%s %s' % fPair for fPair in tableFields])
-                )
-            cur.execute(creationCommand)
+    return Database(dbFile)
 
-def populate_db(dbfilename):
+def populate_db(db):
     '''
-        using the db table descriptors in /database and the local dummy values, populates the db
+        populates the DB through the use of ORMs
     '''
-    with lite.connect(dbfilename) as dbcon:
-        cur=dbcon.cursor()
-        # for each table in the testvalues list, insert the provided rows
-        for tableName, tableRows in _testvalues.items():
-            for tRow in tableRows:
-                # make each one into a proper tuple as required by the sqllite driver before insertion
-                tFields=list(filter(lambda fld: fld in tRow,map(itemgetter(0),tableDesc[tableName])))
-                actualFields=tuple(tRow[fld] for fld in tFields)
-                fDesc=','.join(tFields)
-                qMarks=','.join(['?']*len(actualFields))
-                cur.execute('INSERT INTO %s (%s) VALUES (%s)' % (tableName,fDesc,qMarks), actualFields)
+    print('')
+    for qTable,qModel in tableToModel.items():
+        print('    %s' % qTable)
+        qModel.db=db
+        for item in _testvalues[qTable]:
+            qObject=qModel(**item)
+            qObject.save()
+
+def commit_db(db):
+    db.commit()
 
 def logDo(fct,msg):
     '''
@@ -66,9 +67,10 @@ def logDo(fct,msg):
     '''
     print('%s ... ' % msg,end='')
     sys.stdout.flush()
-    fct()
+    retval=fct()
     print('Done.')
     sys.stdout.flush()
+    return retval
 
 if __name__=='__main__':
 
@@ -76,8 +78,9 @@ if __name__=='__main__':
     print('Database file: %s' % dbFile)
 
     if clearToProceed(dbFile):
-        logDo(lambda: generate_db(dbFile),'Generating DB')
-        logDo(lambda: populate_db(dbFile),'Populating DB')
+        db=logDo(lambda: generate_db(dbFile),'Generating DB')
+        logDo(lambda: populate_db(db),'Populating DB')
+        logDo(lambda: commit_db(db),'Closing DB')
         print('Finished.')
     else:
         print('Operation aborted.')
