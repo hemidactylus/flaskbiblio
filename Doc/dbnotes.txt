@@ -19,7 +19,7 @@ flaskbiblio, internal notes "as we go along"
     (note the serialised string in 'languages'. Suboptimal solution but acceptable here)
         'id'            A5F0123
         'title'         'The book of books'
-        'authorid'      11111
+        'authorid'      '11111,1543,12'
         'type'          'DIC'
         'inhouse'       False
         'notes'         'Given to John in September 2015'
@@ -29,4 +29,4 @@ flaskbiblio, internal notes "as we go along"
     Helper table 'users'
         'id'            U123
         'name'          Stefano
-        'passwordhash'  B045F34...
+        'passwordhash'  B045F34... * password during tests

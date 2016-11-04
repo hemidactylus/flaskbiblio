@@ -3,6 +3,7 @@
 import os
 import sys
 import sqlite3 as lite
+from operator import itemgetter
 
 import env
 
@@ -53,8 +54,11 @@ def populate_db(dbfilename):
         for tableName, tableRows in _testvalues.items():
             for tRow in tableRows:
                 # make each one into a proper tuple as required by the sqllite driver before insertion
-                tFields=tableDesc[tRow]
-                actualFields FROM HERE BUILD THE INSERT QUERY
+                tFields=list(filter(lambda fld: fld in tRow,map(itemgetter(0),tableDesc[tableName])))
+                actualFields=tuple(tRow[fld] for fld in tFields)
+                fDesc=','.join(tFields)
+                qMarks=','.join(['?']*len(actualFields))
+                cur.execute('INSERT INTO %s (%s) VALUES (%s)' % (tableName,fDesc,qMarks), actualFields)
 
 def logDo(fct,msg):
     '''
