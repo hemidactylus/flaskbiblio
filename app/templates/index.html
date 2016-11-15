@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Hi, {{ user.nickname }}!</h1>
+    {% if g.user.is_authenticated %}
+          <h1>Hi, {{ user.name }}!</h1>
+    {% else %}
+          <h1>Welcome. Please log in</h1>
+    {% endif %}
     {% for post in posts %}
-    <div><p>{{ post.author.nickname }} says: <b>{{ post.body }}</b></p></div>
+        <div><p>{{ post.author.name }} says: <b>{{ post.body }}</b></p></div>
     {% endfor %}
 {% endblock %}

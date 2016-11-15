@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Hi, {{ user.nickname }}!</h1>
+    <h3>Hi, {{ user.name }}!</h3>
+    <hr>
+    <h2>Author list</h2>
     {% for author in authors %}
         <div><p>{{ author.lastname }}, {{ author.firstname }}</p></div>
     {% endfor %}

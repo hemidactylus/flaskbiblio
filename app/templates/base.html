@@ -7,19 +7,26 @@
     {% endif %}
   </head>
   <body>
-    <div>Navigation bar:
+    <div><img width="60px" src="images/library.png"></div>
+    <div>
+          Navigation bar:
             <a href="/index">Home</a>
-            <a href="/books">Books</a>
-            <a href="/authors">Authors</a>
-            <a href="/booktypes">Booktypes</a>
-            <a href="/languages">Languages</a>
+            {% if g.user.is_authenticated %}
+              <a href="/books">Books</a>
+              <a href="/authors">Authors</a>
+              <a href="/booktypes">Booktypes</a>
+              <a href="/languages">Languages</a>
+              <b><a href="{{ url_for('ep_logout') }}">Logout</a></b>
+            {% else %}
+              <b><a href="{{ url_for('ep_login') }}">Login</a></b>
+            {% endif %}
     </div>
     <hr>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul>
         {% for message in messages %}
-            <li>{{ message }} </li>
+            <li><font color="red">{{ message }}</font></li>
         {% endfor %}
         </ul>
       {% endif %}

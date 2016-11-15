@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Hi, {{ user.nickname }}!</h1>
+    <h1>Hi, {{ user.name }}!</h1>
     <ul>
     {% for book in books %}
         <li>
@@ -10,7 +10,7 @@
                     {{ auth.firstname }} {{ auth.lastname }}
                 {% endfor %}
             ]
-            {{ book.resInhouse }}
+            {{ book.inhouse | string }}
             <i>{{ book.notes }}</i>
             [
                 {% for lang in book.resLanguages %}

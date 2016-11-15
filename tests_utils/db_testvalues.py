@@ -17,6 +17,14 @@ _testvalues={
                     'firstname': 'Lev',
                     'lastname': 'Tolstoj',
                 },
+                {
+                    'firstname': 'Gennaro',
+                    'lastname': 'Sbucciapesche',
+                },
+                {
+                    'firstname': 'Filippo',
+                    'lastname': 'Roditorsoli',
+                },
             ],
     'language': [
                 {
@@ -30,6 +38,10 @@ _testvalues={
                 {
                     'tag': 'DE',
                     'name': 'German',
+                },
+                {
+                    'tag': 'PT',
+                    'name': 'Portuguese',
                 },
             ],
     'booktype': [
@@ -58,16 +70,16 @@ _testvalues={
                     'inhouse':       True,
                     'notes':         'Carino',
                     'languages':     'PT,IT',
-                    'lasteditor':    100,
+                    'lasteditor':    1,
                 },
                 {
                     'title':         'Guida alle bucce',
-                    'authors':       '3',
+                    'authors':       '3,4',
                     'booktype':      'ESS',
                     'inhouse':       False,
                     'notes':         'Mediocre',
                     'languages':     'IT',
-                    'lasteditor':    101,
+                    'lasteditor':    1,
                 },
             ],
 }

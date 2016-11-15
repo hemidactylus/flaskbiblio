@@ -42,3 +42,15 @@ def dbMakeDict(objList, fieldname='id'):
         into a dict id -> object, for ease of lookup
     '''
     return {getattr(obj,fieldname): obj for obj in objList}
+
+# table-specific tools
+def dbGetUser(name):
+    '''
+        Returns a user object from its name,
+        None if not found
+    '''
+    db=dbGetDatabase()
+    for qUser in User.manager(db).all():
+        if qUser.name==name:
+            return qUser
+
