@@ -7,7 +7,13 @@
     {% endif %}
   </head>
   <body>
-    <div><img width="60px" src="images/library.png"></div>
+    <div><img width=30px" src="images/library.png"><i>
+            {% if g.user.is_authenticated %}
+              Hi, {{ g.user.name }} !
+            {% else %}
+              Log in to use the Library
+            {% endif %}
+    </i></div>
     <div>
           Navigation bar:
             <a href="/index">Home</a>

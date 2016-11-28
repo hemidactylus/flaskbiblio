@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-    <h3>Hi, {{ user.name }}!</h3>
+    <h2>Author list <a href="{{ url_for('ep_newauthor') }}">Add new</a></h2>
     <hr>
-    <h2>Author list</h2>
     {% for author in authors %}
-        <div><p>{{ author.lastname }}, {{ author.firstname }}</p></div>
+        <div>
+            <p>{{ author.lastname }}, {{ author.firstname }}
+            <a href="{{url_for('ep_editauthor',id=author.id)}}">Ed</a>
+            <a href="{{url_for('ep_deleteauthor',id=author.id)}}">X</a>
+        </p></div>
     {% endfor %}
 {% endblock %}

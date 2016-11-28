@@ -50,6 +50,9 @@ class Author(AutoModel):
     firstname=str
     lastname=str
 
+    def __str__(self):
+        return '%s, %s' % (self.lastname, self.firstname)
+
     def __lt__(self,other):
         if self.lastname!=other.lastname:
             return self.lastname < other.lastname
@@ -66,6 +69,9 @@ class Language(AutoModel):
 class Booktype(AutoModel):
     tag=str
     name=str
+
+    def __lt__(self,other):
+        return self.name < other.name
 
 tableToModel={
     'user': User,

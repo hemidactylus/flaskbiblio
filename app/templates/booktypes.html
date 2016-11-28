@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Hi, {{ user.name }}!</h1>
+    <h2>Booktype list</h2>
+    <hr>
     {% for booktype in booktypes %}
         <div><p>{{ booktype.tag }}: <b>{{ booktype.name }}</b></p></div>
     {% endfor %}

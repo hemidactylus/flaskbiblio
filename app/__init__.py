@@ -18,9 +18,9 @@ lm.init_app(app)
 
 # global static init lists and db
 db=dbGetDatabase()
-languages=list(dbGetAll('language'))
+languages=sorted(list(dbGetAll('language')))
 languagesDict=dbMakeDict(languages,'tag')
-booktypes=list(dbGetAll('booktype'))
+booktypes=sorted(list(dbGetAll('booktype')))
 booktypesDict=dbMakeDict(booktypes,'tag')
 
 # this must be AFTER the above, otherwise 'db' is circularly not found in the imports

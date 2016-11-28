@@ -54,3 +54,59 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
+
+def dbAddAuthor(firstname,lastname):
+    '''
+        Attempts adding and author and returns the new Author object.
+        returns None if duplicates are detected
+    '''
+    db=dbGetDatabase()
+    Author.db=db
+    for qAuthor in Author.manager(db).all():
+        if qAuthor.firstname==firstname and qAuthor.lastname==lastname:
+            return None
+    # no duplicates: add author through the orm
+    nAuthor=Author(firstname=firstname,lastname=lastname)
+    nAuthor.save()
+    db.commit()
+    return nAuthor
+
+def dbDeleteAuthor(id):
+    '''
+        attempts deletion of an author. If deletion succeeds, returns True
+    '''
+    db=dbGetDatabase()
+    Author.db=db
+    try:
+        dAuthor=Author.manager(db).get(id)
+        dAuthor.delete()
+        db.commit()
+        return id
+    except:
+        return None
+
+def dbGetAuthor(id):
+    '''
+        Returns a user object from its id,
+        None if not found
+    '''
+    db=dbGetDatabase()
+    try:
+        qAuthor=Author.manager(db).get(id)
+        return qAuthor
+    except:
+        return None
+
+def dbReplaceAuthor(id,firstname,lastname):
+    '''
+        overwrites the fields of an author given its id.
+        Returns None if not found (or other errors)
+    '''
+    db=dbGetDatabase()
+    Author.db=db
+    nAuthor=Author.manager(db).get(id)
+    nAuthor.firstname=firstname
+    nAuthor.lastname=lastname
+    nAuthor.update()
+    db.commit()
+    return nAuthor

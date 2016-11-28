@@ -2,13 +2,17 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import  login_user, logout_user, current_user, login_required
 
 from app import app, db, lm
-from .forms import LoginForm
+from .forms import LoginForm, NewAuthorForm
 
 from app.database.dbtools import    (
                                         dbGetDatabase,
                                         dbGetAll,
                                         dbMakeDict,
                                         dbGetUser,
+                                        dbAddAuthor,
+                                        dbDeleteAuthor,
+                                        dbGetAuthor,
+                                        dbReplaceAuthor,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -30,20 +34,11 @@ def before_request():
 @app.route('/index')
 def ep_index():
     user = g.user
-    posts = [  # fake array of posts
-        { 
-            'author': {'name': 'John'}, 
-            'body': 'Beautiful day in Portland!' 
-        },
-        { 
-            'author': {'name': 'Susan'}, 
-            'body': 'The Avengers movie was so cool!' 
-        }
-    ]
-    return render_template("index.html",
-                           title='Home',
-                           user=user,
-                           posts=posts)
+    return render_template(
+                            "index.html",
+                            title='Home',
+                            user=user,
+                           )
 
 @app.route('/languages')
 @login_required
@@ -51,6 +46,7 @@ def ep_languages():
     user = g.user
     return render_template  (
                                 "languages.html",
+                                title='Languages',
                                 user=user,
                                 languages=languages,
                             )
@@ -61,6 +57,7 @@ def ep_booktypes():
     user = g.user
     return render_template  (
                                 "booktypes.html",
+                                title='Book Types',
                                 user=user,
                                 booktypes=booktypes,
                             )
@@ -72,9 +69,71 @@ def ep_authors():
     authors=sorted(list(dbGetAll('author')))
     return render_template  (
                                 "authors.html",
+                                title='Authors',
                                 user=user,
                                 authors=authors,
                             )
+
+@app.route('/newauthor', methods=['GET', 'POST'])
+@login_required
+def ep_newauthor():
+    user=g.user
+    form=NewAuthorForm()
+    if form.validate_on_submit():
+        newAuthor=dbAddAuthor(form.firstname.data,form.lastname.data)
+        if newAuthor is not None:
+            flash('Author %s inserted successfully.' % newAuthor)
+        else:
+            flash('Could not perform the insertion.')
+        return redirect(url_for('ep_authors'))
+    else:
+        return render_template  (
+                                    'newauthor.html',
+                                    title='New Author',
+                                    user=user,
+                                    form=form,
+            )
+
+@app.route('/deleteauthor/<id>')
+@login_required
+def ep_deleteauthor(id):
+    user=g.user
+    if dbDeleteAuthor(int(id)):
+        flash('Author successfully deleted.')
+    else:
+        flash('Could not delete author.')
+    return redirect(url_for('ep_authors'))
+
+@app.route('/editauthor/<id>', methods=['GET', 'POST'])
+@login_required
+def ep_editauthor(id):
+    user=g.user
+    form=NewAuthorForm()
+    if form.validate_on_submit():
+        newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
+        if newAuthor is not None:
+            flash('Author %s updated successfully.' % newAuthor)
+        else:
+            flash('Could not perform the update.')
+        return redirect(url_for('ep_authors'))
+    else:
+        qAuthor=dbGetAuthor(int(id))
+        if qAuthor:
+            form.firstname.data=qAuthor.firstname
+            form.lastname.data=qAuthor.lastname
+        return render_template  (
+                                    'newauthor.html',
+                                    title='Edit Author',
+                                    user=user,
+                                    form=form,
+                                    id=id,
+            )
+
+
+def ep_editauthor(id):
+    user=g.user
+    flash('Should edit author %s' % id)
+    return redirect(url_for('ep_authors'))
 
 def resolveParams():
     # refresh authors list
@@ -96,6 +155,7 @@ def ep_books():
     # done.
     return render_template  (
                                 "books.html",
+                                title='Books',
                                 user=user,
                                 books=books,
                             )
@@ -107,13 +167,6 @@ def ep_login():
     form = LoginForm()
     if form.validate_on_submit():
         session['remember_me'] = form.remember_me.data
-        '''
-        to do:
-        user name = user id (string)
-        regenerate db
-        fix load_user
-        careful in books, last update by = user name (=id)
-        '''
         qUser=dbGetUser(form.username.data)
         if qUser and qUser.passwordhash==form.password.data:
             login_user(load_user(qUser.id))
@@ -123,7 +176,7 @@ def ep_login():
             flash('Invalid username/password provided')
             return redirect(url_for('ep_index'))
     return render_template('login.html', 
-                           title='Sign In',
+                           title='Log In',
                            form=form)
 
 @app.route('/logout')

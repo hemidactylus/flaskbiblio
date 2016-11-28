@@ -5,7 +5,4 @@
     {% else %}
           <h1>Welcome. Please log in</h1>
     {% endif %}
-    {% for post in posts %}
-        <div><p>{{ post.author.name }} says: <b>{{ post.body }}</b></p></div>
-    {% endfor %}
 {% endblock %}
