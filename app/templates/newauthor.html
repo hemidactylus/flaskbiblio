@@ -1,0 +1,26 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  {% if id %}
+    <form action="" method="post" name="{{url_for('ep_editauthor',id=id)}}">
+  {% else %}
+    <form action="" method="post" name="{{url_for('ep_newauthor')}}">
+  {% endif %}
+      {{ form.hidden_tag() }}
+      <p>
+          Author's First Name:<br>
+          {{ form.firstname(size=80) }}<br>
+          {% for error in form.firstname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          Author's Last Name:<br>
+          {{ form.lastname(size=80) }}<br>
+          {% for error in form.lastname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+      </p>
+      <p><input type="submit" value="Save Author"></p>
+  </form>
+{% endblock %}
