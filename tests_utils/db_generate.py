@@ -1,5 +1,7 @@
 # test DB creation script
 
+from __future__ import print_function
+
 import os
 import sys
 import sqlite3 as lite
