@@ -10,3 +10,12 @@ class LoginForm(FlaskForm):
 class NewAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[DataRequired()])
     lastname = StringField('authorlastname', validators=[DataRequired()])
+
+class NewBookForm(FlaskForm):
+    title = StringField('booktitle', validators=[DataRequired()])
+    inhouse = BooleanField('bookinhouse', default=True)
+    notes = StringField('booknotes')
+    # TO FIX BLA BLA
+    booktype = StringField('booktype',validators=[DataRequired()])
+    languages = StringField('booklanguages', validators=[DataRequired()])
+    authors = StringField('bookauthors')

@@ -1,0 +1,46 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ title }} (<a href="{{url_for('ep_books')}}">Back</a>)</h2>
+  {% if id %}
+    <form action="" method="post" name="{{url_for('ep_editbook',id=id)}}">
+  {% else %}
+    <form action="" method="post" name="{{url_for('ep_newbook')}}">
+  {% endif %}
+      {{ form.hidden_tag() }}
+      <p>
+          Book Title:<br>
+          {{ form.title(size=80) }}<br>
+          {% for error in form.title.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          Authors:<br>
+          {{ form.authors(size=80) }}<br>
+          {% for error in form.authors.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          In House:<br>
+          {{ form.inhouse() }}<br>
+          {% for error in form.inhouse.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          Notes:<br>
+          {{ form.notes(size=80) }}<br>
+          {% for error in form.notes.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          Book Type:<br>
+          {{ form.booktype(size=80) }}<br>
+          {% for error in form.booktype.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+          Book Languages:<br>
+          {{ form.languages(size=80) }}<br>
+          {% for error in form.languages.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}<br>
+      </p>
+      <p><input type="submit" value="Save Book"></p>
+  </form>
+{% endblock %}

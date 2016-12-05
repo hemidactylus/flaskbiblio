@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Book list</h2>
+    <h2>Book list <a href="{{ url_for('ep_newbook') }}">Add new</a></h2>
     <hr>
     <ul>
     {% for book in books %}
@@ -19,6 +19,8 @@
                 {% endfor %}
             ]
             {{ book.resBooktype.name }}
+            <a href="{{url_for('ep_editbook',id=book.id)}}">E</a>
+            <a href="{{url_for('ep_deletebook',id=book.id)}}">X</a>
         </li>
     {% endfor %}
     </ul>

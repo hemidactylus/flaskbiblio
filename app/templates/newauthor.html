@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>{{ title }}</h1>
+  <h2>{{ title }} (<a href="{{url_for('ep_authors')}}">Back</a>)</h2>
   {% if id %}
     <form action="" method="post" name="{{url_for('ep_editauthor',id=id)}}">
   {% else %}

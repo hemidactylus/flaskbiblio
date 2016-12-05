@@ -54,10 +54,47 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
+def dbAddBook(title,inhouse,notes,booktype,languages,authors,lasteditor):
+    '''
+        Attempts adding a book and returns the new Book object.
+        returns None if duplicates are detected
+    '''
+    db=dbGetDatabase()
+    Book.db=db
+    for qBook in Book.manager(db).all():
+        if qBook.title==title and qBook.authors==authors: # TODO: here check ordering and tricks
+            return None
+    # no duplicates: add author through the orm
+    nBook=Book(
+        title=title,
+        inhouse=inhouse,
+        notes=notes,
+        booktype=booktype,
+        languages=languages,
+        authors=authors,
+        lasteditor=lasteditor,
+    )
+    nBook.save()
+    db.commit()
+    return nBook
+
+def dbDeleteBook(id):
+    '''
+        attempts deletion of a book. If deletion succeeds, returns True
+    '''
+    db=dbGetDatabase()
+    Book.db=db
+    try:
+        dBook=Book.manager(db).get(id)
+        dBook.delete()
+        db.commit()
+        return id
+    except:
+        return None
 
 def dbAddAuthor(firstname,lastname):
     '''
-        Attempts adding and author and returns the new Author object.
+        Attempts adding an author and returns the new Author object.
         returns None if duplicates are detected
     '''
     db=dbGetDatabase()

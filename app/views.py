@@ -2,7 +2,11 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import  login_user, logout_user, current_user, login_required
 
 from app import app, db, lm
-from .forms import LoginForm, NewAuthorForm
+from .forms import (
+                        LoginForm,
+                        NewAuthorForm,
+                        NewBookForm,
+                    )
 
 from app.database.dbtools import    (
                                         dbGetDatabase,
@@ -13,6 +17,8 @@ from app.database.dbtools import    (
                                         dbDeleteAuthor,
                                         dbGetAuthor,
                                         dbReplaceAuthor,
+                                        dbAddBook,
+                                        dbDeleteBook,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -61,6 +67,70 @@ def ep_booktypes():
                                 user=user,
                                 booktypes=booktypes,
                             )
+
+@app.route('/newbook', methods=['GET', 'POST'])
+@login_required
+def ep_newbook():
+    user=g.user
+    form=NewBookForm()
+    if form.validate_on_submit():
+        newBook=dbAddBook   (
+                                form.title.data,
+                                form.inhouse.data,
+                                form.notes.data,
+                                form.booktype.data,
+                                form.languages.data,
+                                form.authors.data,
+                                user.id
+                            )
+        if newBook is not None:
+            flash('Book %s inserted successfully.' % newBook)
+        else:
+            flash('Could not perform the insertion.')
+        return redirect(url_for('ep_books'))
+    else:
+        return render_template  (
+                                    'newbook.html',
+                                    title='New Book',
+                                    user=user,
+                                    form=form,
+            )
+
+@app.route('/deletebook/<id>')
+@login_required
+def ep_deletebook(id):
+    user=g.user
+    if dbDeleteBook(int(id)):
+        flash('Book successfully deleted.')
+    else:
+        flash('Could not delete book.')
+    return redirect(url_for('ep_books'))
+
+@app.route('/editbook/<id>', methods=['GET', 'POST'])
+@login_required
+def ep_editbook(id):
+    user=g.user
+    return 'TO DO'
+    # form=NewAuthorForm()
+    # if form.validate_on_submit():
+    #     newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
+    #     if newAuthor is not None:
+    #         flash('Author %s updated successfully.' % newAuthor)
+    #     else:
+    #         flash('Could not perform the update.')
+    #     return redirect(url_for('ep_authors'))
+    # else:
+    #     qAuthor=dbGetAuthor(int(id))
+    #     if qAuthor:
+    #         form.firstname.data=qAuthor.firstname
+    #         form.lastname.data=qAuthor.lastname
+    #     return render_template  (
+    #                                 'newauthor.html',
+    #                                 title='Edit Author',
+    #                                 user=user,
+    #                                 form=form,
+    #                                 id=id,
+    #         )
 
 @app.route('/authors')
 @login_required
@@ -128,7 +198,6 @@ def ep_editauthor(id):
                                     form=form,
                                     id=id,
             )
-
 
 def ep_editauthor(id):
     user=g.user

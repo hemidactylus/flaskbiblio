@@ -20,6 +20,9 @@ class Book(AutoModel):
         self.resBooktype=booktypes.get(self.booktype,'')
         return self
 
+    def __str__(self):
+        return '%s (TEMP %s)' % (self.title, self.authors)
+
 class User(AutoModel):
     name=str
     passwordhash=str
