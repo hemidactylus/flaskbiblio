@@ -5,7 +5,7 @@
     {% for author in authors %}
         <div>
             <p>{{ author.lastname }}, {{ author.firstname }}
-            <a href="{{url_for('ep_editauthor',id=author.id)}}">Ed</a>
+            <a href="{{url_for('ep_editauthor',id=author.id)}}">E</a>
             <a href="{{url_for('ep_deleteauthor',id=author.id)}}">X</a>
         </p></div>
     {% endfor %}
