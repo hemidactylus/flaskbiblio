@@ -18,7 +18,9 @@ from app.database.dbtools import    (
                                         dbGetAuthor,
                                         dbReplaceAuthor,
                                         dbAddBook,
+                                        dbGetBook,
                                         dbDeleteBook,
+                                        dbReplaceBook,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -81,10 +83,12 @@ def ep_newbook():
                                 form.booktype.data,
                                 form.languages.data,
                                 form.authors.data,
-                                user.id
+                                user.id,
+                                resolve=True,
+                                resolveParams=resolveParams(),
                             )
         if newBook is not None:
-            flash('Book %s inserted successfully.' % newBook)
+            flash('"%s" inserted successfully.' % newBook)
         else:
             flash('Could not perform the insertion.')
         return redirect(url_for('ep_books'))
@@ -110,27 +114,43 @@ def ep_deletebook(id):
 @login_required
 def ep_editbook(id):
     user=g.user
-    return 'TO DO'
-    # form=NewAuthorForm()
-    # if form.validate_on_submit():
-    #     newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
-    #     if newAuthor is not None:
-    #         flash('Author %s updated successfully.' % newAuthor)
-    #     else:
-    #         flash('Could not perform the update.')
-    #     return redirect(url_for('ep_authors'))
-    # else:
-    #     qAuthor=dbGetAuthor(int(id))
-    #     if qAuthor:
-    #         form.firstname.data=qAuthor.firstname
-    #         form.lastname.data=qAuthor.lastname
-    #     return render_template  (
-    #                                 'newauthor.html',
-    #                                 title='Edit Author',
-    #                                 user=user,
-    #                                 form=form,
-    #                                 id=id,
-    #         )
+    form=NewBookForm()
+    if form.validate_on_submit():
+        newBook=dbReplaceBook   (
+                                    id,
+                                    form.title.data,
+                                    form.inhouse.data,
+                                    form.notes.data,
+                                    form.booktype.data,
+                                    form.languages.data,
+                                    form.authors.data,
+                                    resolve=True,
+                                    resolveParams=resolveParams(),
+                                )
+        if newBook is not None:
+            flash('"%s" updated successfully.' % newBook)
+        else:
+            flash('Could not perform the update.')
+        return redirect(url_for('ep_books'))
+    else:
+        qBook=dbGetBook(int(id))
+        if qBook:
+            form.title.data=qBook.title
+            form.inhouse.dataq=int(qBook.inhouse)
+            form.notes.data=qBook.notes
+            form.booktype.data=qBook.booktype
+            form.languages.data=qBook.languages
+            form.authors.data=qBook.authors
+            return render_template  (
+                                        'newbook.html',
+                                        title='Edit Book',
+                                        user=user,
+                                        form=form,
+                                        id=id,
+                )
+        else:
+            flash('Internal error retrieving book')
+            return redirect(url_for('ep_books'))
 
 @app.route('/authors')
 @login_required
@@ -191,13 +211,16 @@ def ep_editauthor(id):
         if qAuthor:
             form.firstname.data=qAuthor.firstname
             form.lastname.data=qAuthor.lastname
-        return render_template  (
-                                    'newauthor.html',
-                                    title='Edit Author',
-                                    user=user,
-                                    form=form,
-                                    id=id,
-            )
+            return render_template  (
+                                        'newauthor.html',
+                                        title='Edit Author',
+                                        user=user,
+                                        form=form,
+                                        id=id,
+                )
+        else:
+            flash('Internal error retrieving author.')
+            return redirect(url_for('ep_authors'))
 
 def ep_editauthor(id):
     user=g.user

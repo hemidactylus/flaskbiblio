@@ -54,7 +54,7 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
-def dbAddBook(title,inhouse,notes,booktype,languages,authors,lasteditor):
+def dbAddBook(title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
     '''
         Attempts adding a book and returns the new Book object.
         returns None if duplicates are detected
@@ -76,6 +76,8 @@ def dbAddBook(title,inhouse,notes,booktype,languages,authors,lasteditor):
     )
     nBook.save()
     db.commit()
+    if resolve:
+        nBook.resolveReferences(**resolveParams)
     return nBook
 
 def dbDeleteBook(id):
@@ -122,17 +124,44 @@ def dbDeleteAuthor(id):
     except:
         return None
 
-def dbGetAuthor(id):
+def dbGetByIdFactory(className):
     '''
-        Returns a user object from its id,
-        None if not found
+        factory function to generate getters-by-id
+        for various object types.
+        The getters return None if the id is not found
+    '''
+    def _byIdGetter(id):
+        db=dbGetDatabase()
+        try:
+            qObject=className.manager(db).get(id)
+            return qObject
+        except:
+            return None
+    return _byIdGetter
+
+dbGetAuthor=dbGetByIdFactory(Author)
+dbGetBook=dbGetByIdFactory(Book)
+
+def dbReplaceBook(id,title,inhouse,notes,booktype,languages,authors,resolve=False, resolveParams=None):
+    '''
+        overwrites the fields of a book its id.
+        Returns None if not found (or other errors)
     '''
     db=dbGetDatabase()
-    try:
-        qAuthor=Author.manager(db).get(id)
-        return qAuthor
-    except:
-        return None
+    Book.db=db
+    nBook=Book.manager(db).get(id)
+    if nBook is not None:
+        nBook.title=title
+        nBook.inhouse=inhouse
+        nBook.notes=notes
+        nBook.booktype=booktype
+        nBook.languages=languages
+        nBook.authors=authors
+        nBook.update()
+        db.commit()
+        if resolve:
+            nBook.resolveReferences(**resolveParams)
+        return nBook
 
 def dbReplaceAuthor(id,firstname,lastname):
     '''
@@ -142,8 +171,9 @@ def dbReplaceAuthor(id,firstname,lastname):
     db=dbGetDatabase()
     Author.db=db
     nAuthor=Author.manager(db).get(id)
-    nAuthor.firstname=firstname
-    nAuthor.lastname=lastname
-    nAuthor.update()
-    db.commit()
-    return nAuthor
+    if nBook is not None:
+        nAuthor.firstname=firstname
+        nAuthor.lastname=lastname
+        nAuthor.update()
+        db.commit()
+        return nAuthor

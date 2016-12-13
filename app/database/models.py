@@ -21,7 +21,7 @@ class Book(AutoModel):
         return self
 
     def __str__(self):
-        return '%s (TEMP %s)' % (self.title, self.authors)
+        return '%s (%s)' % (self.title, ' - '.join([a.lastname for a in self.resAuthors]))
 
 class User(AutoModel):
     name=str
