@@ -10,6 +10,9 @@
   {% endif %}
       {{ form.hidden_tag() }}
       <p>
+
+          {{form.test}}
+
           Book Title:<br>
           {{ form.title(size=80) }}<br>
           {% for error in form.title.errors %}
@@ -31,7 +34,7 @@
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>
           Book Type:<br>
-          {{ form.booktype(size=80) }}<br>
+          {{ form.booktype }}<br>
           {% for error in form.booktype.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>

@@ -1,0 +1,14 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Log In</h1>
+  <form action="" method="post" name="test">
+      {{ form.hidden_tag() }}
+      <p>
+          Test:
+          {{ form.test }}<br>
+      </p>
+      <p><input type="submit" value="Go!"></p>
+  </form>
+{% endblock %}

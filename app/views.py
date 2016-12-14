@@ -6,6 +6,7 @@ from .forms import (
                         LoginForm,
                         NewAuthorForm,
                         NewBookForm,
+                        TestForm,
                     )
 
 from app.database.dbtools import    (
@@ -75,6 +76,7 @@ def ep_booktypes():
 def ep_newbook():
     user=g.user
     form=NewBookForm()
+    form.setBooktypes(resolveParams()['booktypes'].values())
     if form.validate_on_submit():
         newBook=dbAddBook   (
                                 form.title.data,
@@ -115,6 +117,7 @@ def ep_deletebook(id):
 def ep_editbook(id):
     user=g.user
     form=NewBookForm()
+    form.setBooktypes(resolveParams()['booktypes'].values())
     if form.validate_on_submit():
         newBook=dbReplaceBook   (
                                     id,
@@ -278,6 +281,19 @@ def ep_logout():
         flash('Logged out successfully.')
         logout_user()
     return redirect(url_for('ep_index'))        
+
+@app.route('/test', methods=['GET', 'POST'])
+def ep_test():
+    form=TestForm()
+    form.setc(map(lambda la: (la.tag,la.name),resolveParams()['booktypes'].values()))
+    # form.test.choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')]
+    if form.validate_on_submit():
+        flash('Test passed: %s' % form.test.data)
+        return redirect(url_for('ep_index'))
+    else:
+        return render_template( 'test.html',
+                                title='Test Form',
+                                form=form)
 
 # user loader function given to flask_login. This queries the db to fetch a user by id
 @lm.user_loader
