@@ -1,6 +1,18 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, PasswordField, SelectField
+from wtforms import (
+                        StringField,
+                        BooleanField,
+                        PasswordField,
+                        SelectField,
+                        SelectMultipleField,
+                    )
 from wtforms.validators import DataRequired
+
+from app.utils.MultiCheckboxField import MultiCheckboxField
+
+# utility functions to sort out list population
+def _sortTagNamePair(pairList):
+    return sorted(map(lambda la: (la.tag, la.name), pairList),key=lambda p: p[1])
 
 class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired()])
@@ -17,17 +29,17 @@ class NewBookForm(FlaskForm):
     notes = StringField('booknotes')
     booktype = SelectField('booktype')
     # TO FIX ONE-TO-MANY
-    languages = StringField('booklanguages', validators=[DataRequired()])
+    languages = MultiCheckboxField('languages')
     authors = StringField('bookauthors')
 
     def setBooktypes(self,btPairList):
-        self.booktype.choices=map(lambda bt: (bt.tag, bt.name), btPairList)
+        self.booktype.choices=_sortTagNamePair(btPairList)
+
+    def setLanguages(self,laPairList):
+        self.languages.choices=_sortTagNamePair(laPairList)
 
 class TestForm(FlaskForm):
-    test = SelectField(
-            'Programming Language',
-            # choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')]
-        )
+    test=MultiCheckboxField('test')
 
-    def setc(self,c):
-        self.test.choices=c
+    def setLanguages(self,laPairList):
+        self.test.choices=_sortTagNamePair(laPairList)

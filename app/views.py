@@ -77,13 +77,14 @@ def ep_newbook():
     user=g.user
     form=NewBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
+    form.setLanguages(resolveParams()['languages'].values())
     if form.validate_on_submit():
         newBook=dbAddBook   (
                                 form.title.data,
                                 form.inhouse.data,
                                 form.notes.data,
                                 form.booktype.data,
-                                form.languages.data,
+                                ','.join(form.languages.data),
                                 form.authors.data,
                                 user.id,
                                 resolve=True,
@@ -118,6 +119,7 @@ def ep_editbook(id):
     user=g.user
     form=NewBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
+    form.setLanguages(resolveParams()['languages'].values())
     if form.validate_on_submit():
         newBook=dbReplaceBook   (
                                     id,
@@ -125,7 +127,7 @@ def ep_editbook(id):
                                     form.inhouse.data,
                                     form.notes.data,
                                     form.booktype.data,
-                                    form.languages.data,
+                                    ','.join(form.languages.data),
                                     form.authors.data,
                                     resolve=True,
                                     resolveParams=resolveParams(),
@@ -142,7 +144,7 @@ def ep_editbook(id):
             form.inhouse.dataq=int(qBook.inhouse)
             form.notes.data=qBook.notes
             form.booktype.data=qBook.booktype
-            form.languages.data=qBook.languages
+            form.languages.data=qBook.languages.split(',')
             form.authors.data=qBook.authors
             return render_template  (
                                         'newbook.html',
@@ -285,8 +287,7 @@ def ep_logout():
 @app.route('/test', methods=['GET', 'POST'])
 def ep_test():
     form=TestForm()
-    form.setc(map(lambda la: (la.tag,la.name),resolveParams()['booktypes'].values()))
-    # form.test.choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')]
+    form.setLanguages(resolveParams()['languages'].values())
     if form.validate_on_submit():
         flash('Test passed: %s' % form.test.data)
         return redirect(url_for('ep_index'))
