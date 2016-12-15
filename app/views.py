@@ -274,30 +274,42 @@ def ep_logout():
 @app.route('/test', methods=['GET', 'POST'])
 def ep_test():
     form=TestForm()
-    #
     # parse the list
     authorParameter=request.args.get('authorlist')
     if authorParameter:
-        authorList=authorParameter.split(',')
+        authorIdList=authorParameter.split(',')
     else:
-        authorList=[]
+        authorIdList=[]
+    # process deletion of author if any
+    toDelete=request.args.get('delete')
+    if toDelete:
+        flash('Deleting %s' % toDelete)
+        authorIdList=[aid for aid in authorIdList if aid != toDelete]
+    # all authors as objects
+    allAuthors=sorted(list(dbGetAll('author')))
+    presentAuthors=filter(lambda a: str(a.id) in authorIdList,allAuthors)
+    # take out already-insertee authors
+    availableAuthors=filter(lambda a: str(a.id) not in authorIdList,allAuthors)
+    form.setAuthors(availableAuthors)
+    #
     if form.validate_on_submit():
         # here a button was pressed. Which one? (add or submit)
         if form.additem.data:
             # pressed the add-item button
-            authorList.append(form.newitem.data)
-            # authorList.append('%02i' % (len(authorList)+1))
-            flash('Adding another one (now: <%s>)' % '/'.join(authorList))
-            return redirect(url_for('ep_test',authorlist=','.join(authorList)))
+            authorIdList.append(form.newitem.data)
+            flash('Adding another one (now: <%s>)' % '/'.join(authorIdList))
+            return redirect(url_for('ep_test',authorlist=','.join(authorIdList)))
         else:
             # pressed the submit button
-            flash('Finished adding. Final: <%s>' % '/'.join(authorList))
+            flash('Finished adding. Final: <%s>' % '/'.join(authorIdList))
             return redirect(url_for('ep_index'))
     else:
         # produce the form
         return render_template( 'test.html',
                                 title='Test Form',
-                                form=form)
+                                form=form,
+                                items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
+                                authorlist=','.join(authorIdList))
 
 # user loader function given to flask_login. This queries the db to fetch a user by id
 @lm.user_loader

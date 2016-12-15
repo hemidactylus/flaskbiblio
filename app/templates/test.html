@@ -5,6 +5,9 @@
   <h1>Test Form</h1>
   <form action="" method="post" name="test">
       {{ form.hidden_tag() }}
+      {% for item in items %}
+          <div><p>{{ item.description }}: <a href="{{url_for('ep_test',delete=item.id,authorlist=authorlist)}}">X</a></p></div>
+      {% endfor %}
       <p>
           Sample. Pick your choice.
           {{ form.newitem }}
