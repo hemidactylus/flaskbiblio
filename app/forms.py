@@ -5,6 +5,7 @@ from wtforms import (
                         PasswordField,
                         SelectField,
                         SelectMultipleField,
+                        SubmitField,
                     )
 from wtforms.validators import DataRequired
 
@@ -13,6 +14,8 @@ from app.utils.MultiCheckboxField import MultiCheckboxField
 # utility functions to sort out list population
 def _sortTagNamePair(pairList):
     return sorted(map(lambda la: (la.tag, la.name), pairList),key=lambda p: p[1])
+def _sortAuthorPair(pairList):
+    return sorted(map(lambda au: (au.id, str(au)), pairList),key=lambda p: str(p[1]))
 
 class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired()])
@@ -39,7 +42,20 @@ class NewBookForm(FlaskForm):
         self.languages.choices=_sortTagNamePair(laPairList)
 
 class TestForm(FlaskForm):
-    test=MultiCheckboxField('test')
+    # authors=SelectField('author',choices=[(1,'a'),(2,'b')],validators=[DataRequired()])
+    additem=SubmitField('AddItem')
+    submit=SubmitField('GoGo')
+    newitem=StringField('newitem')
 
-    def setLanguages(self,laPairList):
-        self.test.choices=_sortTagNamePair(laPairList)
+    def validate(self):
+        rv=FlaskForm.validate(self)
+        if not rv:
+            return False
+        elif self.additem.data and len(self.newitem.data)==0:
+            self.newitem.errors.append('Insert something')
+            return False
+        else:
+            return True
+
+    # def setAuthors(self,auPairList):
+    #     self.authors.choices=_sortAuthorPair(auPairList)

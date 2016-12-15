@@ -6,12 +6,12 @@
   <form action="" method="post" name="test">
       {{ form.hidden_tag() }}
       <p>
-          Test:
-          {{ form.test }}<br>
-          {% for error in form.test.errors %}
+          Sample. Pick your choice.
+          {{ form.newitem }}
+          {% for error in form.newitem.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>
       </p>
-      <p><input type="submit" value="Go!"></p>
+      <p>{{ form.submit }} {{ form.additem }}</p>
   </form>
 {% endblock %}

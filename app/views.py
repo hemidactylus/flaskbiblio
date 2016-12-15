@@ -275,14 +275,26 @@ def ep_logout():
 def ep_test():
     form=TestForm()
     #
-    tryArgs='X'.join(request.args.get('try','').split(','))
-    #
-    flash('Try = %s' % tryArgs)
-    form.setLanguages(resolveParams()['languages'].values())
-    if form.validate_on_submit():
-        flash('Test passed: %s' % form.test.data)
-        return redirect(url_for('ep_index'))
+    # parse the list
+    authorParameter=request.args.get('authorlist')
+    if authorParameter:
+        authorList=authorParameter.split(',')
     else:
+        authorList=[]
+    if form.validate_on_submit():
+        # here a button was pressed. Which one? (add or submit)
+        if form.additem.data:
+            # pressed the add-item button
+            authorList.append(form.newitem.data)
+            # authorList.append('%02i' % (len(authorList)+1))
+            flash('Adding another one (now: <%s>)' % '/'.join(authorList))
+            return redirect(url_for('ep_test',authorlist=','.join(authorList)))
+        else:
+            # pressed the submit button
+            flash('Finished adding. Final: <%s>' % '/'.join(authorList))
+            return redirect(url_for('ep_index'))
+    else:
+        # produce the form
         return render_template( 'test.html',
                                 title='Test Form',
                                 form=form)
