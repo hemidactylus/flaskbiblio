@@ -3,11 +3,7 @@
 
 {% block content %}
   <h2>{{ title }} (<a href="{{url_for('ep_books')}}">Back</a>)</h2>
-  {% if id %}
-    <form action="" method="post" name="{{url_for('ep_editbook',id=id)}}">
-  {% else %}
-    <form action="" method="post" name="{{url_for('ep_newbook')}}">
-  {% endif %}
+  <form action="" method="post" name="{{url_for('ep_alterbook',id=id)}}">
       {{ form.hidden_tag() }}
       <p>
 

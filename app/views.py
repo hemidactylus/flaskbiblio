@@ -71,38 +71,6 @@ def ep_booktypes():
                                 booktypes=booktypes,
                             )
 
-@app.route('/newbook', methods=['GET', 'POST'])
-@login_required
-def ep_newbook():
-    user=g.user
-    form=NewBookForm()
-    form.setBooktypes(resolveParams()['booktypes'].values())
-    form.setLanguages(resolveParams()['languages'].values())
-    if form.validate_on_submit():
-        newBook=dbAddBook   (
-                                form.title.data,
-                                form.inhouse.data,
-                                form.notes.data,
-                                form.booktype.data,
-                                ','.join(form.languages.data),
-                                form.authors.data,
-                                user.id,
-                                resolve=True,
-                                resolveParams=resolveParams(),
-                            )
-        if newBook is not None:
-            flash('"%s" inserted successfully.' % newBook)
-        else:
-            flash('Could not perform the insertion.')
-        return redirect(url_for('ep_books'))
-    else:
-        return render_template  (
-                                    'newbook.html',
-                                    title='New Book',
-                                    user=user,
-                                    form=form,
-            )
-
 @app.route('/deletebook/<id>')
 @login_required
 def ep_deletebook(id):
@@ -114,48 +82,67 @@ def ep_deletebook(id):
     return redirect(url_for('ep_books'))
 
 @app.route('/editbook/<id>', methods=['GET', 'POST'])
+@app.route('/newbook', methods=['GET', 'POST'])
 @login_required
-def ep_editbook(id):
+def ep_alterbook(id=None):
+    '''
+        id is None for new books, it is set for edits
+    '''
     user=g.user
     form=NewBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
     if form.validate_on_submit():
-        newBook=dbReplaceBook   (
-                                    id,
-                                    form.title.data,
-                                    form.inhouse.data,
-                                    form.notes.data,
-                                    form.booktype.data,
-                                    ','.join(form.languages.data),
-                                    form.authors.data,
-                                    resolve=True,
-                                    resolveParams=resolveParams(),
-                                )
-        if newBook is not None:
-            flash('"%s" updated successfully.' % newBook)
+        if id is None:
+            changer=dbAddBook
+            opName='Add'
         else:
-            flash('Could not perform the update.')
+            changer=dbReplaceBook
+            opName='Edit'
+        newBook=changer (
+                            id,
+                            form.title.data,
+                            form.inhouse.data,
+                            form.notes.data,
+                            form.booktype.data,
+                            ','.join(form.languages.data),
+                            form.authors.data,
+                            user.id,
+                            resolve=True,
+                            resolveParams=resolveParams(),
+                        )
+        if newBook is not None:
+            flash('"%s" %sed successfully.' % (newBook,opName))
+        else:
+            flash('Could not perform the %s operation.' % opName)
         return redirect(url_for('ep_books'))
     else:
-        qBook=dbGetBook(int(id))
-        if qBook:
-            form.title.data=qBook.title
-            form.inhouse.dataq=int(qBook.inhouse)
-            form.notes.data=qBook.notes
-            form.booktype.data=qBook.booktype
-            form.languages.data=qBook.languages.split(',')
-            form.authors.data=qBook.authors
+        if id is None:
             return render_template  (
                                         'newbook.html',
-                                        title='Edit Book',
+                                        title='New Book',
                                         user=user,
                                         form=form,
-                                        id=id,
                 )
         else:
-            flash('Internal error retrieving book')
-            return redirect(url_for('ep_books'))
+            qBook=dbGetBook(int(id))
+            if qBook:
+                form.title.data=qBook.title
+                form.inhouse.dataq=int(qBook.inhouse)
+                form.notes.data=qBook.notes
+                form.booktype.data=qBook.booktype
+                form.languages.data=qBook.languages.split(',')
+                form.authors.data=qBook.authors
+                return render_template  (
+                                            'newbook.html',
+                                            title='Edit Book',
+                                            user=user,
+                                            form=form,
+                                            id=id,
+                    )
+            else:
+                flash('Internal error retrieving book')
+                return redirect(url_for('ep_books'))
 
 @app.route('/authors')
 @login_required

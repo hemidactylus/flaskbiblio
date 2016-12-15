@@ -54,7 +54,7 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
-def dbAddBook(title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
+def dbAddBook(id,title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
     '''
         Attempts adding a book and returns the new Book object.
         returns None if duplicates are detected
@@ -142,7 +142,7 @@ def dbGetByIdFactory(className):
 dbGetAuthor=dbGetByIdFactory(Author)
 dbGetBook=dbGetByIdFactory(Book)
 
-def dbReplaceBook(id,title,inhouse,notes,booktype,languages,authors,resolve=False, resolveParams=None):
+def dbReplaceBook(id,title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
     '''
         overwrites the fields of a book its id.
         Returns None if not found (or other errors)
