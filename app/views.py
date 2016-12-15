@@ -274,6 +274,10 @@ def ep_logout():
 @app.route('/test', methods=['GET', 'POST'])
 def ep_test():
     form=TestForm()
+    #
+    tryArgs='X'.join(request.args.get('try','').split(','))
+    #
+    flash('Try = %s' % tryArgs)
     form.setLanguages(resolveParams()['languages'].values())
     if form.validate_on_submit():
         flash('Test passed: %s' % form.test.data)
