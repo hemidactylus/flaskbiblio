@@ -19,19 +19,19 @@
           {% for error in form.authors.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>
-          In House:<br>
-          {{ form.inhouse() }}<br>
-          {% for error in form.inhouse.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
           Notes:<br>
           {{ form.notes(size=80) }}<br>
           {% for error in form.notes.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>
           Book Type:<br>
-          {{ form.booktype }}<br>
+          {{ form.booktype }}
           {% for error in form.booktype.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %}
+          In House:
+          {{ form.inhouse() }}<br>
+          {% for error in form.inhouse.errors %}
             <span style="color: red;">[{{ error }}]</span>
           {% endfor %}<br>
           Book Languages:<br>

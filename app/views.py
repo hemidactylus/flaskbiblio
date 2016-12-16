@@ -81,14 +81,15 @@ def ep_deletebook(id):
         flash('Could not delete book.')
     return redirect(url_for('ep_books'))
 
-@app.route('/editbook/<id>', methods=['GET', 'POST'])
-@app.route('/newbook', methods=['GET', 'POST'])
+@app.route('/editbook', methods=['GET', 'POST'])
 @login_required
-def ep_alterbook(id=None):
+def ep_alterbook():
     '''
+        'id' is read from the query params
         id is None for new books, it is set for edits
     '''
     user=g.user
+    id=request.args.get('id')
     form=NewBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
