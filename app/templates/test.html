@@ -5,16 +5,27 @@
   <h1>Test Form</h1>
   <form action="" method="post" name="test">
       {{ form.hidden_tag() }}
+      {{ form.name }}
+      {% for error in form.name.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}<br>
+      <p>
+          Add
+          {{ form.newauthors }}
+          {% for error in form.newauthors.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %} {{ form.additem }} <br>
+      </p>
       {% for item in items %}
-          <div><p>{{ item.description }}: <a href="{{url_for('ep_test',delete=item.id,authorlist=authorlist)}}">X</a></p></div>
+          <div><p><i>&nbsp;&nbsp;&nbsp;{{ item.description }}</i></p></div>
       {% endfor %}
       <p>
-          Sample. Pick your choice.
-          {{ form.newitem }}
-          {% for error in form.newitem.errors %}
+          Remove
+          {{ form.delauthors }}
+          {% for error in form.delauthors.errors %}
             <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
+          {% endfor %} {{ form.delitem }} <br>
       </p>
-      <p>{{ form.submit }} {{ form.additem }}</p>
+      <p>{{ form.submit }}</p>
   </form>
 {% endblock %}

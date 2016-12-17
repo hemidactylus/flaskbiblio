@@ -45,18 +45,37 @@ class NewBookForm(FlaskForm):
 
 class TestForm(FlaskForm):
     additem=SubmitField('AddItem')
+    delitem=SubmitField('DelItem')
     submit=SubmitField('GoGo')
-    newitem=SelectField('newitem')
+    newauthors=SelectField('newauthors')
+    delauthors=SelectField('delauthors')
+    name=StringField('name')
 
     def validate(self):
         rv=FlaskForm.validate(self)
         if not rv:
             return False
-        elif self.additem.data and (self.newitem.data is None or self.newitem.data=='-1'):
-            self.newitem.errors.append('Choose something')
-            return False
+        elif self.additem.data:
+            if (self.newauthors.data is None or self.newauthors.data=='-1'):
+                self.newauthors.errors.append('Choose something')
+                return False
+            else:
+                return True
+        elif self.delitem.data:
+            if (self.delauthors.data is None or self.delauthors.data=='-1'):
+                self.delauthors.errors.append('Choose something')
+                return False
+            else:
+                return True
         else:
-            return True
+            if self.name.data and self.name.data!='':
+                return True
+            else:
+                self.name.errors.append('Cannot be empty~')
+                return False
 
-    def setAuthors(self,auPairList):
-        self.newitem.choices=[('-1','<Please select>')]+_sortAuthorPair(auPairList)
+    def setAuthorsToAdd(self,auPairList):
+        self.newauthors.choices=[('-1','<Please select>')]+_sortAuthorPair(auPairList)
+
+    def setAuthorsToDelete(self,auPairList):
+        self.delauthors.choices=[('-1','<Please select>')]+_sortAuthorPair(auPairList)

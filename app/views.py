@@ -281,31 +281,37 @@ def ep_test():
         authorIdList=authorParameter.split(',')
     else:
         authorIdList=[]
-    # process deletion of author if any
-    toDelete=request.args.get('delete')
-    if toDelete:
-        flash('Deleting %s' % toDelete)
-        authorIdList=[aid for aid in authorIdList if aid != toDelete]
     # all authors as objects
     allAuthors=sorted(list(dbGetAll('author')))
-    presentAuthors=filter(lambda a: str(a.id) in authorIdList,allAuthors)
+    presentAuthors=list(filter(lambda a: str(a.id) in authorIdList,allAuthors))
+    form.setAuthorsToDelete(presentAuthors)
     # take out already-insertee authors
     availableAuthors=filter(lambda a: str(a.id) not in authorIdList,allAuthors)
-    form.setAuthors(availableAuthors)
+    form.setAuthorsToAdd(availableAuthors)
     #
     if form.validate_on_submit():
         # here a button was pressed. Which one? (add or submit)
         if form.additem.data:
             # pressed the add-item button
-            authorIdList.append(form.newitem.data)
+            authorIdList.append(form.newauthors.data)
+            msg=form.name.data
             flash('Adding another one (now: <%s>)' % '/'.join(authorIdList))
-            return redirect(url_for('ep_test',authorlist=','.join(authorIdList)))
+            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg))
+        elif form.delitem.data:
+            # pressed the delete-item button
+            authorIdList=[au for au in authorIdList if au != form.delauthors.data]
+            msg=form.name.data
+            flash('Deleting one (now: <%s>)' % '/'.join(authorIdList))
+            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg))
         else:
             # pressed the submit button
-            flash('Finished adding. Final: <%s>' % '/'.join(authorIdList))
+            flash('Finished adding. Final: <%s>, name=%s' % ('/'.join(authorIdList), form.name.data))
             return redirect(url_for('ep_index'))
     else:
         # produce the form
+        msg=request.args.get('name')
+        if msg:
+            form.name.data=msg
         return render_template( 'test.html',
                                 title='Test Form',
                                 form=form,
