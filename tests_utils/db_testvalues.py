@@ -7,6 +7,14 @@ _testvalues={
                     'name': 'Stefano',
                     'passwordhash': '123',
                 },
+                {
+                    'name': 'Annabelle',
+                    'passwordhash': 'qwerty',
+                },
+                {
+                    'name': 'Fiorenza',
+                    'passwordhash': 'cagnoli',
+                },
             ],
     'author': [
                 {

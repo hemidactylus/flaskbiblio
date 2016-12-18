@@ -1,4 +1,4 @@
 __pycache__
 *.pyc
 app/database/biblio.db
-
+wsgi_run.fcgi

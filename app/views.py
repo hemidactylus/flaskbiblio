@@ -23,6 +23,7 @@ from app.database.dbtools import    (
                                         dbGetBook,
                                         dbDeleteBook,
                                         dbAddReplaceBook,
+                                        registerLogin,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -206,9 +207,16 @@ def ep_login():
     if form.validate_on_submit():
         session['remember_me'] = form.remember_me.data
         qUser=dbGetUser(form.username.data)
-        if qUser and qUser.passwordhash==form.password.data:
+        if qUser and qUser.checkPassword(form.password.data):
             login_user(load_user(qUser.id))
-            flash('Login successful. Welcome, %s!' % qUser.name)
+            #
+            lastlogin=qUser.lastlogindate
+            #
+            flash('Login successful. Welcome, %s! (last login: %s)' %
+                (qUser.name,lastlogin if lastlogin else 'first login'))
+            #
+            registerLogin(qUser.id)
+            #
             return redirect(url_for('ep_index'))
         else:
             flash('Invalid username/password provided')

@@ -113,6 +113,15 @@ def dbDeleteBook(id):
     except:
         return None
 
+def registerLogin(userId):
+    db=dbGetDatabase()
+    User.db=db
+    qUser=User.manager(db).get(userId)
+    qUser.lastlogindate=datetime.now().strftime(DATETIME_STR_FORMAT)
+    qUser.update()
+    db.commit()
+    return qUser.lastlogindate
+
 def dbAddAuthor(firstname,lastname):
     '''
         Attempts adding an author and returns the new Author object.
@@ -169,7 +178,7 @@ def dbReplaceAuthor(id,firstname,lastname):
     db=dbGetDatabase()
     Author.db=db
     nAuthor=Author.manager(db).get(id)
-    if nBook is not None:
+    if nAuthor is not None:
         nAuthor.firstname=firstname
         nAuthor.lastname=lastname
         nAuthor.update()

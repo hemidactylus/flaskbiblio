@@ -27,6 +27,10 @@ class Book(AutoModel):
 class User(AutoModel):
     name=str
     passwordhash=str
+    lastlogindate=str
+
+    def checkPassword(self,stringToCheck):
+        return stringToCheck == self.passwordhash
 
     @property
     def is_authenticated(self):
