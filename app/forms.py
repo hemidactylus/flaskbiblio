@@ -29,28 +29,33 @@ class NewAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[DataRequired()])
     lastname = StringField('authorlastname', validators=[DataRequired()])
 
-class NewBookForm(FlaskForm):
-    title = StringField('booktitle', validators=[DataRequired()])
+# class NewBookForm(FlaskForm):
+#     title = StringField('booktitle', validators=[DataRequired()])
+#     inhouse = BooleanField('bookinhouse', default=True)
+#     notes = StringField('booknotes')
+#     booktype = SelectField('booktype')
+#     # TO FIX ONE-TO-MANY
+#     languages = MultiCheckboxField('languages')
+#     authors = StringField('bookauthors')
+
+#     def setBooktypes(self,btPairList):
+#         self.booktype.choices=_sortTagNamePair(btPairList)
+
+#     def setLanguages(self,laPairList):
+#         self.languages.choices=_sortTagNamePair(laPairList)
+
+class TestForm(FlaskForm):
+
+    title = StringField('booktitle')
     inhouse = BooleanField('bookinhouse', default=True)
     notes = StringField('booknotes')
     booktype = SelectField('booktype')
-    # TO FIX ONE-TO-MANY
     languages = MultiCheckboxField('languages')
-    authors = StringField('bookauthors')
-
-    def setBooktypes(self,btPairList):
-        self.booktype.choices=_sortTagNamePair(btPairList)
-
-    def setLanguages(self,laPairList):
-        self.languages.choices=_sortTagNamePair(laPairList)
-
-class TestForm(FlaskForm):
     additem=SubmitField('AddItem')
     delitem=SubmitField('DelItem')
     submit=SubmitField('GoGo')
     newauthors=SelectField('newauthors')
     delauthors=SelectField('delauthors')
-    name=StringField('name')
     authorlist=HiddenField('authorlist')
     bookid=HiddenField('bookid')
 
@@ -71,7 +76,7 @@ class TestForm(FlaskForm):
             else:
                 return True
         else:
-            if self.name.data and self.name.data!='':
+            if self.title.data and self.title.data!='':
                 return True
             else:
                 self.name.errors.append('Cannot be empty~')
@@ -82,3 +87,9 @@ class TestForm(FlaskForm):
 
     def setAuthorsToDelete(self,auPairList):
         self.delauthors.choices=[('-1','<Please select>')]+_sortAuthorPair(auPairList)
+
+    def setBooktypes(self,btPairList):
+        self.booktype.choices=_sortTagNamePair(btPairList)
+
+    def setLanguages(self,laPairList):
+        self.languages.choices=_sortTagNamePair(laPairList)

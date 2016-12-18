@@ -5,7 +5,7 @@ from app import app, db, lm
 from .forms import (
                         LoginForm,
                         NewAuthorForm,
-                        NewBookForm,
+                        # NewBookForm,
                         TestForm,
                     )
 
@@ -26,6 +26,7 @@ from app.database.dbtools import    (
 from app.database.models import (
                                     tableToModel, 
                                     User,
+                                    Book,
                                 )
 
 from app import (
@@ -273,21 +274,37 @@ def ep_logout():
     return redirect(url_for('ep_index'))        
 
 @app.route('/test', methods=['GET', 'POST'])
+@login_required
 def ep_test():
+    user=g.user
     form=TestForm()
+    form.setBooktypes(resolveParams()['booktypes'].values())
+    form.setLanguages(resolveParams()['languages'].values())
     if request.method=='GET':
-        paramName=request.args.get('name')
         paramId=request.args.get('bookid')
         authorParameter=request.args.get('authorlist')
+        # HERE should set form local properties from request
+        form.title.data=request.args.get('title')
+        form.inhouse.data=int(request.args.get('inhouse','1'))
+        form.notes.data=request.args.get('notes')
+        form.booktype.data=request.args.get('booktype')
+        form.languages.data=request.args.get('languages','').split(',')
     else:
-        paramName=form.name.data
         paramId=form.bookid.data
         authorParameter=form.authorlist.data
-    if paramId is not None and paramName is None:
+    if paramId is not None and authorParameter is None:
         formTitle='Edit Book'
         qBook=dbGetBook(int(paramId))
-        form.name.data=qBook.title
-        authorParameter=qBook.authors
+        if qBook:
+            authorParameter=qBook.authors
+            form.title.data=qBook.title
+            form.inhouse.data=int(qBook.inhouse)
+            form.notes.data=qBook.notes
+            form.booktype.data=qBook.booktype
+            form.languages.data=qBook.languages.split(',')
+        else:
+            flash('Internal error retrieving book')
+            return redirect(url_for('ep_books'))
     else:
         formTitle='New Book'
     # parse the list
@@ -302,6 +319,17 @@ def ep_test():
     # take out already-insertee authors
     availableAuthors=filter(lambda a: str(a.id) not in authorIdList,allAuthors)
     form.setAuthorsToAdd(availableAuthors)
+    # HERE values are read off the form into a Book instance
+    editedBook=Book(
+        id=form.bookid.data,
+        title=form.title.data,
+        inhouse=int(form.inhouse.data),
+        notes=form.notes.data,
+        booktype=form.booktype.data,
+        languages=','.join(form.languages.data) if form.languages.data is not None else '',
+        authors=form.authorlist.data,
+        lasteditor=user.id,
+    )
     #
     if form.validate_on_submit():
         # here a button was pressed. Which one? (add or submit)
@@ -313,13 +341,24 @@ def ep_test():
                 # pressed the delete-item button
                 authorIdList=[au for au in authorIdList if au != form.delauthors.data]
             # HERE must read values off the form and pass them to the url
-            msg=form.name.data
             flash('Adding another one (now: <%s>)' % '/'.join(authorIdList))
-            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg,bookid=paramId))
+            editedBook.authors=','.join(authorIdList)
+            return redirect(url_for(
+                                        'ep_test',
+                                        authorlist=editedBook.authors,
+                                        bookid=editedBook.id,
+                                        title=editedBook.title,
+                                        inhouse=editedBook.inhouse,
+                                        notes=editedBook.notes,
+                                        booktype=editedBook.booktype,
+                                        languages=editedBook.languages,
+                                        authors=editedBook.authors,
+                                    )
+                           )
         else:
             # pressed the submit button
             # HERE the actual save/update is triggered
-            msgDesc='Name=%s, ID=%s, finalAuthorList=%s' % (form.name.data,paramId,'/'.join(authorIdList))
+            msgDesc='Title=%s, ID=%s, finalAuthorList=%s' % (form.title.data,paramId,'/'.join(authorIdList))
             flash('Finished adding. "%s"' % msgDesc)
             return redirect(url_for('ep_index'))
     else:
