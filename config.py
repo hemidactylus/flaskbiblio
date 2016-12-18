@@ -9,3 +9,7 @@ DB_NAME='biblio.db'
 # stuff for Flask
 WTF_CSRF_ENABLED = True
 SECRET_KEY = 'TestSecretKey_NotForProduction'
+
+# formats, etc
+DATETIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
+SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'

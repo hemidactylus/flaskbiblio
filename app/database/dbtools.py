@@ -3,7 +3,9 @@
 from orm import Database
 import os
 
-from config import DB_DIRECTORY, DB_NAME
+from datetime import datetime
+
+from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT
 from app.database.models import (
                                     tableToModel, 
                                     User,
@@ -66,6 +68,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             Returns None if not found (or other errors)
     '''
     db=dbGetDatabase()
+    newBook.lasteditdate=datetime.now().strftime(DATETIME_STR_FORMAT)
     Book.db=db
     if newBook.id is None:
         # if new-insertion, check for duplicates then proceed
@@ -84,6 +87,8 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             nBook.booktype=newBook.booktype
             nBook.languages=newBook.languages
             nBook.authors=newBook.authors
+            nBook.lasteditor=newBook.lasteditor
+            nBook.lasteditdate=newBook.lasteditdate
             nBook.update()
         else:
             return None

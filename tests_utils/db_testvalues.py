@@ -71,6 +71,7 @@ _testvalues={
                     'notes':         'Carino',
                     'languages':     'PT,IT',
                     'lasteditor':    1,
+                    'lasteditdate':  '',
                 },
                 {
                     'title':         'Guida alle bucce',
@@ -80,6 +81,7 @@ _testvalues={
                     'notes':         'Mediocre',
                     'languages':     'IT',
                     'lasteditor':    1,
+                    'lasteditdate':  '',
                 },
             ],
 }

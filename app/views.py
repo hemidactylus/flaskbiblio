@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import  login_user, logout_user, current_user, login_required
+from datetime import datetime
 
 from app import app, db, lm
 from .forms import (
@@ -7,6 +8,8 @@ from .forms import (
                         NewAuthorForm,
                         EditBookForm,
                     )
+
+from config import DATETIME_STR_FORMAT, SHORT_DATETIME_STR_FORMAT
 
 from app.database.dbtools import    (
                                         dbGetDatabase,
@@ -17,10 +20,8 @@ from app.database.dbtools import    (
                                         dbDeleteAuthor,
                                         dbGetAuthor,
                                         dbReplaceAuthor,
-                                        # dbAddBook,
                                         dbGetBook,
                                         dbDeleteBook,
-                                        # dbReplaceBook,
                                         dbAddReplaceBook,
                                     )
 from app.database.models import (
@@ -157,6 +158,9 @@ def ep_editauthor(id):
     flash('Should edit author %s' % id)
     return redirect(url_for('ep_authors'))
 
+def retrieveUsers():
+    return dbMakeDict(dbGetAll('user'))
+
 def resolveParams():
     # refresh authors list
     authors=list(dbGetAll('author'))
@@ -174,6 +178,18 @@ def ep_books():
     user = g.user
     # perform live query
     books=dbGetAll('book',resolve=True, resolveParams=resolveParams())
+    umap = retrieveUsers()
+    for bo in books:
+        lasteditor=umap.get(int(bo.lasteditor))
+        if lasteditor:
+            bo.lastedit=lasteditor.name
+            if bo.lasteditdate:
+                try:
+                    bo.lastedit+=' (%s)' % datetime.strptime(str(bo.lasteditdate),DATETIME_STR_FORMAT).strftime(SHORT_DATETIME_STR_FORMAT)
+                except:
+                    pass
+        else:
+            bo.lastedit=''
     # done.
     return render_template  (
                                 "books.html",

@@ -13,6 +13,7 @@ class Book(AutoModel):
     notes=str
     languages=str
     lasteditor=str
+    lasteditdate=str
 
     def resolveReferences(self,authors={},languages={},booktypes={}):
         self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if len(aID)>0 and int(aID) in authors])

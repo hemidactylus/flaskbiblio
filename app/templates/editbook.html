@@ -1,0 +1,55 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ formtitle }}</h1>
+  <form action="" method="post" name="{{url_for('ep_editbook',authorlist=authorlist)}}">
+      {{ form.hidden_tag() }}
+      <hr>
+      Book Title:<br>
+      {{ form.title(size=80) }}<br>
+      {% for error in form.title.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}<br>
+      Notes:<br>
+      {{ form.notes(size=80) }}<br>
+      {% for error in form.notes.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}<br>
+      Book Type:<br>
+      {{ form.booktype }}
+      {% for error in form.booktype.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      In House:
+      {{ form.inhouse() }}<br>
+      {% for error in form.inhouse.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}<br>
+      Book Languages:<br>
+      {{ form.languages(size=80) }}<br>
+      {% for error in form.languages.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      <hr>
+      <p>
+          Add
+          {{ form.newauthors }}
+          {% for error in form.newauthors.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %} {{ form.additem }} <br>
+      </p>
+      {% for item in items %}
+          <div><p><i>&nbsp;&nbsp;&nbsp;{{ item.description }}</i></p></div>
+      {% endfor %}
+      <p>
+          Remove
+          {{ form.delauthors }}
+          {% for error in form.delauthors.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+          {% endfor %} {{ form.delitem }} <br>
+      </p>
+      <hr>
+      <p>{{ form.submit }}</p>
+  </form>
+{% endblock %}
