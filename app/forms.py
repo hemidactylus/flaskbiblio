@@ -6,6 +6,7 @@ from wtforms import (
                         SelectField,
                         SelectMultipleField,
                         SubmitField,
+                        HiddenField,
                     )
 from wtforms.validators import DataRequired
 
@@ -50,6 +51,8 @@ class TestForm(FlaskForm):
     newauthors=SelectField('newauthors')
     delauthors=SelectField('delauthors')
     name=StringField('name')
+    authorlist=HiddenField('authorlist')
+    bookid=HiddenField('bookid')
 
     def validate(self):
         rv=FlaskForm.validate(self)

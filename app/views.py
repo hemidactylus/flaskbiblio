@@ -71,11 +71,11 @@ def ep_booktypes():
                                 booktypes=booktypes,
                             )
 
-@app.route('/deletebook/<id>')
+@app.route('/deletebook/<bookid>')
 @login_required
-def ep_deletebook(id):
+def ep_deletebook(bookid):
     user=g.user
-    if dbDeleteBook(int(id)):
+    if dbDeleteBook(int(bookid)):
         flash('Book successfully deleted.')
     else:
         flash('Could not delete book.')
@@ -275,8 +275,22 @@ def ep_logout():
 @app.route('/test', methods=['GET', 'POST'])
 def ep_test():
     form=TestForm()
+    if request.method=='GET':
+        paramName=request.args.get('name')
+        paramId=request.args.get('bookid')
+        authorParameter=request.args.get('authorlist')
+    else:
+        paramName=form.name.data
+        paramId=form.bookid.data
+        authorParameter=form.authorlist.data
+    if paramId is not None and paramName is None:
+        formTitle='Edit Book'
+        qBook=dbGetBook(int(paramId))
+        form.name.data=qBook.title
+        authorParameter=qBook.authors
+    else:
+        formTitle='New Book'
     # parse the list
-    authorParameter=request.args.get('authorlist')
     if authorParameter:
         authorIdList=authorParameter.split(',')
     else:
@@ -291,29 +305,32 @@ def ep_test():
     #
     if form.validate_on_submit():
         # here a button was pressed. Which one? (add or submit)
-        if form.additem.data:
-            # pressed the add-item button
-            authorIdList.append(form.newauthors.data)
+        if form.additem.data or form.delitem.data:
+            if form.additem.data:
+                # pressed the add-item button
+                authorIdList.append(form.newauthors.data)
+            else:
+                # pressed the delete-item button
+                authorIdList=[au for au in authorIdList if au != form.delauthors.data]
+            # HERE must read values off the form and pass them to the url
             msg=form.name.data
             flash('Adding another one (now: <%s>)' % '/'.join(authorIdList))
-            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg))
-        elif form.delitem.data:
-            # pressed the delete-item button
-            authorIdList=[au for au in authorIdList if au != form.delauthors.data]
-            msg=form.name.data
-            flash('Deleting one (now: <%s>)' % '/'.join(authorIdList))
-            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg))
+            return redirect(url_for('ep_test',authorlist=','.join(authorIdList),name=msg,bookid=paramId))
         else:
             # pressed the submit button
-            flash('Finished adding. Final: <%s>, name=%s' % ('/'.join(authorIdList), form.name.data))
+            # HERE the actual save/update is triggered
+            msgDesc='Name=%s, ID=%s, finalAuthorList=%s' % (form.name.data,paramId,'/'.join(authorIdList))
+            flash('Finished adding. "%s"' % msgDesc)
             return redirect(url_for('ep_index'))
     else:
-        # produce the form
+        # HERE the form's additionals are set
         msg=request.args.get('name')
         if msg:
             form.name.data=msg
+        form.authorlist.data=','.join(authorIdList)
+        form.bookid.data=paramId
         return render_template( 'test.html',
-                                title='Test Form',
+                                formtitle=formTitle,
                                 form=form,
                                 items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
                                 authorlist=','.join(authorIdList))
