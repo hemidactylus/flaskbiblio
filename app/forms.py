@@ -29,22 +29,7 @@ class NewAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[DataRequired()])
     lastname = StringField('authorlastname', validators=[DataRequired()])
 
-# class NewBookForm(FlaskForm):
-#     title = StringField('booktitle', validators=[DataRequired()])
-#     inhouse = BooleanField('bookinhouse', default=True)
-#     notes = StringField('booknotes')
-#     booktype = SelectField('booktype')
-#     # TO FIX ONE-TO-MANY
-#     languages = MultiCheckboxField('languages')
-#     authors = StringField('bookauthors')
-
-#     def setBooktypes(self,btPairList):
-#         self.booktype.choices=_sortTagNamePair(btPairList)
-
-#     def setLanguages(self,laPairList):
-#         self.languages.choices=_sortTagNamePair(laPairList)
-
-class TestForm(FlaskForm):
+class EditBookForm(FlaskForm):
 
     title = StringField('booktitle')
     inhouse = BooleanField('bookinhouse', default=True)
@@ -79,7 +64,7 @@ class TestForm(FlaskForm):
             if self.title.data and self.title.data!='':
                 return True
             else:
-                self.name.errors.append('Cannot be empty~')
+                self.title.errors.append('Cannot be empty~')
                 return False
 
     def setAuthorsToAdd(self,auPairList):

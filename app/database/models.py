@@ -15,7 +15,7 @@ class Book(AutoModel):
     lasteditor=str
 
     def resolveReferences(self,authors={},languages={},booktypes={}):
-        self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if int(aID) in authors])
+        self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if len(aID)>0 and int(aID) in authors])
         self.resLanguages=sorted([languages[lID] for lID in self.languages.split(',') if lID in languages])
         self.resBooktype=booktypes.get(self.booktype,'')
         return self

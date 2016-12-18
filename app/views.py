@@ -5,8 +5,7 @@ from app import app, db, lm
 from .forms import (
                         LoginForm,
                         NewAuthorForm,
-                        # NewBookForm,
-                        TestForm,
+                        EditBookForm,
                     )
 
 from app.database.dbtools import    (
@@ -18,10 +17,11 @@ from app.database.dbtools import    (
                                         dbDeleteAuthor,
                                         dbGetAuthor,
                                         dbReplaceAuthor,
-                                        dbAddBook,
+                                        # dbAddBook,
                                         dbGetBook,
                                         dbDeleteBook,
-                                        dbReplaceBook,
+                                        # dbReplaceBook,
+                                        dbAddReplaceBook,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -81,70 +81,6 @@ def ep_deletebook(bookid):
     else:
         flash('Could not delete book.')
     return redirect(url_for('ep_books'))
-
-@app.route('/editbook', methods=['GET', 'POST'])
-@login_required
-def ep_alterbook():
-    '''
-        'id' is read from the query params
-        id is None for new books, it is set for edits
-    '''
-    user=g.user
-    id=request.args.get('id')
-    form=NewBookForm()
-    form.setBooktypes(resolveParams()['booktypes'].values())
-    form.setLanguages(resolveParams()['languages'].values())
-    if form.validate_on_submit():
-        if id is None:
-            changer=dbAddBook
-            opName='Add'
-        else:
-            changer=dbReplaceBook
-            opName='Edit'
-        newBook=changer (
-                            id,
-                            form.title.data,
-                            form.inhouse.data,
-                            form.notes.data,
-                            form.booktype.data,
-                            ','.join(form.languages.data),
-                            form.authors.data,
-                            user.id,
-                            resolve=True,
-                            resolveParams=resolveParams(),
-                        )
-        if newBook is not None:
-            flash('"%s" %sed successfully.' % (newBook,opName))
-        else:
-            flash('Could not perform the %s operation.' % opName)
-        return redirect(url_for('ep_books'))
-    else:
-        if id is None:
-            return render_template  (
-                                        'newbook.html',
-                                        title='New Book',
-                                        user=user,
-                                        form=form,
-                )
-        else:
-            qBook=dbGetBook(int(id))
-            if qBook:
-                form.title.data=qBook.title
-                form.inhouse.dataq=int(qBook.inhouse)
-                form.notes.data=qBook.notes
-                form.booktype.data=qBook.booktype
-                form.languages.data=qBook.languages.split(',')
-                form.authors.data=qBook.authors
-                return render_template  (
-                                            'newbook.html',
-                                            title='Edit Book',
-                                            user=user,
-                                            form=form,
-                                            id=id,
-                    )
-            else:
-                flash('Internal error retrieving book')
-                return redirect(url_for('ep_books'))
 
 @app.route('/authors')
 @login_required
@@ -273,22 +209,29 @@ def ep_logout():
         logout_user()
     return redirect(url_for('ep_index'))        
 
-@app.route('/test', methods=['GET', 'POST'])
+@app.route('/editbook', methods=['GET', 'POST'])
 @login_required
-def ep_test():
+def ep_editbook():
     user=g.user
-    form=TestForm()
+    form=EditBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
     if request.method=='GET':
-        paramId=request.args.get('bookid')
+        paramIdString=request.args.get('bookid')
+        if paramIdString is not None and len(paramIdString)>0:
+            paramId=int(paramIdString)
+        else:
+            paramId=None
         authorParameter=request.args.get('authorlist')
         # HERE should set form local properties from request
         form.title.data=request.args.get('title')
         form.inhouse.data=int(request.args.get('inhouse','1'))
         form.notes.data=request.args.get('notes')
         form.booktype.data=request.args.get('booktype')
-        form.languages.data=request.args.get('languages','').split(',')
+        if len(request.args.get('languages',''))>0:
+            form.languages.data=request.args['languages'].split(',')
+        else:
+            form.languages.data=[]
     else:
         paramId=form.bookid.data
         authorParameter=form.authorlist.data
@@ -321,7 +264,7 @@ def ep_test():
     form.setAuthorsToAdd(availableAuthors)
     # HERE values are read off the form into a Book instance
     editedBook=Book(
-        id=form.bookid.data,
+        id=form.bookid.data if form.bookid.data is not None and len(form.bookid.data)>0 else None,
         title=form.title.data,
         inhouse=int(form.inhouse.data),
         notes=form.notes.data,
@@ -341,10 +284,9 @@ def ep_test():
                 # pressed the delete-item button
                 authorIdList=[au for au in authorIdList if au != form.delauthors.data]
             # HERE must read values off the form and pass them to the url
-            flash('Adding another one (now: <%s>)' % '/'.join(authorIdList))
             editedBook.authors=','.join(authorIdList)
             return redirect(url_for(
-                                        'ep_test',
+                                        'ep_editbook',
                                         authorlist=editedBook.authors,
                                         bookid=editedBook.id,
                                         title=editedBook.title,
@@ -358,17 +300,23 @@ def ep_test():
         else:
             # pressed the submit button
             # HERE the actual save/update is triggered
-            msgDesc='Title=%s, ID=%s, finalAuthorList=%s' % (form.title.data,paramId,'/'.join(authorIdList))
-            flash('Finished adding. "%s"' % msgDesc)
-            return redirect(url_for('ep_index'))
+            newEntry=editedBook.id is None
+            updatedBook=dbAddReplaceBook(editedBook,
+                                resolve=True,
+                                resolveParams=resolveParams())
+            if updatedBook:
+                if newEntry:
+                    flash('"%s" successfully added.' % str(updatedBook))
+                else:
+                    flash('"%s" successfully updated.' % str(updatedBook))
+            else:
+                flash('Internal error updating the book table.')
+            return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
-        msg=request.args.get('name')
-        if msg:
-            form.name.data=msg
         form.authorlist.data=','.join(authorIdList)
         form.bookid.data=paramId
-        return render_template( 'test.html',
+        return render_template( 'editbook.html',
                                 formtitle=formTitle,
                                 form=form,
                                 items=[{'description': str(au), 'id': au.id} for au in presentAuthors],

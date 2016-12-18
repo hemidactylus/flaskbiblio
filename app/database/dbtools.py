@@ -54,31 +54,45 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
-def dbAddBook(id,title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
+def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
     '''
-        Attempts adding a book and returns the new Book object.
-        returns None if duplicates are detected
+        Add/Replace a book to DB
+
+        if book.id is None:
+            Attempts adding a book and returns the new Book object.
+            returns None if duplicates are detected
+        else:
+            overwrites the fields of a book its id.
+            Returns None if not found (or other errors)
     '''
     db=dbGetDatabase()
     Book.db=db
-    for qBook in Book.manager(db).all():
-        if qBook.title==title and qBook.authors==authors: # TODO: here check ordering and tricks
+    if newBook.id is None:
+        # if new-insertion, check for duplicates then proceed
+        for qBook in Book.manager(db).all():
+            if qBook.title==newBook.title and qBook.authors==newBook.authors: # TODO: here check ordering and tricks
+                return None
+        newBook.save()
+        nBook=newBook
+    else:
+        # if replacement, find the replacee and proceed
+        nBook=Book.manager(db).get(newBook.id)
+        if nBook is not None:
+            nBook.title=newBook.title
+            nBook.inhouse=newBook.inhouse
+            nBook.notes=newBook.notes
+            nBook.booktype=newBook.booktype
+            nBook.languages=newBook.languages
+            nBook.authors=newBook.authors
+            nBook.update()
+        else:
             return None
-    # no duplicates: add author through the orm
-    nBook=Book(
-        title=title,
-        inhouse=inhouse,
-        notes=notes,
-        booktype=booktype,
-        languages=languages,
-        authors=authors,
-        lasteditor=lasteditor,
-    )
-    nBook.save()
     db.commit()
+
     if resolve:
-        nBook.resolveReferences(**resolveParams)
-    return nBook
+        return nBook.resolveReferences(**resolveParams)
+    else:
+        return nBook
 
 def dbDeleteBook(id):
     '''
@@ -141,27 +155,6 @@ def dbGetByIdFactory(className):
 
 dbGetAuthor=dbGetByIdFactory(Author)
 dbGetBook=dbGetByIdFactory(Book)
-
-def dbReplaceBook(id,title,inhouse,notes,booktype,languages,authors,lasteditor,resolve=False, resolveParams=None):
-    '''
-        overwrites the fields of a book its id.
-        Returns None if not found (or other errors)
-    '''
-    db=dbGetDatabase()
-    Book.db=db
-    nBook=Book.manager(db).get(id)
-    if nBook is not None:
-        nBook.title=title
-        nBook.inhouse=inhouse
-        nBook.notes=notes
-        nBook.booktype=booktype
-        nBook.languages=languages
-        nBook.authors=authors
-        nBook.update()
-        db.commit()
-        if resolve:
-            nBook.resolveReferences(**resolveParams)
-        return nBook
 
 def dbReplaceAuthor(id,firstname,lastname):
     '''
