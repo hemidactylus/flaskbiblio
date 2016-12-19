@@ -87,7 +87,7 @@ _testvalues={
                 },
                 {
                     'tag': 'OTH',
-                    'name': 'Other',
+                    'name': '(Other)',
                 },
             ],
     'book': [
