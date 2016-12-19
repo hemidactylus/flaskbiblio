@@ -1,0 +1,13 @@
+TODO
+
+* nice-looking pages
+
+* searches, pagination and so on
+
+* import from existing csv file with all tricks to normalize
+
+* check against non-ascii chars everywhere
+
+* deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
+
+* a field 'notes' separated from 'location_notes' for books

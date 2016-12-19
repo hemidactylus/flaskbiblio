@@ -12,7 +12,7 @@ from orm import Model, Database
 import env
 
 from config import DB_DIRECTORY, DB_NAME
-from app.utils.interactive import ask_for_confirmation
+from app.utils.interactive import ask_for_confirmation, logDo
 from db_testvalues import _testvalues
 
 from app.database.models import (
@@ -50,7 +50,7 @@ def generate_db(dbFile):
 
 def populate_db(db):
     '''
-        populates the DB through the use of ORMs
+        populates the DB through the use of ORMs.
     '''
     print('')
     for qTable,qModel in tableToModel.items():
@@ -62,17 +62,6 @@ def populate_db(db):
 
 def commit_db(db):
     db.commit()
-
-def logDo(fct,msg):
-    '''
-        utility function to log start/end of an operation (a zero-arg function)
-    '''
-    print('%s ... ' % msg,end='')
-    sys.stdout.flush()
-    retval=fct()
-    print('Done.')
-    sys.stdout.flush()
-    return retval
 
 if __name__=='__main__':
 

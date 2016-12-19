@@ -47,6 +47,22 @@ _testvalues={
                     'tag': 'PT',
                     'name': 'Portuguese',
                 },
+                {
+                    'tag': 'NO',
+                    'name': 'Norwegian',
+                },
+                {
+                    'tag': 'FR',
+                    'name': 'French',
+                },
+                {
+                    'tag': 'RU',
+                    'name': 'Russian',
+                },
+                {
+                    'tag': 'ZZ',
+                    'name': '(Other)',
+                },
             ],
     'booktype': [
                 {
@@ -64,6 +80,14 @@ _testvalues={
                 {
                     'tag': 'ESS',
                     'name': 'Essay',
+                },
+                {
+                    'tag': 'ART',
+                    'name': 'Art book',
+                },
+                {
+                    'tag': 'OTH',
+                    'name': 'Other',
                 },
             ],
     'book': [
