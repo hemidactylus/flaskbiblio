@@ -5,15 +5,11 @@ _testvalues={
     'user': [
                 {
                     'name': 'Stefano',
-                    'passwordhash': '123',
-                },
-                {
-                    'name': 'Annabelle',
-                    'passwordhash': 'qwerty',
+                    'passwordhash': 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', #'123',
                 },
                 {
                     'name': 'Fiorenza',
-                    'passwordhash': 'cagnoli',
+                    'passwordhash': 'ed4090b094156d720dfe3c3139be353ddb89b3db36ceada7594fe84b6c34b9af', #'cagnoli',
                 },
             ],
     'author': [

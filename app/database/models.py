@@ -1,3 +1,4 @@
+import hashlib
 from orm import Model
 
 class AutoModel(Model):
@@ -29,8 +30,15 @@ class User(AutoModel):
     passwordhash=str
     lastlogindate=str
 
+    @staticmethod
+    def _hashString(message):
+        return hashlib.sha256(message.encode()).hexdigest()
+
     def checkPassword(self,stringToCheck):
-        return stringToCheck == self.passwordhash
+        print('stringtocheck: "%s"' % stringToCheck)
+        print('hashstring:    "%s"' % self._hashString(stringToCheck))
+        print('passwordhash:  "%s"' % self.passwordhash)
+        return self._hashString(stringToCheck) == self.passwordhash
 
     @property
     def is_authenticated(self):
