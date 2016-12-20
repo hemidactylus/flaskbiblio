@@ -141,7 +141,7 @@ def dbAddAuthor(firstname,lastname):
 
 def dbDeleteAuthor(id):
     '''
-        attempts deletion of an author. If deletion succeeds, returns True
+        attempts deletion of an author. If deletion succeeds, returns its id
     '''
     db=dbGetDatabase()
     Author.db=db

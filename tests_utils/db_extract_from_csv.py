@@ -13,9 +13,30 @@ import env
 from config import DATETIME_STR_FORMAT
 from app.utils.interactive import ask_for_confirmation, logDo
 from db_testvalues import _testvalues
+from app.database.dbtools import    (
+                                        dbGetDatabase,
+                                        # dbGetAll,
+                                        # dbMakeDict,
+                                        dbGetUser,
+                                        dbAddAuthor,
+                                        # dbDeleteAuthor,
+                                        # dbGetAuthor,
+                                        # dbReplaceAuthor,
+                                        # dbGetBook,
+                                        # dbDeleteBook,
+                                        dbAddReplaceBook,
+                                        # registerLogin,
+                                    )
+from app.database.models import (
+                                    tableToModel, 
+#                                     User,
+                                    Book,
+                                )
 
 # tools
 langFinder=re.compile('\[([A-Z]{2,2})\]')
+abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
+
 importingUser='Stefano'
 
 # validity w.r.t. test values
@@ -63,6 +84,21 @@ def clearToExtract(inFile,outFile):
             return True
     else:
         print('Source file "%s" must exist.' % (inFile))
+        return False
+
+def clearToImport(inFile1,inFile2):
+    '''
+        Asks for confirmation of the insertion into DB
+    '''
+    # if it does exist, erase it
+    if os.path.isfile(inFile1) and os.path.isfile(inFile2):
+        insertPrompt='Are you sure you want to overwrite the DB with data from "%s" and "%s"?'
+        if ask_for_confirmation(insertPrompt % (inFile1,inFile2),['y','yes','yeah']):
+            return True
+        else:
+            return False
+    else:
+        print('Source files "%s" and "%s" must exist.' % (inFile1, inFile2))
         return False
 
 def parseBookLine(csvLine):
@@ -240,12 +276,33 @@ def read_and_parse_csv(inFile):
     importDate=datetime.now().strftime(DATETIME_STR_FORMAT)
     normalizer=lambda pL: normalizeParsedLine(pL,importingUser,importDate)
     bookList=list(map(normalizer,parsedLines))
+
+    # from random import shuffle
+    # shuffle(bookList)
+    # bookList=bookList[:30]
+
     # 3. format the result as a large json-encoded  and return it along with some other info
     return {
         'booklist': bookList,
         'count': len(bookList),
         'json': json.dumps(bookList,indent=4),
     }
+
+def isOnlyAbbreviations(aName):
+    '''
+        Raises an error if names with only abbreviations are found.
+
+        Ok ''
+        Ok 'James P.'
+        Ok 'A'
+
+        NO 'J.'
+        NO 'A. F.'
+    '''
+    def _isNotAbbrev(piece):
+        return len(abbreviationFinder.findall(piece))==0
+    oktoks=list(filter(_isNotAbbrev,aName.split(' ')))
+    return len(oktoks)==0
 
 def makeIntoVector(qString):
     '''
@@ -319,6 +376,9 @@ def extract_author_list(inFile):
                             finalWarnings.append(_copyAu(wAu))
                     for wau in finalWarnings:
                         addWarningToStruct(au,'similarity',wau)
+                # check if the first name is only punctuated abbreviations
+                if isOnlyAbbreviations(au['firstname']):
+                    addWarningToStruct(au,'abbreviations',au['firstname'])
                 #
                 authorList.append(au)
     # remove the norm information
@@ -332,15 +392,81 @@ def extract_author_list(inFile):
         'count': len(authorList),
     }
 
+def erase_db_table(db,tableName):
+    '''
+        Deletes *all* records from a table of the given DB
+    '''
+    tObject=tableToModel[tableName]
+    tObject.db=db
+    idList=[obj.id for obj in tObject.manager(db).all()]
+    deleteds=[]
+    for oId in idList:
+        tObject.manager(db).get(oId).delete()
+        deleteds.append(oId)
+    db.commit()
+    return {'deleted_%s' % tableName: deleteds}
+
+def insert_authors_from_json(inFile):
+    '''
+        Reads an author list off a json file
+        and inserts all authors to DB.
+        Returns a dictionary from the 2-uple (lastname,firstname) to the database ID
+    '''
+    auList=json.load(open(inFile))
+    report={}
+    for nAu in auList:
+        # insert new author
+        nObj=dbAddAuthor(nAu['firstname'],nAu['lastname'])
+        # register the map
+        report[(nAu['lastname'],nAu['firstname'])]=nObj.id
+    return report
+
+def insert_books_from_json(inFile,authorMap):
+    '''
+        Given a map (lastname,firstname)->authorId, book insertions are done.
+        Returned is a list of IDs in the insertion order.
+    '''
+    fieldsToKill=['_linenumber','_warnings']
+    boList=json.load(open(inFile))
+    report=[]
+    for nBo in boList:
+        # resolve references, adjust fields
+        nBo['lasteditor']=dbGetUser(nBo['lasteditor']).id
+        _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
+        nBo['authors']=_auList
+        nBo['lasteditdate']=datetime.strptime(nBo['lasteditdate'],DATETIME_STR_FORMAT)
+        nBo['languages']=','.join(nBo['languages'])
+        nBo['id']=None
+        #
+        for fld in fieldsToKill:
+            if fld in nBo:
+                del nBo[fld]
+        #
+        newBookObject=Book(**nBo)
+        #
+        nBookReturned=dbAddReplaceBook(newBookObject)
+        report.append(nBookReturned.id)
+    return report
+
 if __name__=='__main__':
 
     # usage: "-i <infile.csv> <bookoutfile.json>" to import
     # and later "-a <bookoutfile.json> <authoroutfile.json>" to make author list
 
+    _helpMsg='''Usage: python script.py ARGS.
+    Args can specify the import mode:
+        (1) -e input.csv outputBooks.json
+            EXTRACT: from csv to book list
+        (2) -a inputBooks.csv outputAuthors.json
+            AUTHORLIST: check and normalize the authors found throughout books
+        (3) -i inputBooks.json inputAuthors.jsos
+            INSERT: read books/authors's jsons and insert data into the DB
+'''
+
     # a valid csv file must be provided
     if len(sys.argv)>1:
-        if sys.argv[1]=='-i':
-            print('-i or IMPORT mode.')
+        if sys.argv[1]=='-e':
+            print('-e or EXTRACT mode.')
             if len(sys.argv)>3:
                 inFile=sys.argv[2]
                 outFile=sys.argv[3]
@@ -356,6 +482,7 @@ if __name__=='__main__':
                     print('Operation aborted.')
             else:
                 print('Two cmdline args are required: inputCSV, outputBookJSON.')
+                print(_helpMsg)
         elif sys.argv[1]=='-a':
             print('-a or AUTHORLIST mode.')
             if len(sys.argv)>3:
@@ -367,17 +494,52 @@ if __name__=='__main__':
                     # stats
                     warningAuthors=len(list(filter(lambda bs: '_warnings' in bs,authorList['authorlist'])))
                     if warningAuthors:
-                        print('Authors with warning: %s. Go and fix them.' % warningAuthors)
+                        print('Authors with warning: %s. Go and check them.' % warningAuthors)
+                        print('Similarity:')
                         # clashing authors explicit print
                         def _auformat(au):
                             return '%-40s' % ('%s, %s' % (au['lastname'],au['firstname']))
                         for au in authorList['authorlist']:
-                            if '_warnings' in au:
+                            if '_warnings' in au and 'similarity' in au['_warnings']:
                                 print('    %s' % _auformat(au))
                                 for wau in au['_warnings']['similarity']:
                                     print('        %s' % _auformat(wau))
+                        print('Shortname:')
+                        for au in authorList['authorlist']:
+                            if '_warnings' in au and 'abbreviations' in au['_warnings']:
+                                print('    %s' % _auformat(au))
+                    print('Finished.')
+                else:
+                    print('Operation aborted.')
+                    print(_helpMsg)
+            else:
+                print('Two cmdline args are required: inputBookJSON, outputAuthorsJSON.')
+        elif sys.argv[1]=='-i':
+            print('-i or INSERT mode.')
+
+            if len(sys.argv)>3:
+                bookFile=sys.argv[2]
+                authorFile=sys.argv[3]
+                if clearToImport(bookFile,authorFile):
+                    db=logDo(lambda: dbGetDatabase(),'Opening DB')
+                    operationLog={}
+                    for tableToDelete in ['author','book']:
+                        operationLog.update(logDo(lambda: erase_db_table(db,tableToDelete),
+                                                  'Erasing table "%s"' % tableToDelete))
+                    deletionLog=', '.join(map(lambda kv: '%s[%i]' % (kv[0],len(kv[1])),operationLog.items()))
+                    print('Deletions: %s' % deletionLog)
+                    authorToId=logDo(lambda: insert_authors_from_json(authorFile), 'Inserting authors from "%s"' % authorFile)
+                    bookInsertLog=logDo(lambda: insert_books_from_json(bookFile,authorToId),'Inserting books from "%s"' % bookFile)
+                    print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
                     print('Finished.')
                 else:
                     print('Operation aborted.')
             else:
-                print('Two cmdline args are required: inputBookJSON, outputAuthorJSON.')
+                print('Two cmdline args are required: inputBookJSON, inputAuthorsJSON.')
+                print(_helpMsg)
+        else:
+            print('No valid operation provided. Quitting.')
+            print(_helpMsg)
+    else:
+        print('No valid operation provided. Quitting.')
+        print(_helpMsg)

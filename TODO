@@ -4,12 +4,11 @@ TODO
 
 * searches, pagination and so on
 
+* warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
+
 * import from existing csv file with all tricks to normalize
     - todo: clear DB and insert values from .json with resolution of relations
 
 * check against non-ascii chars everywhere
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
-
-* a field 'notes' separated from 'inhousenotes' for books
-    

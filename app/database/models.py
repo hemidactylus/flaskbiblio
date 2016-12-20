@@ -36,9 +36,6 @@ class User(AutoModel):
         return hashlib.sha256(message.encode()).hexdigest()
 
     def checkPassword(self,stringToCheck):
-        print('stringtocheck: "%s"' % stringToCheck)
-        print('hashstring:    "%s"' % self._hashString(stringToCheck))
-        print('passwordhash:  "%s"' % self.passwordhash)
         return self._hashString(stringToCheck) == self.passwordhash
 
     @property
