@@ -251,6 +251,7 @@ def ep_editbook():
         form.title.data=request.args.get('title')
         form.inhouse.data=int(request.args.get('inhouse','1'))
         form.notes.data=request.args.get('notes')
+        form.inhousenotes.data=request.args.get('inhousenotes')
         form.booktype.data=request.args.get('booktype')
         if len(request.args.get('languages',''))>0:
             form.languages.data=request.args['languages'].split(',')
@@ -267,6 +268,7 @@ def ep_editbook():
             form.title.data=qBook.title
             form.inhouse.data=int(qBook.inhouse)
             form.notes.data=qBook.notes
+            form.inhousenotes.data=qBook.inhousenotes
             form.booktype.data=qBook.booktype
             form.languages.data=qBook.languages.split(',')
         else:
@@ -292,6 +294,7 @@ def ep_editbook():
         title=form.title.data,
         inhouse=int(form.inhouse.data),
         notes=form.notes.data,
+        inhousenotes=form.inhousenotes.data,
         booktype=form.booktype.data,
         languages=','.join(form.languages.data) if form.languages.data is not None else '',
         authors=form.authorlist.data,
@@ -315,6 +318,7 @@ def ep_editbook():
                                         bookid=editedBook.id,
                                         title=editedBook.title,
                                         inhouse=editedBook.inhouse,
+                                        inhousenotes=editedBook.inhousenotes,
                                         notes=editedBook.notes,
                                         booktype=editedBook.booktype,
                                         languages=editedBook.languages,

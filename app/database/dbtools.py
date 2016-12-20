@@ -83,6 +83,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
         if nBook is not None:
             nBook.title=newBook.title
             nBook.inhouse=newBook.inhouse
+            nBook.inhousenotes=newBook.inhousenotes
             nBook.notes=newBook.notes
             nBook.booktype=newBook.booktype
             nBook.languages=newBook.languages

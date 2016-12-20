@@ -34,6 +34,7 @@ class EditBookForm(FlaskForm):
     title = StringField('booktitle')
     inhouse = BooleanField('bookinhouse', default=True)
     notes = StringField('booknotes')
+    inhousenotes = StringField('inhousenotes')
     booktype = SelectField('booktype')
     languages = MultiCheckboxField('languages')
     additem=SubmitField('Add author')
@@ -61,11 +62,14 @@ class EditBookForm(FlaskForm):
             else:
                 return True
         else:
-            if self.title.data and self.title.data!='':
-                return True
-            else:
-                self.title.errors.append('Cannot be empty~')
-                return False
+            toret=True
+            if not(self.title.data and self.title.data!=''):
+                self.title.errors.append('Please enter a title')
+                toret = False
+            if not self.inhouse.data and not (self.inhousenotes.data and self.inhousenotes.data!=''):
+                self.inhousenotes.errors.append('Please specify a location')
+                toret = False
+            return toret
 
     def setAuthorsToAdd(self,auPairList):
         self.newauthors.choices=[('-1','<Please select>')]+_sortAuthorPair(auPairList)

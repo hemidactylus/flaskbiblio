@@ -7,12 +7,12 @@
       {{ form.hidden_tag() }}
       <hr>
       Book Title:<br>
-      {{ form.title(size=80) }}<br>
+      {{ form.title(size=30) }}<br>
       {% for error in form.title.errors %}
         <span style="color: red;">[{{ error }}]</span>
       {% endfor %}<br>
       Notes:<br>
-      {{ form.notes(size=80) }}<br>
+      {{ form.notes(size=30) }}<br>
       {% for error in form.notes.errors %}
         <span style="color: red;">[{{ error }}]</span>
       {% endfor %}<br>
@@ -24,6 +24,10 @@
       In House:
       {{ form.inhouse() }}<br>
       {% for error in form.inhouse.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      {{ form.inhousenotes(size=14) }}
+      {% for error in form.inhousenotes.errors %}
         <span style="color: red;">[{{ error }}]</span>
       {% endfor %}<br>
       Book Languages:<br>

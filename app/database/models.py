@@ -11,6 +11,7 @@ class Book(AutoModel):
     authors=str
     booktype=str
     inhouse=int # bool
+    inhousenotes=str
     notes=str
     languages=str
     lasteditor=str
