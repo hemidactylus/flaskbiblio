@@ -15,23 +15,24 @@ from app.utils.interactive import ask_for_confirmation, logDo
 from db_testvalues import _testvalues
 from app.database.dbtools import    (
                                         dbGetDatabase,
-                                        # dbGetAll,
-                                        # dbMakeDict,
                                         dbGetUser,
                                         dbAddAuthor,
-                                        # dbDeleteAuthor,
-                                        # dbGetAuthor,
-                                        # dbReplaceAuthor,
-                                        # dbGetBook,
-                                        # dbDeleteBook,
                                         dbAddReplaceBook,
-                                        # registerLogin,
                                     )
 from app.database.models import (
                                     tableToModel, 
-#                                     User,
                                     Book,
                                 )
+
+from app.utils.ascii_checks import  (
+                                        validCharacters,
+                                        translatedCharacters,
+                                        ascifiiString
+                                    )
+from app.utils.string_vectorizer import (
+                                            makeIntoVector,
+                                            scalProd
+                                        )
 
 # tools
 langFinder=re.compile('\[([A-Z]{2,2})\]')
@@ -44,28 +45,8 @@ validLanguages=[lang['tag'] for lang in _testvalues['language']]
 validBooktypes=[booktype['tag'] for booktype in _testvalues['booktype']]
 if len(list(filter(lambda u: u['name']==importingUser,_testvalues['user'])))==0:
     raise ValueError('User %s not found.' % importingUser)
-validCharacters="\" !&'()+,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz"
-translatedCharacters={
-    u'Á': 'A',
-    u'á': 'a',
-    u'ã': 'a',
-    u'ä': 'ae',
-    u'æ': 'ae',
-    u'ç': 'c',
-    u'è': 'e',
-    u'é': 'e',
-    u'í': 'i',
-    u'ò': 'o',
-    u'ó': 'o',
-    u'õ': 'o',
-    u'ö': 'oe',
-    u'ù': 'u',
-    u'ú': 'u',
-    u'ü': 'ue',
-    u'à': 'a',
-}
+
 # used to make strings into a vector
-vectorCharacters=list(map(chr,range(ord('A'),ord('Z')+1)))
 MIN_COSINE_ALERT=0.9 # to raise a similarity error
 
 def clearToExtract(inFile,outFile):
@@ -115,16 +96,7 @@ def parseBookLine(csvLine):
     })
 
 def plainifyStruct(inStruct):
-    return {k:normalizeCharacters(v) for k,v in inStruct.items()}
-
-def normalizeCharacters(inString):
-    '''
-        parses away all non-ascii characters
-    '''
-    resString=inString
-    for k,v in translatedCharacters.items():
-        resString=resString.replace(k,v)
-    return resString
+    return {k:ascifiiString(v) for k,v in inStruct.items()}
 
 def addWarningToStruct(bStruct,wField,wContents):
     '''
@@ -269,17 +241,14 @@ def read_and_parse_csv(inFile):
     # 1. make valid lines into base structures
     parsedLines=list(map(parseBookLine,[li for li in enumerate(csv.reader(open(inFile)))][1:]))
     # 1b. must check for non-ascii chars here already and if necessary treat the various warnings
-    untreatedCharSet=list(filter(lambda c: c not in validCharacters and c not in translatedCharacters.keys(),collectCharacters(parsedLines)))
+    passingCharacters=set(list(validCharacters)) | set(translatedCharacters.keys())
+    untreatedCharSet=list(filter(lambda c: c not in passingCharacters, collectCharacters(parsedLines)))
     if len(untreatedCharSet)>0:
         raise ValueError('Some untreated special chars to check: "%s"' % ''.join(sorted(list(untreatedCharSet))))
     # 2. apply a normalisation function to each line
     importDate=datetime.now().strftime(DATETIME_STR_FORMAT)
     normalizer=lambda pL: normalizeParsedLine(pL,importingUser,importDate)
     bookList=list(map(normalizer,parsedLines))
-
-    # from random import shuffle
-    # shuffle(bookList)
-    # bookList=bookList[:30]
 
     # 3. format the result as a large json-encoded  and return it along with some other info
     return {
@@ -304,18 +273,6 @@ def isOnlyAbbreviations(aName):
     oktoks=list(filter(_isNotAbbrev,aName.split(' ')))
     return len(oktoks)==0
 
-def makeIntoVector(qString):
-    '''
-        makes a string into a unitary vectors.
-        No non-alphabetic, no case-sensitivity
-    '''
-    lCnt=Counter([let for let in list(qString.upper()) if let in vectorCharacters])
-    lNorm=sum(map(lambda x: x**2.0,lCnt.values()))**0.5
-    if lNorm>0:
-        return {k: v/lNorm for k,v in lCnt.items()}
-    else:
-        return dict(lCnt)
-
 def makeAuthorIntoVector(lName,fName):
     '''
         generates two unitary-norm vectors, one from lName and one from the combination
@@ -324,12 +281,6 @@ def makeAuthorIntoVector(lName,fName):
         '_normLast': makeIntoVector(lName),
         '_normFull': makeIntoVector('%s%s' % (lName,fName))
     }
-
-def scalProd(di1,di2):
-    '''
-        scalar product of two vectors
-    '''
-    return sum([v*di2[k] for k,v in di1.items() if k in di2])
 
 def insert_author_to_list(newA,aList,linenumber=None):
     '''

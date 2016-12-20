@@ -1,5 +1,7 @@
 __pycache__
 *.pyc
+*.json
+*.csv
 app/database/biblio.db
 wsgi_run.fcgi
 tests_utils/BibliotecaMansarda.csv

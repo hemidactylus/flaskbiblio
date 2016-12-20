@@ -6,9 +6,10 @@ TODO
 
 * warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
 
-* import from existing csv file with all tricks to normalize
-    - todo: clear DB and insert values from .json with resolution of relations
+* when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
+    This requires that since the start items have vectors stored on DB (for speed)
 
 * check against non-ascii chars everywhere
+    - upon db insertion
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)

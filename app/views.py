@@ -178,7 +178,7 @@ def resolveParams():
 def ep_books():
     user = g.user
     # perform live query
-    books=dbGetAll('book',resolve=True, resolveParams=resolveParams())
+    books=sorted(dbGetAll('book',resolve=True, resolveParams=resolveParams()))
     umap = retrieveUsers()
     for bo in books:
         lasteditor=umap.get(int(bo.lasteditor))

@@ -26,6 +26,9 @@ class Book(AutoModel):
     def __str__(self):
         return '%s (%s)' % (self.title, ' - '.join([a.lastname for a in self.resAuthors]))
 
+    def __lt__(self,other):
+        return self.title < other.title
+
 class User(AutoModel):
     name=str
     passwordhash=str

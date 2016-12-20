@@ -11,6 +11,7 @@ from wtforms import (
 from wtforms.validators import DataRequired
 
 from app.utils.MultiCheckboxField import MultiCheckboxField
+from app.utils.validators import AsciiOnly
 
 # utility functions to sort out list population
 def _sortTagNamePair(pairList):
@@ -21,20 +22,20 @@ def _sortAuthorPair(pairList):
     return sorted(map(lambda au: (str(au.id), str(au)), pairList),key=lambda p: str(p[1]))
 
 class LoginForm(FlaskForm):
-    username = StringField('UserName', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('UserName', validators=[DataRequired(),AsciiOnly()])
+    password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
     remember_me = BooleanField('remember_me', default=False)
 
 class NewAuthorForm(FlaskForm):
-    firstname = StringField('authorfirstname', validators=[DataRequired()])
-    lastname = StringField('authorlastname', validators=[DataRequired()])
+    firstname = StringField('authorfirstname', validators=[DataRequired(),AsciiOnly()])
+    lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
 
 class EditBookForm(FlaskForm):
 
-    title = StringField('booktitle')
+    title = StringField('booktitle',validators=[AsciiOnly()])
     inhouse = BooleanField('bookinhouse', default=True)
-    notes = StringField('booknotes')
-    inhousenotes = StringField('inhousenotes')
+    notes = StringField('booknotes',validators=[AsciiOnly()])
+    inhousenotes = StringField('inhousenotes',validators=[AsciiOnly()])
     booktype = SelectField('booktype')
     languages = MultiCheckboxField('languages')
     additem=SubmitField('Add author')
