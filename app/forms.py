@@ -27,7 +27,7 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('remember_me', default=False)
 
 class NewAuthorForm(FlaskForm):
-    firstname = StringField('authorfirstname', validators=[DataRequired(),AsciiOnly()])
+    firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
 
 class EditBookForm(FlaskForm):
