@@ -127,24 +127,25 @@ def registerLogin(userId):
 
 def dbAddAuthor(firstname,lastname):
     '''
-        Attempts adding an author and returns the new Author object.
-        returns None if duplicates are detected
+        Attempts adding an author and returns (1, the new Author object).
+        returns (0, status) if duplicates are detected
     '''
     db=dbGetDatabase()
     Author.db=db
     for qAuthor in Author.manager(db).all():
         if qAuthor.firstname==firstname and qAuthor.lastname==lastname:
-            return None
+            return (0,'Duplicate detected')
     # no duplicates: add author through the orm
     nAuthor=Author(firstname=firstname,lastname=lastname)
     nAuthor.forceAscii()
     nAuthor.save()
     db.commit()
-    return nAuthor
+    return (1,nAuthor)
 
 def dbDeleteAuthor(id):
     '''
         attempts deletion of an author. If deletion succeeds, returns its id
+        Always a 2-uple (success,stuff)
     '''
     db=dbGetDatabase()
     Author.db=db
@@ -152,9 +153,9 @@ def dbDeleteAuthor(id):
         dAuthor=Author.manager(db).get(id)
         dAuthor.delete()
         db.commit()
-        return id
+        return (1,id)
     except:
-        return None
+        return (0,'Cannot delete')
 
 def dbGetByIdFactory(className):
     '''
@@ -178,9 +179,13 @@ def dbReplaceAuthor(id,firstname,lastname):
     '''
         overwrites the fields of an author given its id.
         Returns None if not found (or other errors)
+        Always a 2-uple (success,stuff)
     '''
     db=dbGetDatabase()
     Author.db=db
+    for qAuthor in Author.manager(db).all():
+        if qAuthor.id != id and (qAuthor.firstname==firstname and qAuthor.lastname==lastname):
+            return (0,'Duplicate detected')
     nAuthor=Author.manager(db).get(id)
     if nAuthor is not None:
         nAuthor.firstname=firstname
@@ -188,4 +193,5 @@ def dbReplaceAuthor(id,firstname,lastname):
         nAuthor.forceAscii()
         nAuthor.update()
         db.commit()
-        return nAuthor
+        return (1,nAuthor)
+    return (0,'Not found')

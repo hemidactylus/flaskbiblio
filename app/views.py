@@ -102,11 +102,11 @@ def ep_newauthor():
     user=g.user
     form=NewAuthorForm()
     if form.validate_on_submit():
-        newAuthor=dbAddAuthor(form.firstname.data,form.lastname.data)
-        if newAuthor is not None:
+        status,newAuthor=dbAddAuthor(form.firstname.data,form.lastname.data)
+        if status:
             flash('Author %s inserted successfully.' % newAuthor)
         else:
-            flash('Could not perform the insertion.')
+            flash('Could not perform the insertion (error: %s).' % newAuthor)
         return redirect(url_for('ep_authors'))
     else:
         return render_template  (
@@ -120,10 +120,11 @@ def ep_newauthor():
 @login_required
 def ep_deleteauthor(id):
     user=g.user
-    if dbDeleteAuthor(int(id)):
+    status,delId=dbDeleteAuthor(int(id))
+    if status:
         flash('Author successfully deleted.')
     else:
-        flash('Could not delete author.')
+        flash('Could not delete author (error: %s).' % delId)
     return redirect(url_for('ep_authors'))
 
 @app.route('/editauthor/<id>', methods=['GET', 'POST'])
@@ -132,11 +133,11 @@ def ep_editauthor(id):
     user=g.user
     form=NewAuthorForm()
     if form.validate_on_submit():
-        newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
-        if newAuthor is not None:
+        status,newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
+        if status:
             flash('Author %s updated successfully.' % newAuthor)
         else:
-            flash('Could not perform the update.')
+            flash('Could not perform the update (error: %s).' % newAuthor)
         return redirect(url_for('ep_authors'))
     else:
         qAuthor=dbGetAuthor(int(id))

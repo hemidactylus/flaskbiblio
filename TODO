@@ -9,7 +9,7 @@ TODO
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
 
-* check against non-ascii chars everywhere
-    - upon db insertion
-
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
+
+* Add+replace author must become a single call to reuse code.
+    And must accept an Author instance to then automatize arguments copying in db-calls
