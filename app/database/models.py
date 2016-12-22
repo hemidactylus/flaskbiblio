@@ -1,10 +1,21 @@
+'''
+    Sqlite ORM models
+'''
+
 import hashlib
+
 from orm import Model
+from app.utils.ascii_checks import ascifiiString
 
 class AutoModel(Model):
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
             setattr(self,k,v)
+    # a method to ascifii string fields - not optimally implemented, perhaps
+    def forceAscii(self):
+        for k,q in self.__dict__.items():
+            if isinstance(q,str):
+                setattr(self,k,ascifiiString(q,forceAsciification=True))
 
 class Book(AutoModel):
     title=str

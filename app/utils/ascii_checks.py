@@ -33,11 +33,17 @@ def isAscii(inString):
     '''
     return len(nonAsciiCharacters(inString))==0
 
-def ascifiiString(inString):
+def ascifiiString(inString, forceAsciification=False):
     '''
         translates characters so that the result is an ascii-fication of the input string
+        
+        if forceAsciification is True, the string is forcefully converted to a pure ascii,
+            even at the cost of losing characters (non-ascii which do not fall into the translation table)
     '''
     resString=inString
     for k,v in translatedCharacters.items():
         resString=resString.replace(k,v)
-    return resString
+    if forceAsciification:
+        return ''.join(c for c in resString if c in validCharacters)
+    else:
+        return resString

@@ -75,6 +75,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
         for qBook in Book.manager(db).all():
             if qBook.title==newBook.title and qBook.authors==newBook.authors: # TODO: here check ordering and tricks
                 return None
+        nAuthor.forceAscii()
         newBook.save()
         nBook=newBook
     else:
@@ -90,6 +91,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             nBook.authors=newBook.authors
             nBook.lasteditor=newBook.lasteditor
             nBook.lasteditdate=newBook.lasteditdate
+            nAuthor.forceAscii()
             nBook.update()
         else:
             return None
@@ -135,6 +137,7 @@ def dbAddAuthor(firstname,lastname):
             return None
     # no duplicates: add author through the orm
     nAuthor=Author(firstname=firstname,lastname=lastname)
+    nAuthor.forceAscii()
     nAuthor.save()
     db.commit()
     return nAuthor
@@ -182,6 +185,7 @@ def dbReplaceAuthor(id,firstname,lastname):
     if nAuthor is not None:
         nAuthor.firstname=firstname
         nAuthor.lastname=lastname
+        nAuthor.forceAscii()
         nAuthor.update()
         db.commit()
         return nAuthor
