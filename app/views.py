@@ -29,6 +29,7 @@ from app.database.models import (
                                     tableToModel, 
                                     User,
                                     Book,
+                                    Author,
                                 )
 
 from app import (
@@ -102,7 +103,8 @@ def ep_newauthor():
     user=g.user
     form=NewAuthorForm()
     if form.validate_on_submit():
-        status,newAuthor=dbAddAuthor(form.firstname.data,form.lastname.data)
+        authorToAdd=Author(firstname=form.firstname.data, lastname=form.lastname.data)
+        status,newAuthor=dbAddAuthor(authorToAdd)
         if status:
             flash('Author %s inserted successfully.' % newAuthor)
         else:
@@ -133,7 +135,8 @@ def ep_editauthor(id):
     user=g.user
     form=NewAuthorForm()
     if form.validate_on_submit():
-        status,newAuthor=dbReplaceAuthor(id,form.firstname.data,form.lastname.data)
+        authorToInsert=Author(firstname=form.firstname.data, lastname=form.lastname.data, id=int(id))
+        status,newAuthor=dbReplaceAuthor(authorToInsert)
         if status:
             flash('Author %s updated successfully.' % newAuthor)
         else:

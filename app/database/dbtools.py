@@ -75,7 +75,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
         for qBook in Book.manager(db).all():
             if qBook.title==newBook.title and qBook.authors==newBook.authors: # TODO: here check ordering and tricks
                 return None
-        nAuthor.forceAscii()
+        newBook.forceAscii()
         newBook.save()
         nBook=newBook
     else:
@@ -125,7 +125,7 @@ def registerLogin(userId):
     db.commit()
     return qUser.lastlogindate
 
-def dbAddAuthor(firstname,lastname):
+def dbAddAuthor(newAuthor):
     '''
         Attempts adding an author and returns (1, the new Author object).
         returns (0, status) if duplicates are detected
@@ -133,14 +133,13 @@ def dbAddAuthor(firstname,lastname):
     db=dbGetDatabase()
     Author.db=db
     for qAuthor in Author.manager(db).all():
-        if qAuthor.firstname==firstname and qAuthor.lastname==lastname:
+        if qAuthor.firstname==newAuthor.firstname and qAuthor.lastname==newAuthor.lastname:
             return (0,'Duplicate detected')
     # no duplicates: add author through the orm
-    nAuthor=Author(firstname=firstname,lastname=lastname)
-    nAuthor.forceAscii()
-    nAuthor.save()
+    newAuthor.forceAscii()
+    newAuthor.save()
     db.commit()
-    return (1,nAuthor)
+    return (1,newAuthor)
 
 def dbDeleteAuthor(id):
     '''
@@ -175,7 +174,7 @@ def dbGetByIdFactory(className):
 dbGetAuthor=dbGetByIdFactory(Author)
 dbGetBook=dbGetByIdFactory(Book)
 
-def dbReplaceAuthor(id,firstname,lastname):
+def dbReplaceAuthor(newAuthor):
     '''
         overwrites the fields of an author given its id.
         Returns None if not found (or other errors)
@@ -184,12 +183,13 @@ def dbReplaceAuthor(id,firstname,lastname):
     db=dbGetDatabase()
     Author.db=db
     for qAuthor in Author.manager(db).all():
-        if qAuthor.id != id and (qAuthor.firstname==firstname and qAuthor.lastname==lastname):
+        if qAuthor.id != newAuthor.id and \
+                    (qAuthor.firstname==newAuthor.firstname and qAuthor.lastname==newAuthor.lastname):
             return (0,'Duplicate detected')
-    nAuthor=Author.manager(db).get(id)
+    nAuthor=Author.manager(db).get(newAuthor.id)
     if nAuthor is not None:
-        nAuthor.firstname=firstname
-        nAuthor.lastname=lastname
+        nAuthor.firstname=newAuthor.firstname
+        nAuthor.lastname=newAuthor.lastname
         nAuthor.forceAscii()
         nAuthor.update()
         db.commit()
