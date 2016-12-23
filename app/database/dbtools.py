@@ -64,7 +64,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             Attempts adding a book and returns the new Book object.
             returns None if duplicates are detected
         else:
-            overwrites the fields of a book its id.
+            overwrites the fields of the book with the specified id
             Returns None if not found (or other errors)
     '''
     db=dbGetDatabase()
@@ -73,13 +73,17 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
     if newBook.id is None:
         # if new-insertion, check for duplicates then proceed
         for qBook in Book.manager(db).all():
-            if qBook.title==newBook.title and qBook.authors==newBook.authors: # TODO: here check ordering and tricks
-                return None
+            if qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower(): # TODO: here check ordering and tricks
+                return (0,'Duplicate detected.')
         newBook.forceAscii()
         newBook.save()
         nBook=newBook
     else:
         # if replacement, find the replacee and proceed
+        for qBook in Book.manager(db).all():
+            if qBook.id != newBook.id and \
+                    (qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower()):
+                return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
             nBook.title=newBook.title
@@ -91,16 +95,16 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             nBook.authors=newBook.authors
             nBook.lasteditor=newBook.lasteditor
             nBook.lasteditdate=newBook.lasteditdate
-            nAuthor.forceAscii()
+            nBook.forceAscii()
             nBook.update()
         else:
-            return None
+            return (0,'Not found.')
     db.commit()
 
     if resolve:
-        return nBook.resolveReferences(**resolveParams)
+        return (1,nBook.resolveReferences(**resolveParams))
     else:
-        return nBook
+        return (1,nBook)
 
 def dbDeleteBook(id):
     '''
@@ -124,22 +128,6 @@ def registerLogin(userId):
     qUser.update()
     db.commit()
     return qUser.lastlogindate
-
-def dbAddAuthor(newAuthor):
-    '''
-        Attempts adding an author and returns (1, the new Author object).
-        returns (0, status) if duplicates are detected
-    '''
-    db=dbGetDatabase()
-    Author.db=db
-    for qAuthor in Author.manager(db).all():
-        if qAuthor.firstname==newAuthor.firstname and qAuthor.lastname==newAuthor.lastname:
-            return (0,'Duplicate detected')
-    # no duplicates: add author through the orm
-    newAuthor.forceAscii()
-    newAuthor.save()
-    db.commit()
-    return (1,newAuthor)
 
 def dbDeleteAuthor(id):
     '''
@@ -174,24 +162,41 @@ def dbGetByIdFactory(className):
 dbGetAuthor=dbGetByIdFactory(Author)
 dbGetBook=dbGetByIdFactory(Book)
 
-def dbReplaceAuthor(newAuthor):
+def dbAddReplaceAuthor(newAuthor):
     '''
-        overwrites the fields of an author given its id.
-        Returns None if not found (or other errors)
-        Always a 2-uple (success,stuff)
+        Add/Replace an author to DB
+
+        if author.id is None:
+            Attempts adding an author and returns the new Author object.
+            returns None if duplicates are detected
+        else:
+            overwrites the fields of the author with the requested id
+            Returns None if not found (or other errors)
     '''
     db=dbGetDatabase()
     Author.db=db
-    for qAuthor in Author.manager(db).all():
-        if qAuthor.id != newAuthor.id and \
-                    (qAuthor.firstname==newAuthor.firstname and qAuthor.lastname==newAuthor.lastname):
-            return (0,'Duplicate detected')
-    nAuthor=Author.manager(db).get(newAuthor.id)
-    if nAuthor is not None:
-        nAuthor.firstname=newAuthor.firstname
-        nAuthor.lastname=newAuthor.lastname
-        nAuthor.forceAscii()
-        nAuthor.update()
-        db.commit()
-        return (1,nAuthor)
-    return (0,'Not found')
+    if newAuthor.id is None:
+        # new insertion: check for duplicates then proceed
+        for qAuthor in Author.manager(db).all():
+            if qAuthor.firstname.lower()==newAuthor.firstname.lower() and qAuthor.lastname.lower()==newAuthor.lastname.lower():
+                return (0,'Duplicate detected')
+        # no duplicates: add author through the orm
+        newAuthor.forceAscii()
+        newAuthor.save()
+        nAuthor=newAuthor
+    else:
+        # if replacement, find the replacee and proceed
+        for qAuthor in Author.manager(db).all():
+            if qAuthor.id != newAuthor.id and \
+                    (qAuthor.firstname.lower()==newAuthor.firstname.lower() and qAuthor.lastname.lower()==newAuthor.lastname.lower()):
+                return (0,'Duplicate detected')
+        nAuthor=Author.manager(db).get(newAuthor.id)
+        if nAuthor is not None:
+            nAuthor.firstname=newAuthor.firstname
+            nAuthor.lastname=newAuthor.lastname
+            nAuthor.forceAscii()
+            nAuthor.update()
+        else:
+            return (0,'Not found')
+    db.commit()
+    return (1,nAuthor)

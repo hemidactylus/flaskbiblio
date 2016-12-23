@@ -16,12 +16,13 @@ from db_testvalues import _testvalues
 from app.database.dbtools import    (
                                         dbGetDatabase,
                                         dbGetUser,
-                                        dbAddAuthor,
+                                        dbAddReplaceAuthor,
                                         dbAddReplaceBook,
                                     )
 from app.database.models import (
-                                    tableToModel, 
+                                    tableToModel,
                                     Book,
+                                    Author,
                                 )
 
 from app.utils.ascii_checks import  (
@@ -367,9 +368,13 @@ def insert_authors_from_json(inFile):
     report={}
     for nAu in auList:
         # insert new author
-        nObj=dbAddAuthor(nAu['firstname'],nAu['lastname'])
+        newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'])
+        status,nObj=dbAddReplaceAuthor(newAuthor)
         # register the map
-        report[(nAu['lastname'],nAu['firstname'])]=nObj.id
+        if status:
+            report[(nAu['lastname'],nAu['firstname'])]=nObj.id
+        else:
+            raise ValueError()
     return report
 
 def insert_books_from_json(inFile,authorMap):
@@ -395,8 +400,11 @@ def insert_books_from_json(inFile,authorMap):
         #
         newBookObject=Book(**nBo)
         #
-        nBookReturned=dbAddReplaceBook(newBookObject)
-        report.append(nBookReturned.id)
+        status,nBookReturned=dbAddReplaceBook(newBookObject)
+        if status:
+            report.append(nBookReturned.id)
+        else:
+            raise ValueError()
     return report
 
 if __name__=='__main__':

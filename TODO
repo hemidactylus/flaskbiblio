@@ -5,6 +5,7 @@ TODO
 * searches, pagination and so on
 
 * warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
+    transactions lock the updates until the book-per-author counters are adjusted
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
@@ -12,5 +13,5 @@ TODO
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 
-* Add+replace author must become a single call to reuse code.
-    And must accept an Author instance to then automatize arguments copying in db-calls
+* in the two addreplace calls, when updating the list of attributes must be cleverly handled instead of a lot of
+    explicit member copies that are now being done.

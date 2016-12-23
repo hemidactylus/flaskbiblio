@@ -16,10 +16,9 @@ from app.database.dbtools import    (
                                         dbGetAll,
                                         dbMakeDict,
                                         dbGetUser,
-                                        dbAddAuthor,
                                         dbDeleteAuthor,
                                         dbGetAuthor,
-                                        dbReplaceAuthor,
+                                        dbAddReplaceAuthor,
                                         dbGetBook,
                                         dbDeleteBook,
                                         dbAddReplaceBook,
@@ -103,8 +102,8 @@ def ep_newauthor():
     user=g.user
     form=NewAuthorForm()
     if form.validate_on_submit():
-        authorToAdd=Author(firstname=form.firstname.data, lastname=form.lastname.data)
-        status,newAuthor=dbAddAuthor(authorToAdd)
+        authorToAdd=Author(id=None, firstname=form.firstname.data, lastname=form.lastname.data)
+        status,newAuthor=dbAddReplaceAuthor(authorToAdd)
         if status:
             flash('Author %s inserted successfully.' % newAuthor)
         else:
@@ -136,7 +135,7 @@ def ep_editauthor(id):
     form=NewAuthorForm()
     if form.validate_on_submit():
         authorToInsert=Author(firstname=form.firstname.data, lastname=form.lastname.data, id=int(id))
-        status,newAuthor=dbReplaceAuthor(authorToInsert)
+        status,newAuthor=dbAddReplaceAuthor(authorToInsert)
         if status:
             flash('Author %s updated successfully.' % newAuthor)
         else:
@@ -294,7 +293,7 @@ def ep_editbook():
     form.setAuthorsToAdd(availableAuthors)
     # HERE values are read off the form into a Book instance
     editedBook=Book(
-        id=form.bookid.data if form.bookid.data is not None and len(form.bookid.data)>0 else None,
+        id=int(form.bookid.data) if form.bookid.data is not None and len(form.bookid.data)>0 else None,
         title=form.title.data,
         inhouse=int(form.inhouse.data),
         notes=form.notes.data,
@@ -333,16 +332,16 @@ def ep_editbook():
             # pressed the submit button
             # HERE the actual save/update is triggered
             newEntry=editedBook.id is None
-            updatedBook=dbAddReplaceBook(editedBook,
+            result,updatedBook=dbAddReplaceBook(editedBook,
                                 resolve=True,
                                 resolveParams=resolveParams())
-            if updatedBook:
+            if result:
                 if newEntry:
                     flash('"%s" successfully added.' % str(updatedBook))
                 else:
                     flash('"%s" successfully updated.' % str(updatedBook))
             else:
-                flash('Internal error updating the book table.')
+                flash('Internal error updating the book table (error: %s).' % updatedBook)
             return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
