@@ -23,6 +23,10 @@ from app.database.models import (
                                     Booktype,
                                     Book,
                                 )
+from app.database.dbtools import    (
+                                        dbAddReplaceAuthor,
+                                        dbAddReplaceBook,
+                                    )
 
 def clearToProceed(dbfilename):
     '''
@@ -53,14 +57,42 @@ def populate_db(db):
         populates the DB through the use of ORMs.
     '''
     print('')
-    for qTable,qModel in tableToModel.items():
+    # populate other tables
+    for qTable,qModel in filter(lambda qtP: qtP[0] not in ['book','author'], tableToModel.items()):
         print('    %s' % qTable)
         qModel.db=db
         for item in _testvalues[qTable]:
             qObject=qModel(**item)
             qObject.save()
-
-def commit_db(db):
+    db.commit()
+    # add authors
+    auLNameMap={} # used later for books
+    Author.db=db
+    print('    %s' % 'author')
+    for item in _testvalues['author']:
+        nAuthor=Author(id=None,firstname=item['firstname'],lastname=item['lastname'])
+        result,newAu=dbAddReplaceAuthor(nAuthor)
+        if not result:
+            raise ValueError()
+        else:
+            auLNameMap[newAu.lastname]=newAu.id
+    # add books with author resolution
+    Book.db=db
+    print('    %s' % 'book')
+    for item in _testvalues['book']:
+        # authors to autorlist string
+        authorList=','.join(map(str, sorted([auLNameMap[auLName] for auLName in item['authors'].split(',')])))
+        #
+        del item['authors']
+        nBook=Book  (
+                        id=None,
+                        authors=authorList,
+                        **item
+                    )
+        result,newBo=dbAddReplaceBook(nBook)
+        if not result:
+            raise ValueError()
+    # done.
     db.commit()
 
 if __name__=='__main__':
@@ -71,7 +103,6 @@ if __name__=='__main__':
     if clearToProceed(dbFile):
         db=logDo(lambda: generate_db(dbFile),'Generating DB')
         logDo(lambda: populate_db(db),'Populating DB')
-        logDo(lambda: commit_db(db),'Closing DB')
         print('Finished.')
     else:
         print('Operation aborted.')

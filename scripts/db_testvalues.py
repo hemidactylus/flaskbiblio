@@ -93,7 +93,7 @@ _testvalues={
     'book': [
                 {
                     'title':         'Tutti i nomi',
-                    'authors':       '1',
+                    'authors':       'Saramago',
                     'booktype':      'FIC',
                     'inhouse':       True,
                     'inhousenotes':  '',
@@ -104,7 +104,7 @@ _testvalues={
                 },
                 {
                     'title':         'Guida alle bucce',
-                    'authors':       '3,4',
+                    'authors':       'Tolstoj,Sbucciapesche',
                     'booktype':      'ESS',
                     'inhouse':       False,
                     'inhousenotes':  'Nel frutteto',
