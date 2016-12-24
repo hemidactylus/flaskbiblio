@@ -88,7 +88,10 @@ def ep_deletebook(bookid):
 @login_required
 def ep_authors():
     user = g.user
-    authors=sorted(list(dbGetAll('author')))
+    # TEMP test
+    bookDict=dbMakeDict(dbGetAll('book'))
+    authors=sorted(list(dbGetAll('author',resolve=True, resolveParams={'books': bookDict})))
+    # a b c qui non passa la risolta?
     return render_template  (
                                 "authors.html",
                                 title='Authors',

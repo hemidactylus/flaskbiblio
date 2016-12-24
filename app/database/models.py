@@ -6,6 +6,7 @@ import hashlib
 
 from orm import Model
 from app.utils.ascii_checks import ascifiiString
+from app.utils.stringlists import unrollStringList
 
 class AutoModel(Model):
     def __init__(self, **kwargs):
@@ -77,6 +78,12 @@ class User(AutoModel):
 class Author(AutoModel):
     firstname=str
     lastname=str
+    bookcount=int
+    booklist=str
+
+    def resolveReferences(self,books={}):
+        self.resBooks=sorted([books[bID] for bID in unrollStringList(self.booklist) if bID in books])
+        return self
 
     def __str__(self):
         return '%s, %s' % (self.lastname, self.firstname)

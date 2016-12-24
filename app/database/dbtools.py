@@ -6,6 +6,11 @@ import os
 from datetime import datetime
 
 from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT
+from app.utils.stringlists import   (
+                                        unrollStringList,
+                                        addToStringList,
+                                        expungeFromStringList,
+                                    )
 from app.database.models import (
                                     tableToModel, 
                                     User,
@@ -66,6 +71,8 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
         else:
             overwrites the fields of the book with the specified id
             Returns None if not found (or other errors)
+
+        Takes care of authors' bookcounters
     '''
     db=dbGetDatabase()
     newBook.lasteditdate=datetime.now().strftime(DATETIME_STR_FORMAT)
@@ -76,6 +83,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             if qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower(): # TODO: here check ordering and tricks
                 return (0,'Duplicate detected.')
         newBook.forceAscii()
+        prevAuthorList=''
         newBook.save()
         nBook=newBook
     else:
@@ -86,6 +94,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
                 return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
+            prevAuthorList=nBook.authors
             nBook.title=newBook.title
             nBook.inhouse=newBook.inhouse
             nBook.inhousenotes=newBook.inhousenotes
@@ -99,12 +108,44 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             nBook.update()
         else:
             return (0,'Not found.')
+    # reflect authorlist changes to the authors table. Current book's id is nBook.id
+    oldAuthorSet=set(unrollStringList(prevAuthorList))
+    newAuthorSet=set(unrollStringList(nBook.authors))
+    wonAuthors=newAuthorSet-oldAuthorSet
+    lostAuthors=oldAuthorSet-newAuthorSet
+    updateBookCounters(db,nBook.id,lost=lostAuthors,won=wonAuthors)
+    #
     db.commit()
 
     if resolve:
         return (1,nBook.resolveReferences(**resolveParams))
     else:
         return (1,nBook)
+
+def updateBookCounters(dbSession,bookId,lost,won):
+    '''
+        updates some author objects to reflect a pending change
+        in a book's author list. Takes care of counters and comma-separated id list
+    '''
+    Author.db=dbSession
+    for lostAu in lost:
+        qAuthor=Author.manager(dbSession).get(lostAu)
+        if qAuthor:
+            newList,listCount=expungeFromStringList(qAuthor.booklist, bookId)
+            qAuthor.booklist=newList
+            qAuthor.bookcount=listCount
+            qAuthor.update()
+        else:
+            raise ValueError
+    for wonAu in won:
+        qAuthor=Author.manager(dbSession).get(wonAu)
+        if qAuthor:
+            newList,listCount=addToStringList(qAuthor.booklist, bookId)
+            qAuthor.booklist=newList
+            qAuthor.bookcount=listCount
+            qAuthor.update()
+        else:
+            raise ValueError
 
 def dbDeleteBook(id):
     '''
@@ -181,6 +222,8 @@ def dbAddReplaceAuthor(newAuthor):
             if qAuthor.firstname.lower()==newAuthor.firstname.lower() and qAuthor.lastname.lower()==newAuthor.lastname.lower():
                 return (0,'Duplicate detected')
         # no duplicates: add author through the orm
+        newAuthor.bookcount=0
+        newAuthor.booklist=''
         newAuthor.forceAscii()
         newAuthor.save()
         nAuthor=newAuthor
@@ -194,6 +237,8 @@ def dbAddReplaceAuthor(newAuthor):
         if nAuthor is not None:
             nAuthor.firstname=newAuthor.firstname
             nAuthor.lastname=newAuthor.lastname
+            nAuthor.bookcount=newAuthor.bookcount
+            nAuthor.booklist=newAuthor.booklist
             nAuthor.forceAscii()
             nAuthor.update()
         else:

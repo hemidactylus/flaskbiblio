@@ -6,6 +6,11 @@ TODO
 
 * warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
     transactions lock the updates until the book-per-author counters are adjusted
+    WORKING ON THIS.
+    Be clever about the resolve-book-names associated to authors (do that e.g. when detailing an author)
+    (at the moment it's not like that)
+
+* Move the books-per-author title list into the author-detail page (i.e. author edit)
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
@@ -15,3 +20,6 @@ TODO
 
 * in the two addreplace calls, when updating the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
+
+* validate e.g. author list transactionally, right when inserting a book and its book-counters in authors,
+    and so on
