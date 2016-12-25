@@ -10,17 +10,25 @@
   {% endif %}
       {{ form.hidden_tag() }}
       <p>
-          Author's First Name:<br>
-          {{ form.firstname(size=80) }}<br>
-          {% for error in form.firstname.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
-          Author's Last Name:<br>
-          {{ form.lastname(size=80) }}<br>
-          {% for error in form.lastname.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
+        Author's First Name:<br>
+        {{ form.firstname(size=80) }}<br>
+        {% for error in form.firstname.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}<br>
+        Author's Last Name:<br>
+        {{ form.lastname(size=80) }}<br>
+        {% for error in form.lastname.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %} <br>
+        <input type="submit" value="Save Author">
       </p>
-      <p><input type="submit" value="Save Author"></p>
+      {% if id %}
+        <hr>
+        Involved in {{ bookcount }} books:
+        {% for qtitle in booklist %}
+          "{{ qtitle }}"
+        {% endfor %}
+        <hr>
+      {% endif %}
   </form>
 {% endblock %}

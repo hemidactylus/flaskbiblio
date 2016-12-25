@@ -8,6 +8,7 @@ from .forms import (
                         NewAuthorForm,
                         EditBookForm,
                     )
+from app.utils.stringlists import unrollStringList
 
 from config import DATETIME_STR_FORMAT, SHORT_DATETIME_STR_FORMAT
 
@@ -30,7 +31,6 @@ from app.database.models import (
                                     Book,
                                     Author,
                                 )
-
 from app import (
                     languages,
                     languagesDict,
@@ -88,10 +88,7 @@ def ep_deletebook(bookid):
 @login_required
 def ep_authors():
     user = g.user
-    # TEMP test
-    bookDict=dbMakeDict(dbGetAll('book'))
-    authors=sorted(list(dbGetAll('author',resolve=True, resolveParams={'books': bookDict})))
-    # a b c qui non passa la risolta?
+    authors=sorted(list(dbGetAll('author')))
     return render_template  (
                                 "authors.html",
                                 title='Authors',
@@ -118,6 +115,7 @@ def ep_newauthor():
                                     title='New Author',
                                     user=user,
                                     form=form,
+                                    newauthor=True,
             )
 
 @app.route('/deleteauthor/<id>')
@@ -149,12 +147,17 @@ def ep_editauthor(id):
         if qAuthor:
             form.firstname.data=qAuthor.firstname
             form.lastname.data=qAuthor.lastname
+            booklist=[dbGetBook(bId).title for bId in unrollStringList(qAuthor.booklist)]
+            bookcount=qAuthor.bookcount
             return render_template  (
                                         'newauthor.html',
                                         title='Edit Author',
                                         user=user,
                                         form=form,
                                         id=id,
+                                        booklist=booklist,
+                                        bookcount=bookcount,
+                                        newauthor=True,
                 )
         else:
             flash('Internal error retrieving author.')

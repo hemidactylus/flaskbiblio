@@ -4,14 +4,10 @@
     <hr>
     <ul>
     {% for author in authors %}
-            <li>{{ author.lastname }}, {{ author.firstname }} <i>( {{ author.bookcount }} )</i>
-            <b>
-                {% for bo in author.resBooks %}
-                    {{ bo.title }}
-                {% endfor %}
-            </b>
-            <a href="{{url_for('ep_editauthor',id=author.id)}}">E</a>
-            <a href="{{url_for('ep_deleteauthor',id=author.id)}}">X</a>
+            <li>
+                <a href="{{url_for('ep_editauthor',id=author.id)}}">{{ author.lastname }}, {{ author.firstname }}</a>
+                <i>( {{ author.bookcount }} )</i>
+                <a href="{{url_for('ep_deleteauthor',id=author.id)}}">Delete</a>
         </li>
     {% endfor %}
     </ul>
