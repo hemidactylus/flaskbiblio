@@ -237,8 +237,6 @@ def dbAddReplaceAuthor(newAuthor):
         if nAuthor is not None:
             nAuthor.firstname=newAuthor.firstname
             nAuthor.lastname=newAuthor.lastname
-            nAuthor.bookcount=newAuthor.bookcount
-            nAuthor.booklist=newAuthor.booklist
             nAuthor.forceAscii()
             nAuthor.update()
         else:

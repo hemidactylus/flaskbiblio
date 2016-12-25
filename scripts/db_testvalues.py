@@ -11,6 +11,10 @@ _testvalues={
                     'name': 'Fiorenza',
                     'passwordhash': 'ed4090b094156d720dfe3c3139be353ddb89b3db36ceada7594fe84b6c34b9af', #'cagnoli',
                 },
+                {
+                    'name': 'Carla',
+                    'passwordhash': '490cb1006519621f1927f13c77a51bcef714e5e909c7e7fc771a925c5b2894da', # 'Volpe'
+                },
             ],
     'author': [
                 {
