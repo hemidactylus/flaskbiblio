@@ -5,10 +5,10 @@
     <ul>
     {% for book in books %}
         <li>
-            {{ book.title }}
+            <a href="{{url_for('ep_editbook')}}?bookid={{book.id}}">{{ book.title }}</a>
             [
                 {% for auth in book.resAuthors %}
-                    {{ auth.firstname }} {{ auth.lastname }}
+                    <a href="{{url_for('ep_editauthor',id=auth.id)}}">{{auth.firstname }} {{ auth.lastname}}</a> 
                 {% endfor %}
             ]
             {{ book.inhouse | string }}
@@ -20,8 +20,7 @@
             ]
             {{ book.resBooktype.name }}
             <b><span style="font-size: 10;">Last edit: {{ book.lastedit }}</span></b>
-            <a href="{{url_for('ep_editbook')}}?bookid={{book.id}}">E</a>
-            <a href="{{url_for('ep_deletebook',bookid=book.id)}}">X</a>
+            <a href="{{url_for('ep_deletebook',bookid=book.id)}}">Delete</a>
         </li>
     {% endfor %}
     </ul>
