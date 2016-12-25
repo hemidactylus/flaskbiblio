@@ -11,7 +11,11 @@
                     <a href="{{url_for('ep_editauthor',id=auth.id)}}">{{auth.firstname }} {{ auth.lastname}}</a> 
                 {% endfor %}
             ]
-            {{ book.inhouse | string }}
+            {% if book.inhouse %}
+                <!-- nothing here -->
+            {% else %}
+                <span style="color: red;">Out ({{ book.inhousenotes }})</span>
+            {% endif %}
             <i>{{ book.notes }}</i>
             [
                 {% for lang in book.resLanguages %}

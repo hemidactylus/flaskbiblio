@@ -8,6 +8,9 @@ TODO
     transactions lock the updates until the book-per-author counters are adjusted
     WORKING ON THIS.
 
+* A generic 'doyoureallywant' screen to confirm operations. First use: delete author with some books.
+    Next, other operations (author edit, books etc)
+
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
     Or that every time they are re-calculated (bah)
