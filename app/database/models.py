@@ -42,7 +42,7 @@ class Book(AutoModel):
             return '%s' % (self.title)
 
     def __lt__(self,other):
-        return self.title < other.title
+        return self.title.lower() < other.title.lower()
 
 class User(AutoModel):
     name=str
@@ -92,24 +92,24 @@ class Author(AutoModel):
         return '%s, %s' % (self.lastname, self.firstname)
 
     def __lt__(self,other):
-        if self.lastname!=other.lastname:
-            return self.lastname < other.lastname
+        if self.lastname.lower()!=other.lastname.lower():
+            return self.lastname.lower() < other.lastname.lower()
         else:
-            return self.firstname < other.lastname
+            return self.firstname.lower() < other.lastname.lower()
 
 class Language(AutoModel):
     tag=str
     name=str
 
     def __lt__(self,other):
-        return self.name < other.name
+        return self.name.lower() < other.name.lower()
 
 class Booktype(AutoModel):
     tag=str
     name=str
 
     def __lt__(self,other):
-        return self.name < other.name
+        return self.name.lower() < other.name.lower()
 
 tableToModel={
     'user': User,

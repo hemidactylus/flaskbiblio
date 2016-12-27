@@ -110,28 +110,6 @@ def ep_authors():
                                 authors=authors,
                             )
 
-@app.route('/newauthor', methods=['GET', 'POST'])
-@login_required
-def ep_newauthor():
-    user=g.user
-    form=NewAuthorForm()
-    if form.validate_on_submit():
-        authorToAdd=Author(id=None, firstname=form.firstname.data, lastname=form.lastname.data)
-        status,newAuthor=dbAddReplaceAuthor(authorToAdd)
-        if status:
-            flash('Author %s inserted successfully.' % newAuthor)
-        else:
-            flash('Could not perform the insertion (error: %s).' % newAuthor)
-        return redirect(url_for('ep_authors'))
-    else:
-        return render_template  (
-                                    'newauthor.html',
-                                    title='New Author',
-                                    user=user,
-                                    form=form,
-                                    newauthor=True,
-            )
-
 @app.route('/deleteauthor/<id>')
 @app.route('/deleteauthor/<id>/<confirm>')
 @login_required
@@ -154,6 +132,28 @@ def ep_deleteauthor(id,confirm=None):
             flash('Could not delete author (error: %s).' % delId)
         return redirect(url_for('ep_authors'))
 
+
+@app.route('/newauthor', methods=['GET', 'POST'])
+@login_required
+def ep_newauthor():
+    user=g.user
+    form=NewAuthorForm()
+    if form.validate_on_submit():
+        authorToAdd=Author(id=None, firstname=form.firstname.data, lastname=form.lastname.data)
+        status,newAuthor=dbAddReplaceAuthor(authorToAdd)
+        if status:
+            flash('Author %s inserted successfully.' % newAuthor)
+        else:
+            flash('Could not perform the insertion (error: %s).' % newAuthor)
+        return redirect(url_for('ep_authors'))
+    else:
+        return render_template  (
+                                    'newauthor.html',
+                                    title='New Author',
+                                    user=user,
+                                    form=form,
+                                    newauthor=True,
+            )
 @app.route('/editauthor/<id>', methods=['GET', 'POST'])
 @login_required
 def ep_editauthor(id):
@@ -187,11 +187,6 @@ def ep_editauthor(id):
         else:
             flash('Internal error retrieving author.')
             return redirect(url_for('ep_authors'))
-
-def ep_editauthor(id):
-    user=g.user
-    flash('Should edit author %s' % id)
-    return redirect(url_for('ep_authors'))
 
 def retrieveUsers():
     return dbMakeDict(dbGetAll('user'))
