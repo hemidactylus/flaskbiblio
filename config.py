@@ -13,3 +13,6 @@ SECRET_KEY = 'TestSecretKey_NotForProduction'
 # formats, etc
 DATETIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
 SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'
+
+# similarity thresholds for author (last- and complete-) names
+SIMILAR_AUTHOR_THRESHOLD=0.9

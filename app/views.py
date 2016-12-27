@@ -11,8 +11,9 @@ from .forms import (
                     )
 from app.utils.stringlists import unrollStringList
 
-from config import DATETIME_STR_FORMAT, SHORT_DATETIME_STR_FORMAT
+from config import DATETIME_STR_FORMAT, SHORT_DATETIME_STR_FORMAT, SIMILAR_AUTHOR_THRESHOLD
 
+from app.utils.string_vectorizer import makeIntoVector, scalProd
 from app.database.dbtools import    (
                                         dbGetDatabase,
                                         dbGetAll,
@@ -132,7 +133,16 @@ def ep_deleteauthor(id,confirm=None):
             flash('Could not delete author (error: %s).' % delId)
         return redirect(url_for('ep_authors'))
 
-
+'''
+    This call, similarly to the editbook below,
+    handles both 'new' and 'edit' operations. It supports
+    reiterated action (in particular for books, see the author-list handling).
+    New/edit is determined bu the request 'id' parameter if passed,
+    other details also are rerouted as req args,
+    depending on that we decide whether to self-pass params (as the case for books)
+    or to fill the form with DB-extracted values.
+    A bit cumbersome to handle but completely static forms.
+'''
 @app.route('/editauthor', methods=['GET', 'POST'])
 @login_required
 def ep_editauthor():
@@ -172,6 +182,25 @@ def ep_editauthor():
         # here 'save' button was pressed
         # HERE the actual save/update is triggered
         newEntry=editedAuthor.id is None
+        # Here almost-duplicates could be detected
+        similarAuthors=[]
+        aVecs={
+            'last': makeIntoVector(editedAuthor.lastname),
+            'full': makeIntoVector(editedAuthor.firstname+editedAuthor.lastname)
+        }
+        for otAu in dbGetAll('author',resolve=False):
+            if otAu.id != editedAuthor.id:
+                oVecs={
+                    'last': makeIntoVector(otAu.lastname),
+                    'full': makeIntoVector(otAu.firstname+otAu.lastname)
+                }
+                # if either vector is too similar to the insertee's corresponding one
+                if any([scalProd(aVecs[vkey],oVecs[vkey])>SIMILAR_AUTHOR_THRESHOLD for vkey in aVecs.keys()]):
+                    similarAuthors.append(otAu)
+        #
+        if similarAuthors:
+            flash('Similar authors detected: %s' % ','.join(map(str,similarAuthors)))
+        #
         result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
         if result:
             if newEntry:

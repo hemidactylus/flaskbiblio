@@ -4,18 +4,17 @@ TODO
 
 * searches, pagination and so on
 
-* unify new- edit-author into a single routine/endpoint much as was done for books
-
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
-    Or that every time they are re-calculated (bah)
+    Or that every time they are re-calculated (bah) - at the moment it's like that!
+    And TO DO at the moment it's just a flashing warning and lets you proceed nevertheless (line ~200)
 
 * Use flash+operational checkbox for edit/insert--mode need for confirmation
     (as opposed to delete-mode use of confirm dialog)
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 
-* in the two addreplace calls, when updating the list of attributes must be cleverly handled instead of a lot of
+* in the two addreplace calls, when updating: the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
 * user settings (profile pic, options, change password ...)
