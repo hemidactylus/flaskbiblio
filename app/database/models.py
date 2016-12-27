@@ -36,7 +36,10 @@ class Book(AutoModel):
         return self
 
     def __str__(self):
-        return '%s (%s)' % (self.title, ' - '.join([a.lastname for a in self.resAuthors]))
+        if 'resAuthors' in self.__dict__:
+            return '%s (%s)' % (self.title, ' - '.join([a.lastname for a in self.resAuthors]))
+        else:
+            return '%s' % (self.title)
 
     def __lt__(self,other):
         return self.title < other.title

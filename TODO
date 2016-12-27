@@ -4,14 +4,14 @@ TODO
 
 * searches, pagination and so on
 
-* warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
-    transactions lock the updates until the book-per-author counters are adjusted
-        A "redirect-to-caller" standard machinery with standard args
-        (use flash+optional checkbox for form-based operations instead)
+* unify new- edit-author into a single routine/endpoint much as was done for books
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
     Or that every time they are re-calculated (bah)
+
+* Use flash+operational checkbox for edit/insert--mode need for confirmation
+    (as opposed to delete-mode use of confirm dialog)
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 
@@ -21,3 +21,5 @@ TODO
 * user settings (profile pic, options, change password ...)
 
 * homepage with stats
+
+* Users with "read only" (i.e. guest) privileges - they can browse anything but no changes whatsoever

@@ -80,15 +80,23 @@ def ep_booktypes():
                                 booktypes=booktypes,
                             )
 
-@app.route('/deletebook/<bookid>')
+@app.route('/deletebook/<id>/<confirm>')
+@app.route('/deletebook/<id>')
 @login_required
-def ep_deletebook(bookid):
+def ep_deletebook(id, confirm=None):
     user=g.user
-    if dbDeleteBook(int(bookid)):
-        flash('Book successfully deleted.')
+    if not confirm:
+        return redirect(url_for('ep_confirm',
+                                operation='deletebook',
+                                value=id,
+                                )
+                        )
     else:
-        flash('Could not delete book.')
-    return redirect(url_for('ep_books'))
+        if dbDeleteBook(int(id)):
+            flash('Book successfully deleted.')
+        else:
+            flash('Could not delete book.')
+        return redirect(url_for('ep_books'))
 
 @app.route('/authors')
 @login_required
@@ -268,7 +276,7 @@ def ep_editbook():
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
     if request.method=='GET':
-        paramIdString=request.args.get('bookid')
+        paramIdString=request.args.get('id')
         if paramIdString is not None and len(paramIdString)>0:
             paramId=int(paramIdString)
         else:
@@ -343,7 +351,7 @@ def ep_editbook():
             return redirect(url_for(
                                         'ep_editbook',
                                         authorlist=editedBook.authors,
-                                        bookid=editedBook.id,
+                                        id=editedBook.id,
                                         title=editedBook.title,
                                         inhouse=editedBook.inhouse,
                                         inhousenotes=editedBook.inhousenotes,
@@ -394,13 +402,27 @@ def makeDeleteAuthorMessage(saId):
                                                             's' if rAuthor.bookcount>1 else '',
                                                         )
 
+def makeDeleteBookMessage(sbId):
+    '''
+        constructs a confirm-message before deleting a book (any book)
+    '''
+    rBook=dbGetBook(int(sbId))
+    return 'Really delete book "%s"?' % (
+                                            str(rBook),
+                                        )
+
 confirmOperations={
     'deleteauthor': {
         'message': makeDeleteAuthorMessage, # function from (author) ID to string message
         'okurl': 'ep_deleteauthor', # name of endpoint to go to in case of 'Y'
         # it is implicit that id=id and confirm=1 are passed to this endpoint
         'cancelurl': 'ep_authors',
-    }
+    },
+    'deletebook': {
+        'message': makeDeleteBookMessage,
+        'okurl': 'ep_deletebook',
+        'cancelurl': 'ep_books',
+    },
 }
 
 @app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
