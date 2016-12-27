@@ -5,7 +5,7 @@
     <ul>
     {% for book in books %}
         <li>
-            <a href="{{url_for('ep_editbook')}}?id={{book.id}}">{{ book.title }}</a>
+            <a href="{{url_for('ep_editbook',id=book.id)}}">{{ book.title }}</a>
             [
                 {% for auth in book.resAuthors %}
                     <a href="{{url_for('ep_editauthor',id=auth.id)}}">{{auth.firstname }} {{ auth.lastname}}</a> 

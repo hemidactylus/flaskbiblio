@@ -5,7 +5,7 @@ from datetime import datetime
 from app import app, db, lm
 from .forms import (
                         LoginForm,
-                        NewAuthorForm,
+                        EditAuthorForm,
                         EditBookForm,
                         ConfirmForm,
                     )
@@ -133,60 +133,70 @@ def ep_deleteauthor(id,confirm=None):
         return redirect(url_for('ep_authors'))
 
 
-@app.route('/newauthor', methods=['GET', 'POST'])
+@app.route('/editauthor', methods=['GET', 'POST'])
 @login_required
-def ep_newauthor():
+def ep_editauthor():
     user=g.user
-    form=NewAuthorForm()
-    if form.validate_on_submit():
-        authorToAdd=Author(id=None, firstname=form.firstname.data, lastname=form.lastname.data)
-        status,newAuthor=dbAddReplaceAuthor(authorToAdd)
-        if status:
-            flash('Author %s inserted successfully.' % newAuthor)
+    form=EditAuthorForm()
+    if request.method=='GET':
+        paramIdString=request.args.get('id')
+        if paramIdString is not None and len(paramIdString)>0:
+            paramId=int(paramIdString)
         else:
-            flash('Could not perform the insertion (error: %s).' % newAuthor)
+            paramId=None
+        # HERE should set form local properties from request
+        form.firstname.data=request.args.get('firstname')
+        form.lastname.data=request.args.get('lastname')
+    else:
+        paramId=form.authorid.data
+    if paramId is not None and paramId!='':
+        formTitle='Edit Author'
+        if form.firstname.data is None:
+            qAuthor=dbGetAuthor(int(paramId))
+            if qAuthor:
+                form.firstname.data=qAuthor.firstname
+                form.lastname.data=qAuthor.lastname
+            else:
+                flash('Internal error retrieving author')
+                return redirect(url_for('ep_authors'))
+    else:
+        formTitle='New Author'
+    # HERE values are read off the form into an Author instance
+    editedAuthor=Author(
+        id=int(form.authorid.data) if form.authorid.data is not None and len(form.authorid.data)>0 else None,
+        firstname=form.firstname.data,
+        lastname=form.lastname.data,
+    )
+    #
+    if form.validate_on_submit():
+        # here 'save' button was pressed
+        # HERE the actual save/update is triggered
+        newEntry=editedAuthor.id is None
+        result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
+        if result:
+            if newEntry:
+                flash('"%s" successfully added.' % str(updatedAuthor))
+            else:
+                flash('"%s" successfully updated.' % str(updatedAuthor))
+        else:
+            flash('Internal error updating the author table (error: %s).' % updatedAuthor)
         return redirect(url_for('ep_authors'))
     else:
-        return render_template  (
-                                    'newauthor.html',
-                                    title='New Author',
-                                    user=user,
-                                    form=form,
-                                    newauthor=True,
-            )
-@app.route('/editauthor/<id>', methods=['GET', 'POST'])
-@login_required
-def ep_editauthor(id):
-    user=g.user
-    form=NewAuthorForm()
-    if form.validate_on_submit():
-        authorToInsert=Author(firstname=form.firstname.data, lastname=form.lastname.data, id=int(id))
-        status,newAuthor=dbAddReplaceAuthor(authorToInsert)
-        if status:
-            flash('Author %s updated successfully.' % newAuthor)
-        else:
-            flash('Could not perform the update (error: %s).' % newAuthor)
-        return redirect(url_for('ep_authors'))
-    else:
-        qAuthor=dbGetAuthor(int(id))
-        if qAuthor:
-            form.firstname.data=qAuthor.firstname
-            form.lastname.data=qAuthor.lastname
+        # HERE the form's additionals are set
+        form.authorid.data=paramId
+        if paramId:
             booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(qAuthor.booklist)]
             bookcount=qAuthor.bookcount
-            return render_template  (
-                                        'newauthor.html',
-                                        title='Edit Author',
-                                        user=user,
-                                        form=form,
-                                        id=id,
-                                        booklist=booklist,
-                                        bookcount=bookcount,
-                                        newauthor=True,
-                )
         else:
-            flash('Internal error retrieving author.')
-            return redirect(url_for('ep_authors'))
+            booklist=None
+            bookcount=None
+        return render_template( 'editauthor.html',
+                                id=paramId,
+                                formtitle=formTitle,
+                                form=form,
+                                bookcount=bookcount,
+                                booklist=booklist,
+                              )
 
 def retrieveUsers():
     return dbMakeDict(dbGetAll('user'))
@@ -290,21 +300,21 @@ def ep_editbook():
     else:
         paramId=form.bookid.data
         authorParameter=form.authorlist.data
-    if paramId is not None and authorParameter is None:
+    if paramId is not None and paramId!='':
         formTitle='Edit Book'
-        qBook=dbGetBook(int(paramId))
-        print('AUS = "%s"' % qBook.authors)
-        if qBook:
-            authorParameter=qBook.authors
-            form.title.data=qBook.title
-            form.inhouse.data=int(qBook.inhouse)
-            form.notes.data=qBook.notes
-            form.inhousenotes.data=qBook.inhousenotes
-            form.booktype.data=qBook.booktype
-            form.languages.data=qBook.languages.split(',')
-        else:
-            flash('Internal error retrieving book')
-            return redirect(url_for('ep_books'))
+        if form.title.data is None:
+            qBook=dbGetBook(int(paramId))
+            if qBook:
+                authorParameter=qBook.authors
+                form.title.data=qBook.title
+                form.inhouse.data=int(qBook.inhouse)
+                form.notes.data=qBook.notes
+                form.inhousenotes.data=qBook.inhousenotes
+                form.booktype.data=qBook.booktype
+                form.languages.data=qBook.languages.split(',')
+            else:
+                flash('Internal error retrieving book')
+                return redirect(url_for('ep_books'))
     else:
         formTitle='New Book'
     # parse the list

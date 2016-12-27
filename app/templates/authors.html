@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Author list <a href="{{ url_for('ep_newauthor') }}">Add new</a></h2>
+    <h2>Author list <a href="{{ url_for('ep_editauthor') }}">Add new</a></h2>
     <hr>
     <ul>
     {% for author in authors %}

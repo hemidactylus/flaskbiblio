@@ -2,11 +2,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>{{ title }} (<a href="{{url_for('ep_authors')}}">Back</a>)</h2>
+  <h2>{{ formtitle }} (<a href="{{url_for('ep_authors')}}">Back</a>)</h2>
   {% if id %}
     <form action="" method="post" name="{{url_for('ep_editauthor',id=id)}}">
   {% else %}
-    <form action="" method="post" name="{{url_for('ep_newauthor')}}">
+    <form action="" method="post" name="{{url_for('ep_editauthor')}}">
   {% endif %}
       {{ form.hidden_tag() }}
       <p>
@@ -26,7 +26,7 @@
         <hr>
         Involved in {{ bookcount }} books:
         {% for qbook in booklist %}
-          "<a href="{{url_for('ep_editbook',bookid=qbook.id)}}">{{ qbook.title }}</a>"
+          "<a href="{{url_for('ep_editbook',id=qbook.id)}}">{{ qbook.title }}</a>"
         {% endfor %}
         <hr>
       {% endif %}

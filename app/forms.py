@@ -26,9 +26,10 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
     remember_me = BooleanField('remember_me', default=False)
 
-class NewAuthorForm(FlaskForm):
+class EditAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
+    authorid=HiddenField('authorid')
 
 class ConfirmForm(FlaskForm):
     ok = SubmitField('OK')
