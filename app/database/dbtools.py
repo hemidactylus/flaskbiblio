@@ -7,6 +7,7 @@ from datetime import datetime
 
 from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT
 from app.utils.stringlists import   (
+                                        rollStringList,
                                         unrollStringList,
                                         addToStringList,
                                         expungeFromStringList,
@@ -101,7 +102,10 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
             nBook.notes=newBook.notes
             nBook.booktype=newBook.booktype
             nBook.languages=newBook.languages
-            nBook.authors=newBook.authors
+            # this must be validated
+            _auIdSet={au.id for au in dbGetAll('author')}
+            _bookAuList=rollStringList(set(unrollStringList(newBook.authors)) & _auIdSet)
+            nBook.authors=_bookAuList
             nBook.lasteditor=newBook.lasteditor
             nBook.lasteditdate=newBook.lasteditdate
             nBook.forceAscii()
@@ -150,11 +154,15 @@ def updateBookCounters(dbSession,bookId,lost,won):
 def dbDeleteBook(id):
     '''
         attempts deletion of a book. If deletion succeeds, returns True
+        It also takes care of deregistering authors associated to that book,
+        transactionally
     '''
     db=dbGetDatabase()
     Book.db=db
     try:
         dBook=Book.manager(db).get(id)
+        oldAuthorSet=set(unrollStringList(dBook.authors))
+        updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
         dBook.delete()
         db.commit()
         return id
@@ -162,23 +170,40 @@ def dbDeleteBook(id):
         return None
 
 def registerLogin(userId):
+    '''
+        registers a login by a given user and returns the string
+        expressing the current date. Empty string if errors occur.
+    '''
     db=dbGetDatabase()
     User.db=db
-    qUser=User.manager(db).get(userId)
-    qUser.lastlogindate=datetime.now().strftime(DATETIME_STR_FORMAT)
-    qUser.update()
-    db.commit()
-    return qUser.lastlogindate
+    try:
+        qUser=User.manager(db).get(userId)
+        qUser.lastlogindate=datetime.now().strftime(DATETIME_STR_FORMAT)
+        qUser.update()
+        db.commit()
+        return qUser.lastlogindate
+    except:
+        return ''
 
 def dbDeleteAuthor(id):
     '''
         attempts deletion of an author. If deletion succeeds, returns its id
         Always a 2-uple (success,stuff)
+
+        It must deregister author as author of all its books before deleting it,
+        transactionally.
     '''
     db=dbGetDatabase()
     Author.db=db
     try:
         dAuthor=Author.manager(db).get(id)
+        # browse through all books authored by this author
+        Book.db=db
+        for bookId in unrollStringList(dAuthor.booklist):
+            qBook=Book.manager(db).get(bookId)
+            qBook.authors,_=expungeFromStringList(qBook.authors,id)
+            qBook.update()
+        #
         dAuthor.delete()
         db.commit()
         return (1,id)

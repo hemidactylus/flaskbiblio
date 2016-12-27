@@ -6,10 +6,8 @@ TODO
 
 * warn against deleting authors when they appear in n>0 books (list no. of books per author in the au-list page)
     transactions lock the updates until the book-per-author counters are adjusted
-    WORKING ON THIS.
-
-* A generic 'doyoureallywant' screen to confirm operations. First use: delete author with some books.
-    Next, other operations (author edit, books etc)
+        A "redirect-to-caller" standard machinery with standard args
+        (use flash+optional checkbox for form-based operations instead)
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     This requires that since the start items have vectors stored on DB (for speed)
@@ -20,10 +18,6 @@ TODO
 * in the two addreplace calls, when updating the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
-* validate e.g. author list transactionally, right when inserting a book and its book-counters in authors,
-    and so on
-
 * user settings (profile pic, options, change password ...)
 
 * homepage with stats
-

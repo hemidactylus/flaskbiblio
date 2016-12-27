@@ -7,6 +7,7 @@ from .forms import (
                         LoginForm,
                         NewAuthorForm,
                         EditBookForm,
+                        ConfirmForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -41,6 +42,11 @@ from app import (
 @app.before_request
 def before_request():
     g.user = current_user
+
+# user loader function given to flask_login. This queries the db to fetch a user by id
+@lm.user_loader
+def load_user(id):
+    return User.manager(db).get(int(id))
 
 @app.route('/')
 @app.route('/index')
@@ -119,15 +125,26 @@ def ep_newauthor():
             )
 
 @app.route('/deleteauthor/<id>')
+@app.route('/deleteauthor/<id>/<confirm>')
 @login_required
-def ep_deleteauthor(id):
+def ep_deleteauthor(id,confirm=None):
     user=g.user
-    status,delId=dbDeleteAuthor(int(id))
-    if status:
-        flash('Author successfully deleted.')
+    # try and get the book count for the requested author
+    rAuthor=dbGetAuthor(int(id))
+    # 
+    if rAuthor.bookcount>0 and not confirm:
+        return redirect(url_for('ep_confirm',
+                                operation='deleteauthor',
+                                value=id,
+                                )
+                        )
     else:
-        flash('Could not delete author (error: %s).' % delId)
-    return redirect(url_for('ep_authors'))
+        status,delId=dbDeleteAuthor(int(id))
+        if status:
+            flash('Author successfully deleted.')
+        else:
+            flash('Could not delete author (error: %s).' % delId)
+        return redirect(url_for('ep_authors'))
 
 @app.route('/editauthor/<id>', methods=['GET', 'POST'])
 @login_required
@@ -147,7 +164,7 @@ def ep_editauthor(id):
         if qAuthor:
             form.firstname.data=qAuthor.firstname
             form.lastname.data=qAuthor.lastname
-            booklist=[dbGetBook(bId).title for bId in unrollStringList(qAuthor.booklist)]
+            booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(qAuthor.booklist)]
             bookcount=qAuthor.bookcount
             return render_template  (
                                         'newauthor.html',
@@ -195,7 +212,8 @@ def ep_books():
             bo.lastedit=lasteditor.name
             if bo.lasteditdate:
                 try:
-                    bo.lastedit+=' (%s)' % datetime.strptime(str(bo.lasteditdate),DATETIME_STR_FORMAT).strftime(SHORT_DATETIME_STR_FORMAT)
+                    bo.lastedit+=' (%s)' % datetime.strptime(str(bo.lasteditdate),
+                        DATETIME_STR_FORMAT).strftime(SHORT_DATETIME_STR_FORMAT)
                 except:
                     pass
         else:
@@ -272,6 +290,7 @@ def ep_editbook():
     if paramId is not None and authorParameter is None:
         formTitle='Edit Book'
         qBook=dbGetBook(int(paramId))
+        print('AUS = "%s"' % qBook.authors)
         if qBook:
             authorParameter=qBook.authors
             form.title.data=qBook.title
@@ -359,7 +378,56 @@ def ep_editbook():
                                 items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
                                 authorlist=','.join(authorIdList))
 
-# user loader function given to flask_login. This queries the db to fetch a user by id
-@lm.user_loader
-def load_user(id):
-    return User.manager(db).get(int(id))
+# Generic do-you-want-to-proceed 'dialog' (intermediate form).
+# This is called to confirm an operation, handles a Y/N answer retrieval
+# and calls the appropriate url to proceed if it is the case.
+# There are a handful of registered 'operation's
+
+def makeDeleteAuthorMessage(saId):
+    '''
+        constructs a confirm-message before deleting a bookful author
+    '''
+    rAuthor=dbGetAuthor(int(saId))
+    return '"%s" authors %i book%s: really proceed?' %  (
+                                                            str(rAuthor),
+                                                            rAuthor.bookcount,
+                                                            's' if rAuthor.bookcount>1 else '',
+                                                        )
+
+confirmOperations={
+    'deleteauthor': {
+        'message': makeDeleteAuthorMessage, # function from (author) ID to string message
+        'okurl': 'ep_deleteauthor', # name of endpoint to go to in case of 'Y'
+        # it is implicit that id=id and confirm=1 are passed to this endpoint
+        'cancelurl': 'ep_authors',
+    }
+}
+
+@app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
+@login_required
+def ep_confirm(operation,value):
+    user=g.user
+    #
+    if operation not in confirmOperations:
+        flash('Internal error in "confirm"')
+        return redirect(url_for('ep_index'))
+    else:
+        tOpe=confirmOperations[operation]
+        #
+        form=ConfirmForm()
+        if form.validate_on_submit():
+            if form.ok.data:
+                return redirect(url_for(tOpe['okurl'],id=value,confirm=1))
+            else:
+                return redirect(url_for(tOpe['cancelurl']))
+        else:
+            form.redirecturl.data=str(value)
+            return render_template  (
+                                        'confirm.html',
+                                        form=form,
+                                        submiturl='ep_confirm',
+                                        value=value,
+                                        operation=operation,
+                                        message=tOpe['message'](value),
+                                    )
+\

@@ -30,6 +30,11 @@ class NewAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
 
+class ConfirmForm(FlaskForm):
+    ok = SubmitField('OK')
+    cancel = SubmitField('Cancel')
+    redirecturl=HiddenField('redirecturl')
+
 class EditBookForm(FlaskForm):
 
     title = StringField('booktitle',validators=[AsciiOnly()])

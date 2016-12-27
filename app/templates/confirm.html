@@ -1,0 +1,13 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Confirm operation</h2>
+  <form action="" method="post" name="{{url_for(submiturl,value=value,operation=operation)}}">
+      {{ form.hidden_tag() }}
+      <p>
+        {{ message }}
+      </p>
+      {{ form.ok }} {{ form.cancel }}
+  </form>
+{% endblock %}

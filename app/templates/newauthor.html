@@ -25,8 +25,8 @@
       {% if id %}
         <hr>
         Involved in {{ bookcount }} books:
-        {% for qtitle in booklist %}
-          "{{ qtitle }}"
+        {% for qbook in booklist %}
+          "<a href="{{url_for('ep_editbook',bookid=qbook.id)}}">{{ qbook.title }}</a>"
         {% endfor %}
         <hr>
       {% endif %}
