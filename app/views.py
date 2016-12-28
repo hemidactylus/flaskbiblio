@@ -117,22 +117,25 @@ def ep_authors():
 def ep_deleteauthor(id,confirm=None):
     user=g.user
     # try and get the book count for the requested author
-    rAuthor=dbGetAuthor(int(id))
-    # 
-    if rAuthor.bookcount>0 and not confirm:
-        return redirect(url_for('ep_confirm',
-                                operation='deleteauthor',
-                                value=id,
-                                )
-                        )
-    else:
-        status,delId=dbDeleteAuthor(int(id))
-        if status:
-            flash('Author successfully deleted.')
+    if g.user.canedit:
+        rAuthor=dbGetAuthor(int(id))
+        # 
+        if rAuthor.bookcount>0 and not confirm:
+            return redirect(url_for('ep_confirm',
+                                    operation='deleteauthor',
+                                    value=id,
+                                    )
+                            )
         else:
-            flash('Could not delete author (error: %s).' % delId)
+            status,delId=dbDeleteAuthor(int(id))
+            if status:
+                flash('Author successfully deleted.')
+            else:
+                flash('Could not delete author (error: %s).' % delId)
+            return redirect(url_for('ep_authors'))
+    else:
+        flash('User "%s" has no write privileges.' % g.user.name)
         return redirect(url_for('ep_authors'))
-
 '''
     This call, similarly to the editbook below,
     handles both 'new' and 'edit' operations. It supports
@@ -177,39 +180,64 @@ def ep_editauthor():
         firstname=form.firstname.data,
         lastname=form.lastname.data,
     )
+    # if necessary, retrieve booklist/bookcount from DB
+    if editedAuthor.id is not None:
+        qAuthor=dbGetAuthor(int(editedAuthor.id))
+        editedAuthor.bookcount=qAuthor.bookcount
+        editedAuthor.booklist=qAuthor.booklist
     #
     if form.validate_on_submit():
         # here 'save' button was pressed
-        # HERE the actual save/update is triggered
         newEntry=editedAuthor.id is None
         # Here almost-duplicates could be detected
         similarAuthors=[]
-        aVecs={
-            'last': makeIntoVector(editedAuthor.lastname),
-            'full': makeIntoVector(editedAuthor.firstname+editedAuthor.lastname)
-        }
-        for otAu in dbGetAll('author',resolve=False):
-            if otAu.id != editedAuthor.id:
-                oVecs={
-                    'last': makeIntoVector(otAu.lastname),
-                    'full': makeIntoVector(otAu.firstname+otAu.lastname)
-                }
-                # if either vector is too similar to the insertee's corresponding one
-                if any([scalProd(aVecs[vkey],oVecs[vkey])>SIMILAR_AUTHOR_THRESHOLD for vkey in aVecs.keys()]):
-                    similarAuthors.append(otAu)
-        #
+        if not form.force.data:
+            aVecs={
+                'last': makeIntoVector(editedAuthor.lastname),
+                'full': makeIntoVector(editedAuthor.firstname+editedAuthor.lastname)
+            }
+            for otAu in dbGetAll('author',resolve=False):
+                if otAu.id != editedAuthor.id:
+                    oVecs={
+                        'last': makeIntoVector(otAu.lastname),
+                        'full': makeIntoVector(otAu.firstname+otAu.lastname)
+                    }
+                    # if either vector is too similar to the insertee's corresponding one
+                    if any([scalProd(aVecs[vkey],oVecs[vkey])>SIMILAR_AUTHOR_THRESHOLD for vkey in aVecs.keys()]):
+                        similarAuthors.append(otAu)
+            #
         if similarAuthors:
-            flash('Similar authors detected: %s' % ','.join(map(str,similarAuthors)))
-        #
-        result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
-        if result:
-            if newEntry:
-                flash('"%s" successfully added.' % str(updatedAuthor))
+            flash('One or more similar existing authors found (%s). Please check "confirm" to proceed.' % ','.join(map(str,similarAuthors)))
+            if not newEntry:
+                print('BL %s' % editedAuthor.booklist)
+                booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(editedAuthor.booklist)]
+                bookcount=qAuthor.bookcount
             else:
-                flash('"%s" successfully updated.' % str(updatedAuthor))
+                booklist=None
+                bookcount=None
+            return render_template( 'editauthor.html',
+                                    id=paramId,
+                                    formtitle=formTitle,
+                                    form=form,
+                                    bookcount=bookcount,
+                                    booklist=booklist,
+                                    showforce=True,
+                                    user=user,
+                                  )
         else:
-            flash('Internal error updating the author table (error: %s).' % updatedAuthor)
-        return redirect(url_for('ep_authors'))
+            #
+            if g.user.canedit:
+                result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
+                if result:
+                    if newEntry:
+                        flash('"%s" successfully added.' % str(updatedAuthor))
+                    else:
+                        flash('"%s" successfully updated.' % str(updatedAuthor))
+                else:
+                    flash('Internal error updating the author table (error: %s).' % updatedAuthor)
+            else:
+                flash('User "%s" has no write privileges.' % g.user.name)
+            return redirect(url_for('ep_authors'))
     else:
         # HERE the form's additionals are set
         form.authorid.data=paramId
@@ -225,6 +253,7 @@ def ep_editauthor():
                                 form=form,
                                 bookcount=bookcount,
                                 booklist=booklist,
+                                user=user,
                               )
 
 def retrieveUsers():
@@ -417,6 +446,7 @@ def ep_editbook():
         return render_template( 'editbook.html',
                                 formtitle=formTitle,
                                 form=form,
+                                user=user,
                                 items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
                                 authorlist=','.join(authorIdList))
 

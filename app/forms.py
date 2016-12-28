@@ -27,6 +27,7 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('remember_me', default=False)
 
 class EditAuthorForm(FlaskForm):
+    force = BooleanField('force',default=False)
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
     authorid=HiddenField('authorid')

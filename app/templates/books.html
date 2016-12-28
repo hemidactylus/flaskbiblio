@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Book list <a href="{{ url_for('ep_editbook') }}">Add new</a></h2>
+    <h2>Book list
+        {% if user.canedit %}
+            <a href="{{ url_for('ep_editbook') }}">Add new</a>
+        {% endif %}
+    </h2>
     <hr>
     <ul>
     {% for book in books %}
@@ -24,7 +28,9 @@
             ]
             {{ book.resBooktype.name }}
             <b><span style="font-size: 10;">Last edit: {{ book.lastedit }}</span></b>
-            <a href="{{url_for('ep_deletebook',id=book.id)}}">Delete</a>
+            {% if user.canedit %}
+                <a href="{{url_for('ep_deletebook',id=book.id)}}">Delete</a>
+            {% endif %}
         </li>
     {% endfor %}
     </ul>

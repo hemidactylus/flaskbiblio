@@ -37,23 +37,28 @@
       {% endfor %}
       <hr>
       <p>
-          Add
-          {{ form.newauthors }}
-          {% for error in form.newauthors.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %} {{ form.additem }} <br>
+          {% if user.canedit %}
+            Add
+            {{ form.newauthors }}
+            {% for error in form.newauthors.errors %}
+              <span style="color: red;">[{{ error }}]</span>
+            {% endfor %} {{ form.additem }} <br>
+          {% endif %}
       </p>
       {% for item in items %}
           <div><p><i>&nbsp;&nbsp;&nbsp;{{ item.description }}</i></p></div>
       {% endfor %}
-      <p>
-          Remove
-          {{ form.delauthors }}
-          {% for error in form.delauthors.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %} {{ form.delitem }} <br>
+      <p>{% if user.canedit %}
+            Remove
+            {{ form.delauthors }}
+            {% for error in form.delauthors.errors %}
+              <span style="color: red;">[{{ error }}]</span>
+            {% endfor %} {{ form.delitem }} <br>
+          {% endif %}
       </p>
       <hr>
-      <p>{{ form.submit }}</p>
+      <p>{% if user.canedit %}
+          {{ form.submit }}
+      {% endif %}</p>
   </form>
 {% endblock %}

@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Author list <a href="{{ url_for('ep_editauthor') }}">Add new</a></h2>
+    <h2>Author list
+        {% if user.canedit %}
+            <a href="{{ url_for('ep_editauthor') }}">Add new</a>
+        {% endif %}
+    </h2>
     <hr>
     <ul>
     {% for author in authors %}
             <li>
                 <a href="{{url_for('ep_editauthor',id=author.id)}}">{{ author.lastname }}, {{ author.firstname }}</a>
                 <i>( {{ author.bookcount }} )</i>
-                <a href="{{url_for('ep_deleteauthor',id=author.id)}}">Delete</a>
+                {% if user.canedit %}
+                    <a href="{{url_for('ep_deleteauthor',id=author.id)}}">Delete</a>
+                {% endif %}
         </li>
     {% endfor %}
     </ul>

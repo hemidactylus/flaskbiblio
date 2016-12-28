@@ -5,12 +5,11 @@ TODO
 * searches, pagination and so on
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
-    This requires that since the start items have vectors stored on DB (for speed)
-    Or that every time they are re-calculated (bah) - at the moment it's like that!
-    And TO DO at the moment it's just a flashing warning and lets you proceed nevertheless (line ~200)
-
-* Use flash+operational checkbox for edit/insert--mode need for confirmation
-    (as opposed to delete-mode use of confirm dialog)
+    Done. But at the moment:
+        - it is done for authors
+        - it is evaluated on the fly for all authors
+        - the desired check-box in the edit form is handled in a very cumbersone way in the endpoint code
+        * Should rewrite and largely streamline the whole edit/insert endpoint handling!
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 
@@ -22,3 +21,7 @@ TODO
 * homepage with stats
 
 * Users with "read only" (i.e. guest) privileges - they can browse anything but no changes whatsoever
+    Done, with both hiding edit links in the interface and serious checks in the code.
+    Among the latter, missing:
+        check if user.canedit in add book, delete book, edit book (everywhere!)
+        Also in add new book and recheck in add new author.

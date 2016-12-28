@@ -10,6 +10,9 @@
   {% endif %}
       {{ form.hidden_tag() }}
       <p>
+        {% if showforce %}
+          {{ form.force }} Confirm operation<br>
+        {% endif %}
         Author's First Name:<br>
         {{ form.firstname(size=80) }}<br>
         {% for error in form.firstname.errors %}
@@ -20,7 +23,9 @@
         {% for error in form.lastname.errors %}
           <span style="color: red;">[{{ error }}]</span>
         {% endfor %} <br>
-        <input type="submit" value="Save Author">
+        {% if user.canedit %}
+          <input type="submit" value="Save Author">
+        {% endif %}
       </p>
       {% if id %}
         <hr>

@@ -48,6 +48,7 @@ class User(AutoModel):
     name=str
     passwordhash=str
     lastlogindate=str
+    canedit=int
 
     @staticmethod
     def _hashString(message):
