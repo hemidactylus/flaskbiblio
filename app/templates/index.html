@@ -2,6 +2,9 @@
 {% block content %}
     {% if g.user.is_authenticated %}
           <h1>Hi, {{ user.name }}!</h1>
+          <p>Manage <a href="{{url_for('ep_usersettings')}}">user settings</a></p>
+          <p>Change <a href="{{url_for('ep_changepassword')}}">password</a></p>
+          <p>Some Statistics: x,y,z.</p>          
     {% else %}
           <h1>Welcome. Please log in</h1>
     {% endif %}

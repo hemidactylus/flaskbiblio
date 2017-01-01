@@ -8,6 +8,8 @@ from .forms import (
                         EditAuthorForm,
                         EditBookForm,
                         ConfirmForm,
+                        UserSettingsForm,
+                        ChangePasswordForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -535,6 +537,36 @@ confirmOperations={
         'cancelurl': 'ep_books',
     },
 }
+
+@app.route('/usersettings', methods=['GET', 'POST'])
+@login_required
+def ep_usersettings():
+    user=g.user
+    form=UserSettingsForm()
+    #
+    if form.validate_on_submit():
+        return 'DONE'
+    else:
+        return render_template  (
+                                    'usersettings.html',
+                                    form=form,
+                                    user=user,
+                                )
+
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def ep_changepassword():
+    user=g.user
+    form=ChangePasswordForm()
+    #
+    if form.validate_on_submit():
+        return 'DONE'
+    else:
+        return render_template  (
+                                    'changepassword.html',
+                                    form=form,
+                                    user=user,
+                                )
 
 @app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
 @login_required

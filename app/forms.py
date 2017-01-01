@@ -7,8 +7,9 @@ from wtforms import (
                         SelectMultipleField,
                         SubmitField,
                         HiddenField,
+                        IntegerField,
                     )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange, EqualTo, Required
 
 from app.utils.MultiCheckboxField import MultiCheckboxField
 from app.utils.validators import AsciiOnly
@@ -36,6 +37,18 @@ class ConfirmForm(FlaskForm):
     ok = SubmitField('OK')
     cancel = SubmitField('Cancel')
     redirecturl=HiddenField('redirecturl')
+
+class UserSettingsForm(FlaskForm):
+    submit = SubmitField('Submit')
+    checksimilar = BooleanField('checksimilar', default=True)
+    resultsperpage = IntegerField('resultsperpage', validators=[DataRequired(), NumberRange(min=1)])
+
+class ChangePasswordForm(FlaskForm):
+    submit = SubmitField('Change password')
+    oldpassword = PasswordField('oldpassword', validators=[DataRequired()])
+    newpassword = PasswordField('newpassword', [Required(),
+                                                EqualTo('confirmpassword', message='New password mismatch')])
+    confirmpassword  = PasswordField('confirmpassword')
 
 class EditBookForm(FlaskForm):
     force = BooleanField('force',default=False)
