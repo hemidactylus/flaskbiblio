@@ -6,7 +6,7 @@ TODO
 
 * when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:
-        - it is done for authors
+        - it is done for authors only
         - it is evaluated on the fly for all authors
         - the desired check-box in the edit form is handled in a very cumbersone way in the endpoint code
         * Should rewrite and largely streamline the whole edit/insert endpoint handling!
@@ -16,12 +16,6 @@ TODO
 * in the two addreplace calls, when updating: the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
-* user settings (profile pic, options, change password ...)
+* user settings (profile pic, options, change password, results per page, ...)
 
 * homepage with stats
-
-* Users with "read only" (i.e. guest) privileges - they can browse anything but no changes whatsoever
-    Done, with both hiding edit links in the interface and serious checks in the code.
-    Among the latter, missing:
-        check if user.canedit in add book, delete book, edit book (everywhere!)
-        Also in add new book and recheck in add new author.

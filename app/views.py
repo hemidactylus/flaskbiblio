@@ -86,17 +86,21 @@ def ep_booktypes():
 @login_required
 def ep_deletebook(id, confirm=None):
     user=g.user
-    if not confirm:
-        return redirect(url_for('ep_confirm',
-                                operation='deletebook',
-                                value=id,
-                                )
-                        )
-    else:
-        if dbDeleteBook(int(id)):
-            flash('Book successfully deleted.')
+    if user.canedit:
+        if not confirm:
+            return redirect(url_for('ep_confirm',
+                                    operation='deletebook',
+                                    value=id,
+                                    )
+                            )
         else:
-            flash('Could not delete book.')
+            if dbDeleteBook(int(id)):
+                flash('Book successfully deleted.')
+            else:
+                flash('Could not delete book.')
+        return redirect(url_for('ep_books'))
+    else:
+        flash('User "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_books'))
 
 @app.route('/authors')
@@ -117,7 +121,7 @@ def ep_authors():
 def ep_deleteauthor(id,confirm=None):
     user=g.user
     # try and get the book count for the requested author
-    if g.user.canedit:
+    if user.canedit:
         rAuthor=dbGetAuthor(int(id))
         # 
         if rAuthor.bookcount>0 and not confirm:
@@ -134,7 +138,7 @@ def ep_deleteauthor(id,confirm=None):
                 flash('Could not delete author (error: %s).' % delId)
             return redirect(url_for('ep_authors'))
     else:
-        flash('User "%s" has no write privileges.' % g.user.name)
+        flash('User "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_authors'))
 '''
     This call, similarly to the editbook below,
@@ -226,7 +230,7 @@ def ep_editauthor():
                                   )
         else:
             #
-            if g.user.canedit:
+            if user.canedit:
                 result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
                 if result:
                     if newEntry:
@@ -236,7 +240,7 @@ def ep_editauthor():
                 else:
                     flash('Internal error updating the author table (error: %s).' % updatedAuthor)
             else:
-                flash('User "%s" has no write privileges.' % g.user.name)
+                flash('User "%s" has no write privileges.' % user.name)
             return redirect(url_for('ep_authors'))
     else:
         # HERE the form's additionals are set
@@ -428,17 +432,21 @@ def ep_editbook():
             # pressed the submit button
             # HERE the actual save/update is triggered
             newEntry=editedBook.id is None
-            result,updatedBook=dbAddReplaceBook(editedBook,
-                                resolve=True,
-                                resolveParams=resolveParams())
-            if result:
-                if newEntry:
-                    flash('"%s" successfully added.' % str(updatedBook))
+            if user.canedit:
+                result,updatedBook=dbAddReplaceBook(editedBook,
+                                    resolve=True,
+                                    resolveParams=resolveParams())
+                if result:
+                    if newEntry:
+                        flash('"%s" successfully added.' % str(updatedBook))
+                    else:
+                        flash('"%s" successfully updated.' % str(updatedBook))
                 else:
-                    flash('"%s" successfully updated.' % str(updatedBook))
+                    flash('Internal error updating the book table (error: %s).' % updatedBook)
+                return redirect(url_for('ep_books'))
             else:
-                flash('Internal error updating the book table (error: %s).' % updatedBook)
-            return redirect(url_for('ep_books'))
+                flash('User "%s" has no write privileges.' % user.name)
+                return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
         form.authorlist.data=','.join(authorIdList)
