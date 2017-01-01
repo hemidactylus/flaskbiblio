@@ -16,3 +16,4 @@ SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'
 
 # similarity thresholds for author (last- and complete-) names
 SIMILAR_AUTHOR_THRESHOLD=0.9
+SIMILAR_BOOK_THRESHOLD=0.93

@@ -38,7 +38,7 @@ class ConfirmForm(FlaskForm):
     redirecturl=HiddenField('redirecturl')
 
 class EditBookForm(FlaskForm):
-
+    force = BooleanField('force',default=False)
     title = StringField('booktitle',validators=[AsciiOnly()])
     inhouse = BooleanField('bookinhouse', default=True)
     notes = StringField('booknotes',validators=[AsciiOnly()])

@@ -4,12 +4,13 @@ TODO
 
 * searches, pagination and so on
 
-* when inserting a new author (book also?) warn if the vectorisation detects a cosine-similar item already on DB.
+* when inserting a new author or book warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:
-        - it is done for authors only
-        - it is evaluated on the fly for all authors
+        - it is evaluated on the fly for all authors/books
         - the desired check-box in the edit form is handled in a very cumbersone way in the endpoint code
         * Should rewrite and largely streamline the whole edit/insert endpoint handling!
+        * Should outsource the similar-* issue to a separate module
+        * Should uniformize the edits and form-to-object, reqargs-to-form mechanics.
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 

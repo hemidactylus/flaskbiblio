@@ -11,7 +11,12 @@ from .forms import (
                     )
 from app.utils.stringlists import unrollStringList
 
-from config import DATETIME_STR_FORMAT, SHORT_DATETIME_STR_FORMAT, SIMILAR_AUTHOR_THRESHOLD
+from config import (
+                        DATETIME_STR_FORMAT,
+                        SHORT_DATETIME_STR_FORMAT,
+                        SIMILAR_AUTHOR_THRESHOLD,
+                        SIMILAR_BOOK_THRESHOLD,
+                    )
 
 from app.utils.string_vectorizer import makeIntoVector, scalProd
 from app.database.dbtools import    (
@@ -430,23 +435,57 @@ def ep_editbook():
                            )
         else:
             # pressed the submit button
-            # HERE the actual save/update is triggered
             newEntry=editedBook.id is None
-            if user.canedit:
-                result,updatedBook=dbAddReplaceBook(editedBook,
-                                    resolve=True,
-                                    resolveParams=resolveParams())
-                if result:
-                    if newEntry:
-                        flash('"%s" successfully added.' % str(updatedBook))
-                    else:
-                        flash('"%s" successfully updated.' % str(updatedBook))
-                else:
-                    flash('Internal error updating the book table (error: %s).' % updatedBook)
-                return redirect(url_for('ep_books'))
+            # Here almost-duplicates could be detected
+            similarBooks=[]
+            if not form.force.data:
+                bVecs={
+                    'full': makeIntoVector(editedBook.title)
+                }
+                for otBo in dbGetAll('book',resolve=False):
+                    if otBo.id != editedBook.id:
+                        oVecs={
+                            'full': makeIntoVector(otBo.title)
+                        }
+                        # if either vector is too similar to the insertee's corresponding one
+                        if any([scalProd(bVecs[vkey],oVecs[vkey])>SIMILAR_BOOK_THRESHOLD for vkey in bVecs.keys()]):
+                            similarBooks.append(otBo)
+                #
+            if similarBooks:
+                flash('One or more similar existing books found (%s). Please check "confirm" to proceed.' % ','.join(map(str,similarBooks)))
+                # if not newEntry:
+                #     booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(editedAuthor.booklist)]
+                #     bookcount=qAuthor.bookcount
+                # else:
+                #     booklist=None
+                #     bookcount=None
+                form.authorlist.data=','.join(authorIdList)
+                form.bookid.data=paramId
+                return render_template( 'editbook.html',
+                                        formtitle=formTitle,
+                                        form=form,
+                                        user=user,
+                                        items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
+                                        authorlist=','.join(authorIdList),
+                                        showforce=True)
             else:
-                flash('User "%s" has no write privileges.' % user.name)
-                return redirect(url_for('ep_books'))
+                # HERE the actual save/update is triggered
+                newEntry=editedBook.id is None
+                if user.canedit:
+                    result,updatedBook=dbAddReplaceBook(editedBook,
+                                        resolve=True,
+                                        resolveParams=resolveParams())
+                    if result:
+                        if newEntry:
+                            flash('"%s" successfully added.' % str(updatedBook))
+                        else:
+                            flash('"%s" successfully updated.' % str(updatedBook))
+                    else:
+                        flash('Internal error updating the book table (error: %s).' % updatedBook)
+                    return redirect(url_for('ep_books'))
+                else:
+                    flash('User "%s" has no write privileges.' % user.name)
+                    return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
         form.authorlist.data=','.join(authorIdList)
