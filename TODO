@@ -17,5 +17,4 @@ TODO
 * in the two addreplace calls, when updating: the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
-* user settings (profile pic, options, change password, results per page, ...)
 * homepage with stats

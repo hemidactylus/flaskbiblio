@@ -221,7 +221,6 @@ def ep_editauthor():
         if similarAuthors:
             flash('One or more similar existing authors found (%s). Please check "confirm" to proceed.' % ','.join(map(str,similarAuthors)))
             if not newEntry:
-                print('BL %s' % editedAuthor.booklist)
                 booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(editedAuthor.booklist)]
                 bookcount=qAuthor.bookcount
             else:
