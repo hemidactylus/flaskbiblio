@@ -62,6 +62,25 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
+def dbReplaceUser(newUser):
+    '''
+        updates an existing User object given its id
+
+        Returns a 2-tuple (success=0/1, new_User_object)
+    '''
+    db=dbGetDatabase()
+    User.db=db
+    nUser=User.manager(db).get(newUser.id)
+    if nUser:
+        for k,q in newUser.__dict__.items():
+            if k != 'id':
+                setattr(nUser,k,q)
+        nUser.update()
+        db.commit()
+        return (1,newUser)
+    else:
+        return (0,None)
+
 def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
     '''
         Add/Replace a book to DB

@@ -40,13 +40,13 @@ class ConfirmForm(FlaskForm):
 
 class UserSettingsForm(FlaskForm):
     submit = SubmitField('Submit')
-    checksimilar = BooleanField('checksimilar', default=True)
+    requireconfirmation = BooleanField('requireconfirmation', default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[DataRequired(), NumberRange(min=1)])
 
 class ChangePasswordForm(FlaskForm):
     submit = SubmitField('Change password')
-    oldpassword = PasswordField('oldpassword', validators=[DataRequired()])
-    newpassword = PasswordField('newpassword', [Required(),
+    oldpassword = PasswordField('oldpassword', validators=[DataRequired(), AsciiOnly()])
+    newpassword = PasswordField('newpassword', [Required(), AsciiOnly(),
                                                 EqualTo('confirmpassword', message='New password mismatch')])
     confirmpassword  = PasswordField('confirmpassword')
 

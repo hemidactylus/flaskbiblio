@@ -6,10 +6,10 @@
   <form action="" method="post" name="usersettings">
       {{ form.hidden_tag() }}
       <p>
-        {{ form.checksimilar }} Require confirmation for sensitive operations
+        {{ form.requireconfirmation }} Require confirmation for sensitive operations
       </p>
       <p>
-        {{ form.resultsperpage }} Results per page
+        {{ form.resultsperpage(size=6) }} results per page
         {% for error in form.resultsperpage.errors %}
           <span style="color: red;">[{{ error }}]</span>
         {% endfor %}<br>

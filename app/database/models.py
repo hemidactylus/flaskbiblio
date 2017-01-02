@@ -49,6 +49,8 @@ class User(AutoModel):
     passwordhash=str
     lastlogindate=str
     canedit=int
+    resultsperpage=int
+    requireconfirmation=int # (bool)
 
     @staticmethod
     def _hashString(message):

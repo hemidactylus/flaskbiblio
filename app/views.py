@@ -33,6 +33,7 @@ from app.database.dbtools import    (
                                         dbDeleteBook,
                                         dbAddReplaceBook,
                                         registerLogin,
+                                        dbReplaceUser,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -545,8 +546,17 @@ def ep_usersettings():
     form=UserSettingsForm()
     #
     if form.validate_on_submit():
-        return 'DONE'
+        user.requireconfirmation=int(form.requireconfirmation.data)
+        user.resultsperpage=int(form.resultsperpage.data)
+        result,newuser=dbReplaceUser(user)
+        if result:
+            flash('Settings updated successfully.')
+        else:
+            flash('An error occurred trying to update the settings.')
+        return redirect(url_for('ep_index'))
     else:
+        form.requireconfirmation.data=user.requireconfirmation
+        form.resultsperpage.data=str(user.resultsperpage)
         return render_template  (
                                     'usersettings.html',
                                     form=form,
@@ -560,7 +570,17 @@ def ep_changepassword():
     form=ChangePasswordForm()
     #
     if form.validate_on_submit():
-        return 'DONE'
+        # actual password change. Alter current User object and save it back
+        if user.checkPassword(form.oldpassword.data):
+            user.passwordhash=User._hashString(form.newpassword.data)
+            result,newuser=dbReplaceUser(user)
+            if result:
+                flash('Password changed successfully')
+            else:
+                flash('An error occurred trying to change the password.')
+        else:
+            flash('Wrong password.')
+        return redirect(url_for('ep_index'))
     else:
         return render_template  (
                                     'changepassword.html',

@@ -7,16 +7,22 @@ _testvalues={
                     'name': 'Stefano',
                     'passwordhash': 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', #'123',
                     'canedit': 1,
+                    'resultsperpage': 10,
+                    'requireconfirmation': 1,
                 },
                 {
                     'name': 'Fiorenza',
                     'passwordhash': 'ed4090b094156d720dfe3c3139be353ddb89b3db36ceada7594fe84b6c34b9af', #'cagnoli',
                     'canedit': 0,
+                    'resultsperpage': 10,
+                    'requireconfirmation': 1,
                 },
                 {
                     'name': 'Carla',
                     'passwordhash': '490cb1006519621f1927f13c77a51bcef714e5e909c7e7fc771a925c5b2894da', # 'Volpe'
                     'canedit': 1,
+                    'resultsperpage': 10,
+                    'requireconfirmation': 1,
                 },
             ],
     'author': [
