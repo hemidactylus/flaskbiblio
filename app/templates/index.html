@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
     {% if g.user.is_authenticated %}
-          <h1>Hi, {{ user.name }}!</h1>
-          <p>Manage <a href="{{url_for('ep_usersettings')}}">user settings</a></p>
-          <p>Change <a href="{{url_for('ep_changepassword')}}">password</a></p>
-          <p>Some Statistics: x,y,z.</p>          
+        <h1>Hi, {{ user.name }}!</h1>
+        <p>Manage <a href="{{url_for('ep_usersettings')}}">user settings</a></p>
+        <p>Change <a href="{{url_for('ep_changepassword')}}">password</a></p>
+        {% if statistics %}
+            <p>Some Statistics<ul>
+                {% for qstat in statistics %}
+                    <li><i>{{ qstat.description }}:</i> {{ qstat.value }}</li>
+                {% endfor %}
+            </ul></p>
+        {% endif %}
     {% else %}
-          <h1>Welcome. Please log in</h1>
+        <h1>Welcome. Please log in</h1>
     {% endif %}
 {% endblock %}

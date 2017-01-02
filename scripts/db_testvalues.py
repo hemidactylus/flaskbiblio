@@ -2,6 +2,18 @@
 
 # tablename -> list-of-rows
 _testvalues={
+    'statistic': [
+                {
+                    'name': 'nbooks',
+                    'description': 'Number of books',
+                    'value': '0',
+                },
+                {
+                    'name': 'nauthors',
+                    'description': 'Number of authors',
+                    'value': '0',
+                },
+            ],
     'user': [
                 {
                     'name': 'Stefano',

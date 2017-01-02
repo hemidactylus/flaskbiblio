@@ -18,6 +18,11 @@ class AutoModel(Model):
             if isinstance(q,str):
                 setattr(self,k,ascifiiString(q,forceAsciification=True))
 
+class Statistic(AutoModel):
+    name=str
+    description=str
+    value=str
+
 class Book(AutoModel):
     title=str
     authors=str
@@ -120,4 +125,5 @@ tableToModel={
     'language': Language,
     'booktype': Booktype,
     'book': Book,
+    'statistic': Statistic,
 }

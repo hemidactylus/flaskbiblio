@@ -19,7 +19,26 @@ from app.database.models import (
                                     Language,
                                     Booktype,
                                     Book,
+                                    Statistic,
                                 )
+
+def dbIncrementStatistic(db,statName,statDelta):
+    '''
+        Increments/decrements a statistic stored
+        in the DB.
+        It assumes it is called within a transaction
+        hence it does not invoke any commit()
+
+        If statName is not found, an error is raised
+    '''
+    Statistic.db=db
+    stat=[istat for istat in Statistic.manager(db).all() if istat.name==statName]
+    if len(stat)!=1:
+        raise ValueError('Error with statistic name "%s".' % statName)
+    else:
+        istat=stat[0]
+        istat.value=str(int(istat.value)+statDelta)
+        istat.update()
 
 def dbGetDatabase():
     '''
@@ -104,6 +123,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
                 return (0,'Duplicate detected.')
         newBook.forceAscii()
         prevAuthorList=''
+        dbIncrementStatistic(db,'nbooks',1)
         newBook.save()
         nBook=newBook
     else:
@@ -180,6 +200,7 @@ def dbDeleteBook(id):
         oldAuthorSet=set(unrollStringList(dBook.authors))
         updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
         dBook.delete()
+        dbIncrementStatistic(db,'nbooks',-1)
         db.commit()
         return id
     except:
@@ -220,6 +241,7 @@ def dbDeleteAuthor(id):
             qBook.authors,_=expungeFromStringList(qBook.authors,id)
             qBook.update()
         #
+        dbIncrementStatistic(db,'nauthors',-1)
         dAuthor.delete()
         db.commit()
         return (1,id)
@@ -266,6 +288,7 @@ def dbAddReplaceAuthor(newAuthor):
         newAuthor.bookcount=0
         newAuthor.booklist=''
         newAuthor.forceAscii()
+        dbIncrementStatistic(db,'nauthors',1)
         newAuthor.save()
         nAuthor=newAuthor
     else:

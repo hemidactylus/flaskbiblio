@@ -17,4 +17,6 @@ TODO
 * in the two addreplace calls, when updating: the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
-* homepage with stats
+* Some advanced stats in a dedicated subpage of 'index'
+    E.g. book breakdown per genre
+    E.g. percentage and number of books that are out

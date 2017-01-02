@@ -61,10 +61,15 @@ def load_user(id):
 @app.route('/index')
 def ep_index():
     user = g.user
+    if user:
+        message=[{'description': qStat.description, 'value': qStat.value} for qStat in dbGetAll('statistic')]
+    else:
+        message=None
     return render_template(
                             "index.html",
                             title='Home',
                             user=user,
+                            statistics=message,
                            )
 
 @app.route('/languages')
@@ -95,7 +100,7 @@ def ep_booktypes():
 def ep_deletebook(id, confirm=None):
     user=g.user
     if user.canedit:
-        if not confirm:
+        if user.requireconfirmation and not confirm:
             return redirect(url_for('ep_confirm',
                                     operation='deletebook',
                                     value=id,
@@ -132,7 +137,7 @@ def ep_deleteauthor(id,confirm=None):
     if user.canedit:
         rAuthor=dbGetAuthor(int(id))
         # 
-        if rAuthor.bookcount>0 and not confirm:
+        if user.requireconfirmation and rAuthor.bookcount>0 and not confirm:
             return redirect(url_for('ep_confirm',
                                     operation='deleteauthor',
                                     value=id,
