@@ -114,19 +114,16 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
                 return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
-            prevAuthorList=nBook.authors
-            nBook.title=newBook.title
-            nBook.inhouse=newBook.inhouse
-            nBook.inhousenotes=newBook.inhousenotes
-            nBook.notes=newBook.notes
-            nBook.booktype=newBook.booktype
-            nBook.languages=newBook.languages
-            # this must be validated
-            _auIdSet={au.id for au in dbGetAll('author')}
-            _bookAuList=rollStringList(set(unrollStringList(newBook.authors)) & _auIdSet)
-            nBook.authors=_bookAuList
-            nBook.lasteditor=newBook.lasteditor
-            nBook.lasteditdate=newBook.lasteditdate
+            # automatic handling of object attributes except those handled manually:
+            prevAuthorList=''
+            for k,q in newBook.__dict__.items():
+                if k == 'authors':
+                    prevAuthorList=getattr(nBook,k)
+                    _auIdSet={au.id for au in dbGetAll('author')}
+                    _bookAuList=rollStringList(set(unrollStringList(q)) & _auIdSet)
+                    setattr(nBook,k,_bookAuList)
+                else:
+                    setattr(nBook,k,q)
             nBook.forceAscii()
             nBook.update()
         else:
@@ -279,8 +276,12 @@ def dbAddReplaceAuthor(newAuthor):
                 return (0,'Duplicate detected')
         nAuthor=Author.manager(db).get(newAuthor.id)
         if nAuthor is not None:
-            nAuthor.firstname=newAuthor.firstname
-            nAuthor.lastname=newAuthor.lastname
+
+            for k,q in newAuthor.__dict__.items():
+                if k in ['bookcount','booklist']:
+                    pass
+                else:
+                    setattr(nAuthor,k,q)
             nAuthor.forceAscii()
             nAuthor.update()
         else:

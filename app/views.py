@@ -203,7 +203,7 @@ def ep_editauthor():
         newEntry=editedAuthor.id is None
         # Here almost-duplicates could be detected
         similarAuthors=[]
-        if not form.force.data:
+        if user.requireconfirmation and not form.force.data:
             aVecs={
                 'last': makeIntoVector(editedAuthor.lastname),
                 'full': makeIntoVector(editedAuthor.firstname+editedAuthor.lastname)
@@ -440,7 +440,7 @@ def ep_editbook():
             newEntry=editedBook.id is None
             # Here almost-duplicates could be detected
             similarBooks=[]
-            if not form.force.data:
+            if user.requireconfirmation and not form.force.data:
                 bVecs={
                     'full': makeIntoVector(editedBook.title)
                 }
@@ -614,4 +614,3 @@ def ep_confirm(operation,value):
                                         operation=operation,
                                         message=tOpe['message'](value),
                                     )
-\
