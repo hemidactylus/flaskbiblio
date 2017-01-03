@@ -1,6 +1,7 @@
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import  login_user, logout_user, current_user, login_required
 from datetime import datetime
+from werkzeug.datastructures import MultiDict
 
 from app import app, db, lm
 from .forms import (
@@ -313,11 +314,24 @@ def ep_books():
         else:
             bo.lastedit=''
     # done.
+    # prepare arglist for pagination commands by keeping the rest of the multidict
+    prevquery=None
+    nextquery=None
+    if 'nextstartfrom' in result:
+        nextquery=request.args.copy()
+        nextquery['startfrom'] = result['nextstartfrom']
+    if 'prevstartfrom' in result:
+        prevquery=request.args.copy()
+        prevquery['startfrom'] = result['prevstartfrom']
+    # render results list page
     return render_template  (
                                 "books.html",
                                 title='Books',
                                 user=user,
                                 books=books,
+                                queryresult=result,
+                                nextquery=nextquery,
+                                prevquery=prevquery,
                             )
 
 @app.route('/login', methods=['GET', 'POST'])

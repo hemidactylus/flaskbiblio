@@ -1,8 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
     <h2>Books
+        ({{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }})
+        {% if prevquery %}
+            <a href="{{ url_for('ep_books',**prevquery) }}">Prev</a>
+        {% endif %}
+        {% if nextquery %}
+            <a href="{{ url_for('ep_books',**nextquery) }}">Next</a>
+        {% endif %}
         {% if user.canedit %}
-            <a href="{{ url_for('ep_editbook') }}">Add new</a>
+            <p><a href="{{ url_for('ep_editbook') }}">Add new</a></p>
         {% endif %}
     </h2>
     <hr>

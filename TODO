@@ -3,17 +3,9 @@ TODO
 * nice-looking pages
 
 * searches, pagination and so on
-    the 'show all' endpoint becomes a generic 'respond to query' endpoint
-    with some query-request-arguments + a 'startfrom' index.
-    The query arguments are passed to a querying engine, along with
-    the startfrom, which interprets it, trims the results, returns the polished list.
-        QUERY ARGS FOR BOOKS:
-*            author=123      author contains an author ID
-*            title=abcd      title contains a (case-ins) string
-*            booktype=DIZ    type = a type tag
-*           language=DE     languages contains a language tag
-            inhouse=0/1     book is in house or not
-MUST STILL HANDLE MULTIDICT and multiple same-type filters! (AND)
+    A (cumbersome) method to handle pagination is up and running with books.
+    Extend it to authors (implies dbtools, views-endpoint, template html)
+    Prepare query pages and the path to them in the interface!
 
 * when inserting a new author or book warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:
@@ -22,6 +14,8 @@ MUST STILL HANDLE MULTIDICT and multiple same-type filters! (AND)
         * Should rewrite and largely streamline the whole edit/insert endpoint handling!
         * Should outsource the similar-* issue to a separate module
         * Should uniformize the edits and form-to-object, reqargs-to-form mechanics.
+
+        * Perhaps work on 2-gram of letters, might be funnier?
 
 * deploy within a lighty or apache or nginx environment (fastCGI? gunicorn? flup? .htaccess?)
 

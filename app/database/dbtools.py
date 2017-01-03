@@ -2,6 +2,7 @@
 
 from orm import Database
 import os
+from werkzeug.datastructures import ImmutableMultiDict
 
 from datetime import datetime
 
@@ -53,8 +54,15 @@ def dbTableFilterQuery( tableName, startfrom=0,
     '''
         Given a table name, list-slicing arguments
         and a list of filter functions Object->bool,
-        the resulting query result is returned as (result,list) pair.
-        Sorting is applied before slicing.
+        the resulting query result is returned as (result,list) pair:
+            Sorting is applied before slicing.
+            Result is a dict that may contain keys:
+                [error          = an error message. Ignore all other keys!]
+                 ntotal         = number of total matches before slicing
+                 firstitem      = index of first item here
+                 lastitem       = index of last item here
+                [nextstartfrom  = startfrom for the next batch]
+                [prevstartfrom  = startfrom for the prev batch]
     '''
     # perform query and filters
     qlist=list(filter(  lambda obj: all([ffunc(obj) for ffunc in filterList]),
@@ -66,9 +74,17 @@ def dbTableFilterQuery( tableName, startfrom=0,
         reslist=sorted(qlist)
     else:
         reslist=list(sorted(qlist,key=sorter))
+    # determine numbers
+    result={'ntotal': len(reslist)}
+    result['firstitem']=startfrom
+    result['lastitem']=min(len(reslist),startfrom+nresults)-1
+    if startfrom>0:
+        result['prevstartfrom']=max(0,startfrom-nresults)
+    if len(reslist)>startfrom+nresults:
+        result['nextstartfrom']=startfrom+nresults
     # trim section of interest from list
     trimmedlist=reslist[startfrom:startfrom+nresults]
-    return (1,trimmedlist)
+    return (result,trimmedlist)
 
 def makeBookFilter(fName,fValue):
     '''
@@ -91,10 +107,14 @@ def makeBookFilter(fName,fValue):
         def lafinder(bo,v=fValue):
             return v.upper() in bo.languages.split(',')
         return lafinder
+    elif fName=='inhouse':
+        def ihfinder(bo,v=fValue):
+            return bool(bo.inhouse)==bool(int(v))
+        return ihfinder
     else:
         return lambda: True
 
-def dbQueryBooks(   queryArgs={}, resultsperpage=100,
+def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
                     resolve=False, resolveParams={}):
     '''
         A query is interpreted from arguments and executed
@@ -105,12 +125,14 @@ def dbQueryBooks(   queryArgs={}, resultsperpage=100,
     #
     filters=[]
     startfrom=0
-    for k,v in queryArgs.items():
-        # first deal with the non-filtering arguments
-        if k=='startfrom':
-            startfrom=int(v)
-        else:
-            filters.append(makeBookFilter(k,v))
+    # queryArgs is in principle a multidict:
+    for k in queryArgs.keys():
+        for v in queryArgs.getlist(k):
+            # first deal with the non-filtering arguments
+            if k=='startfrom':
+                startfrom=int(v)
+            else:
+                filters.append(makeBookFilter(k,v))
     #
     sorter=None
     result,booklist=dbTableFilterQuery('book',startfrom,resultsperpage,filters,sorter)
