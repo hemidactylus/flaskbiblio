@@ -3,6 +3,17 @@ TODO
 * nice-looking pages
 
 * searches, pagination and so on
+    the 'show all' endpoint becomes a generic 'respond to query' endpoint
+    with some query-request-arguments + a 'startfrom' index.
+    The query arguments are passed to a querying engine, along with
+    the startfrom, which interprets it, trims the results, returns the polished list.
+        QUERY ARGS FOR BOOKS:
+*            author=123      author contains an author ID
+*            title=abcd      title contains a (case-ins) string
+*            booktype=DIZ    type = a type tag
+*           language=DE     languages contains a language tag
+            inhouse=0/1     book is in house or not
+MUST STILL HANDLE MULTIDICT and multiple same-type filters! (AND)
 
 * when inserting a new author or book warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:

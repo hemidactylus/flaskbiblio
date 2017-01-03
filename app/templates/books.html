@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Book list
+    <h2>Books
         {% if user.canedit %}
             <a href="{{ url_for('ep_editbook') }}">Add new</a>
         {% endif %}

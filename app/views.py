@@ -34,6 +34,7 @@ from app.database.dbtools import    (
                                         dbAddReplaceBook,
                                         registerLogin,
                                         dbReplaceUser,
+                                        dbQueryBooks,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -291,7 +292,13 @@ def resolveParams():
 def ep_books():
     user = g.user
     # perform live query
-    books=sorted(dbGetAll('book',resolve=True, resolveParams=resolveParams()))
+    #books=sorted(dbGetAll('book',resolve=True, resolveParams=resolveParams()))
+    result,books=dbQueryBooks   (
+                                    queryArgs=request.args,
+                                    resultsperpage=user.resultsperpage,
+                                    resolve=True,
+                                    resolveParams=resolveParams(),
+                                )
     umap = retrieveUsers()
     for bo in books:
         lasteditor=umap.get(int(bo.lasteditor))

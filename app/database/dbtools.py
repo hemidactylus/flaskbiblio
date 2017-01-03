@@ -47,6 +47,78 @@ def dbGetDatabase():
     dbFile=os.path.join(DB_DIRECTORY,DB_NAME)    
     return Database(dbFile)
 
+def dbTableFilterQuery( tableName, startfrom=0,
+                        nresults=100, filterList=[],
+                        sorter=None):
+    '''
+        Given a table name, list-slicing arguments
+        and a list of filter functions Object->bool,
+        the resulting query result is returned as (result,list) pair.
+        Sorting is applied before slicing.
+    '''
+    # perform query and filters
+    qlist=list(filter(  lambda obj: all([ffunc(obj) for ffunc in filterList]),
+                        (dbGetAll(tableName))
+                     )
+               )
+    # sort results (either with default or explicit sorting key)
+    if sorter is None:
+        reslist=sorted(qlist)
+    else:
+        reslist=list(sorted(qlist,key=sorter))
+    # trim section of interest from list
+    trimmedlist=reslist[startfrom:startfrom+nresults]
+    return (1,trimmedlist)
+
+def makeBookFilter(fName,fValue):
+    '''
+        Interprets an argument name/vale in the query string
+        and produces a corresponding boolean filter
+    '''
+    if fName=='author':
+        def aufinder(bo,v=fValue):
+            return int(v) in unrollStringList(bo.authors)
+        return aufinder
+    elif fName=='title':
+        def tifinder(bo,v=fValue):
+            return v.lower() in bo.title.lower()
+        return tifinder
+    elif fName=='booktype':
+        def btfinder(bo,v=fValue):
+            return bo.booktype.upper()==v.upper()
+        return btfinder
+    elif fName=='language':
+        def lafinder(bo,v=fValue):
+            return v.upper() in bo.languages.split(',')
+        return lafinder
+    else:
+        return lambda: True
+
+def dbQueryBooks(   queryArgs={}, resultsperpage=100,
+                    resolve=False, resolveParams={}):
+    '''
+        A query is interpreted from arguments and executed
+        on books. The results, trimmed and polished, are then shown
+        in a standard format: result, list_of_books.
+        All query-specific terms are stored in 'queryArgs'
+    '''
+    #
+    filters=[]
+    startfrom=0
+    for k,v in queryArgs.items():
+        # first deal with the non-filtering arguments
+        if k=='startfrom':
+            startfrom=int(v)
+        else:
+            filters.append(makeBookFilter(k,v))
+    #
+    sorter=None
+    result,booklist=dbTableFilterQuery('book',startfrom,resultsperpage,filters,sorter)
+    if resolve:
+        return result,[obj.resolveReferences(**resolveParams) for obj in booklist]
+    else:
+        return result,booklist
+
 def dbGetAll(tableName, resolve=False, resolveParams=None):
     '''
         returns a list of all items from the required table
