@@ -134,6 +134,38 @@ def makeAuthorFilter(fName, fValue):
     else:
         return lambda: True
 
+def makeBookSorter(sName):
+    '''
+        returns an 'extractor of sortable attribute'
+        to use when sorting results.
+    '''
+    if sName=='title':
+        def tisorter(bo):
+            return bo.title
+        return tisorter
+    elif sName=='booktype':
+        def btsorter(bo):
+            return bo.booktype
+        return btsorter
+    else:
+        return None
+
+def makeAuthorSorter(sName):
+    '''
+        returns an 'extractor of sortable attribute'
+        to use when sorting results.
+    '''
+    if sName=='firstname':
+        def fnsorter(au):
+            return au.firstname
+        return fnsorter
+    elif sName=='lastname':
+        def lnsorter(au):
+            return au.lastname
+        return lnsorter
+    else:
+        return None
+
 def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
                     resolve=False, resolveParams={}):
     '''
@@ -146,16 +178,18 @@ def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
     #
     filters=[]
     startfrom=0
+    sorter=None
     # queryArgs is in principle a multidict:
     for k in queryArgs.keys():
         for v in queryArgs.getlist(k):
             # first deal with the non-filtering arguments
             if k=='startfrom':
                 startfrom=int(v)
+            elif k=='sortby':
+                sorter=makeBookSorter(v)
             else:
                 filters.append(makeBookFilter(k,v))
     #
-    sorter=None
     result,booklist=dbTableFilterQuery('book',startfrom,resultsperpage,filters,sorter)
     if resolve:
         return result,[obj.resolveReferences(**resolveParams) for obj in booklist]
@@ -172,16 +206,18 @@ def dbQueryAuthors( queryArgs=ImmutableMultiDict(), resultsperpage=100):
     '''
     filters=[]
     startfrom=0
+    sorter=None
     # queryArgs is in principle a multidict:
     for k in queryArgs.keys():
         for v in queryArgs.getlist(k):
             # first deal with the non-filtering arguments
             if k=='startfrom':
                 startfrom=int(v)
+            elif k=='sortby':
+                sorter=makeAuthorSorter(v)
             else:
                 filters.append(makeAuthorFilter(k,v))
     #
-    sorter=None
     result,authorlist=dbTableFilterQuery('author',startfrom,resultsperpage,filters,sorter)
     return result,authorlist
 
