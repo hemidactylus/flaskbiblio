@@ -11,6 +11,8 @@ from .forms import (
                         ConfirmForm,
                         UserSettingsForm,
                         ChangePasswordForm,
+                        SearchBookForm,
+                        SearchAuthorForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -251,6 +253,7 @@ def ep_editauthor():
                 booklist=None
                 bookcount=None
             return render_template( 'editauthor.html',
+                                    title=formTitle,
                                     id=paramId,
                                     formtitle=formTitle,
                                     form=form,
@@ -283,6 +286,7 @@ def ep_editauthor():
             booklist=None
             bookcount=None
         return render_template( 'editauthor.html',
+                                title=formTitle,
                                 id=paramId,
                                 formtitle=formTitle,
                                 form=form,
@@ -304,6 +308,62 @@ def resolveParams():
                 'languages': languagesDict,
                 'booktypes': booktypesDict
             }
+
+@app.route('/authorsearch',methods=['GET','POST'])
+@login_required
+def ep_authorsearch():
+    user=g.user
+    form=SearchAuthorForm()
+    if form.validate_on_submit():
+        # prepare request for search endpoint
+        # In the future a multidict may be built here
+        authorSearchArgs={}
+        if form.firstname.data:
+            authorSearchArgs['firstname']=form.firstname.data
+        if form.lastname.data:
+            authorSearchArgs['lastname']=form.lastname.data
+        authorSearchArgs['sortby']=form.sortby.data
+        return redirect(url_for('ep_authors',**authorSearchArgs))
+    else:
+        return render_template  (
+                                    'authorsearch.html',
+                                    title='Author search',
+                                    user=user,
+                                    form=form,
+                                )
+
+@app.route('/booksearch',methods=['GET','POST'])
+@login_required
+def ep_booksearch():
+    user = g.user
+    form=SearchBookForm()
+    form.setBooktypes(resolveParams()['booktypes'].values())
+    form.setLanguages(resolveParams()['languages'].values())
+    allAuthors=sorted(list(dbGetAll('author')))
+    form.setAuthors(allAuthors)
+    if form.validate_on_submit():
+        # prepare request for search endpoint
+        # In the future this may become a multidict.
+        bookSearchArgs={}
+        if form.title.data:
+            bookSearchArgs['title']=form.title.data
+        if form.author.data!='-1':
+            bookSearchArgs['author']=form.author.data
+        if form.booktype.data!='-1':
+            bookSearchArgs['booktype']=form.booktype.data
+        if form.language.data!='-1':
+            bookSearchArgs['language']=form.language.data
+        if form.inhouse.data!='-1':
+            bookSearchArgs['inhouse']=form.inhouse.data
+        bookSearchArgs['sortby']=form.sortby.data
+        return redirect(url_for('ep_books',**bookSearchArgs))
+    else:
+        return render_template  (
+                                    'booksearch.html',
+                                    title='Book search',
+                                    user=user,
+                                    form=form,
+                                )
 
 @app.route('/books')
 @login_required
@@ -506,6 +566,7 @@ def ep_editbook():
                 form.authorlist.data=','.join(authorIdList)
                 form.bookid.data=paramId
                 return render_template( 'editbook.html',
+                                        title=formTitle,
                                         formtitle=formTitle,
                                         form=form,
                                         user=user,
@@ -535,6 +596,7 @@ def ep_editbook():
         form.authorlist.data=','.join(authorIdList)
         form.bookid.data=paramId
         return render_template( 'editbook.html',
+                                title=formTitle,
                                 formtitle=formTitle,
                                 form=form,
                                 user=user,
@@ -600,6 +662,7 @@ def ep_usersettings():
         form.resultsperpage.data=str(user.resultsperpage)
         return render_template  (
                                     'usersettings.html',
+                                    title='User settings',
                                     form=form,
                                     user=user,
                                 )
@@ -626,6 +689,7 @@ def ep_changepassword():
         return render_template  (
                                     'changepassword.html',
                                     form=form,
+                                    title='Change password',
                                     user=user,
                                 )
 
@@ -650,6 +714,7 @@ def ep_confirm(operation,value):
             form.redirecturl.data=str(value)
             return render_template  (
                                         'confirm.html',
+                                        title='Confirm operation?',
                                         form=form,
                                         submiturl='ep_confirm',
                                         value=value,

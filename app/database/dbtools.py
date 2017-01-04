@@ -84,6 +84,8 @@ def dbTableFilterQuery( tableName, startfrom=0,
         result['nextstartfrom']=startfrom+nresults
     # trim section of interest from list
     trimmedlist=reslist[startfrom:startfrom+nresults]
+    if len(trimmedlist)==0:
+        result['firstitem']=-1
     return (result,trimmedlist)
 
 def makeBookFilter(fName,fValue):
@@ -97,7 +99,8 @@ def makeBookFilter(fName,fValue):
         return aufinder
     elif fName=='title':
         def tifinder(bo,v=fValue):
-            return v.lower() in bo.title.lower()
+            #return v.lower() in bo.title.lower()
+            return any(vpart.lower() in bo.title.lower() for vpart in v.split(' '))
         return tifinder
     elif fName=='booktype':
         def btfinder(bo,v=fValue):

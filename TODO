@@ -3,8 +3,7 @@ TODO
 * nice-looking pages
 
 * searches, pagination and so on
-    A (cumbersome) method to handle pagination is up and running.
-    Prepare query pages and the path to them in the interface!
+    A (not-so-well-scaling, perhaps cumbersome) method to handle pagination is up and running.
 
 * when inserting a new author or book warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:

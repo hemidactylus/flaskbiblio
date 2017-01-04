@@ -50,6 +50,36 @@ class ChangePasswordForm(FlaskForm):
                                                 EqualTo('confirmpassword', message='New password mismatch')])
     confirmpassword  = PasswordField('confirmpassword')
 
+class SearchAuthorForm(FlaskForm):
+    # search criteria
+    firstname=StringField('firstname',validators=[AsciiOnly()])
+    lastname=StringField('lastname',validators=[AsciiOnly()])
+    # sorting options
+    sortby=SelectField('sortby', choices=[('lastname','Last name'),('firstname','First name')])
+    #
+    submit=SubmitField('Search')
+
+class SearchBookForm(FlaskForm):
+    # Search criteria
+    title=StringField('title', validators=[AsciiOnly()])
+    author=SelectField('author')
+    booktype=SelectField('booktype')
+    language=SelectField('language')
+    inhouse=SelectField('inhouse',choices=[('-1','<Optional>'),('1','In-house'),('0','Out')])
+    # sorting options
+    sortby=SelectField('sortby', choices=[('title','Title'),('booktype','Booktype')])
+    #
+    submit=SubmitField('Search')
+
+    def setAuthors(self,auPairList):
+        self.author.choices=[('-1','<Optional>')]+_sortAuthorPair(auPairList)
+
+    def setBooktypes(self,btPairList):
+        self.booktype.choices=[('-1','<Optional>')]+_sortTagNamePair(btPairList)
+
+    def setLanguages(self,laPairList):
+        self.language.choices=[('-1','<Optional>')]+_sortTagNamePair(laPairList)
+
 class EditBookForm(FlaskForm):
     force = BooleanField('force',default=False)
     title = StringField('booktitle',validators=[AsciiOnly()])
