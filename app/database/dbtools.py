@@ -114,13 +114,34 @@ def makeBookFilter(fName,fValue):
     else:
         return lambda: True
 
+def makeAuthorFilter(fName, fValue):
+    '''
+        Same as above but for the 'author' objects
+    '''
+    if fName=='firstname':
+        def fnfinder(au,v=fValue):
+            return v.lower() in au.firstname.lower()
+        return fnfinder
+    elif fName=='lastname':
+        def lnfinder(au,v=fValue):
+            return v.lower() in au.lastname.lower()
+        return lnfinder
+    elif fName=='name':
+        def nafinder(au,v=fValue):
+            return  (v.lower() in au.firstname.lower()) or \
+                    (v.lower() in au.lastname.lower())
+        return nafinder
+    else:
+        return lambda: True
+
 def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
                     resolve=False, resolveParams={}):
     '''
         A query is interpreted from arguments and executed
-        on books. The results, trimmed and polished, are then shown
+        on books. The results, trimmed and polished, are then returned
         in a standard format: result, list_of_books.
         All query-specific terms are stored in 'queryArgs'
+        'result' is a dict with various settings, depending on the query.
     '''
     #
     filters=[]
@@ -140,6 +161,29 @@ def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
         return result,[obj.resolveReferences(**resolveParams) for obj in booklist]
     else:
         return result,booklist
+
+def dbQueryAuthors( queryArgs=ImmutableMultiDict(), resultsperpage=100):
+    '''
+        A query is interpreted from arguments and executed
+        on authors. The results, trimmed and polished, are then returned
+        in a standard format:  result, list_of_authors.
+        All query-specific terms are stored in 'queryArgs'.
+        'result' is a dict with various settings, depending on the query.
+    '''
+    filters=[]
+    startfrom=0
+    # queryArgs is in principle a multidict:
+    for k in queryArgs.keys():
+        for v in queryArgs.getlist(k):
+            # first deal with the non-filtering arguments
+            if k=='startfrom':
+                startfrom=int(v)
+            else:
+                filters.append(makeAuthorFilter(k,v))
+    #
+    sorter=None
+    result,authorlist=dbTableFilterQuery('author',startfrom,resultsperpage,filters,sorter)
+    return result,authorlist
 
 def dbGetAll(tableName, resolve=False, resolveParams=None):
     '''

@@ -3,9 +3,10 @@ TODO
 * nice-looking pages
 
 * searches, pagination and so on
-    A (cumbersome) method to handle pagination is up and running with books.
-    Extend it to authors (implies dbtools, views-endpoint, template html)
+    A (cumbersome) method to handle pagination is up and running.
     Prepare query pages and the path to them in the interface!
+
+    TO DO: (authors, books): 'sorter' (at the moment it is empty)
 
 * when inserting a new author or book warn if the vectorisation detects a cosine-similar item already on DB.
     Done. But at the moment:

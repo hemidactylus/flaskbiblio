@@ -36,6 +36,7 @@ from app.database.dbtools import    (
                                         registerLogin,
                                         dbReplaceUser,
                                         dbQueryBooks,
+                                        dbQueryAuthors,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -122,12 +123,28 @@ def ep_deletebook(id, confirm=None):
 @login_required
 def ep_authors():
     user = g.user
-    authors=sorted(list(dbGetAll('author')))
+    #authors=sorted(list(dbGetAll('author')))
+    result,authors=dbQueryAuthors   (
+                                        queryArgs=request.args,
+                                        resultsperpage=user.resultsperpage,
+                                    )
+    # prepare arglist for pagination commands by keeping the rest of the multidict
+    prevquery=None
+    nextquery=None
+    if 'nextstartfrom' in result:
+        nextquery=request.args.copy()
+        nextquery['startfrom'] = result['nextstartfrom']
+    if 'prevstartfrom' in result:
+        prevquery=request.args.copy()
+        prevquery['startfrom'] = result['prevstartfrom']
     return render_template  (
                                 "authors.html",
                                 title='Authors',
                                 user=user,
                                 authors=authors,
+                                queryresult=result,
+                                nextquery=nextquery,
+                                prevquery=prevquery,
                             )
 
 @app.route('/deleteauthor/<id>')
@@ -293,7 +310,6 @@ def resolveParams():
 def ep_books():
     user = g.user
     # perform live query
-    #books=sorted(dbGetAll('book',resolve=True, resolveParams=resolveParams()))
     result,books=dbQueryBooks   (
                                     queryArgs=request.args,
                                     resultsperpage=user.resultsperpage,
