@@ -721,3 +721,8 @@ def ep_confirm(operation,value):
                                         operation=operation,
                                         message=tOpe['message'](value),
                                     )
+
+@app.route('/btest')
+@login_required
+def ep_btest():
+    return render_template('btest.html')
