@@ -54,6 +54,12 @@ from app import (
                     booktypesDict,
                 )
 
+def flashMessage(msgType,msgHeading,msgBody):
+    '''
+        Enqueues a flashed structured message for use by the render template
+    '''
+    flash({'style':msgType,'heading':msgHeading, 'body': msgBody})
+
 @app.before_request
 def before_request():
     g.user = current_user
@@ -113,13 +119,14 @@ def ep_deletebook(id, confirm=None):
                                     )
                             )
         else:
-            if dbDeleteBook(int(id)):
-                flash('Book successfully deleted.')
+            status,delId=dbDeleteBook(int(id))
+            if status:
+                flashMessage('info','Success','Book successfully deleted.')
             else:
-                flash('Could not delete book.')
+                flashMessage('warning','Could not delete book', delId)
         return redirect(url_for('ep_books'))
     else:
-        flash('User "%s" has no write privileges.' % user.name)
+        flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_books'))
 
 @app.route('/authors')
@@ -158,22 +165,25 @@ def ep_deleteauthor(id,confirm=None):
     # try and get the book count for the requested author
     if user.canedit:
         rAuthor=dbGetAuthor(int(id))
-        # 
-        if user.requireconfirmation and rAuthor.bookcount>0 and not confirm:
-            return redirect(url_for('ep_confirm',
-                                    operation='deleteauthor',
-                                    value=id,
-                                    )
-                            )
-        else:
-            status,delId=dbDeleteAuthor(int(id))
-            if status:
-                flash('Author successfully deleted.')
+        #
+        if rAuthor:
+            if user.requireconfirmation and rAuthor.bookcount>0 and not confirm:
+                return redirect(url_for('ep_confirm',
+                                        operation='deleteauthor',
+                                        value=id,
+                                        )
+                                )
             else:
-                flash('Could not delete author (error: %s).' % delId)
-            return redirect(url_for('ep_authors'))
+                status,delId=dbDeleteAuthor(int(id))
+                if status:
+                    flashMessage('info','Success','author successfully deleted.')
+                else:
+                    flashMessage('warning','Could not delete author', delId)
+        else:
+            flashMessage('warning','Could not delete author','author not found')
+        return redirect(url_for('ep_authors'))
     else:
-        flash('User "%s" has no write privileges.' % user.name)
+        flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_authors'))
 '''
     This call, similarly to the editbook below,
@@ -209,7 +219,7 @@ def ep_editauthor():
                 form.firstname.data=qAuthor.firstname
                 form.lastname.data=qAuthor.lastname
             else:
-                flash('Internal error retrieving author')
+                flashMessage('warning','Error','internal error retrieving author')
                 return redirect(url_for('ep_authors'))
     else:
         formTitle='New Author'
@@ -246,7 +256,7 @@ def ep_editauthor():
                         similarAuthors.append(otAu)
             #
         if similarAuthors:
-            flash('One or more similar existing authors found (%s). Please check "confirm" to proceed.' % ','.join(map(str,similarAuthors)))
+            flashMessage('warning','Confirm operation','similar existing author(s) found (%s). Confirm to proceed.' % ','.join(map(str,similarAuthors)))
             if not newEntry:
                 booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(editedAuthor.booklist)]
                 bookcount=qAuthor.bookcount
@@ -269,13 +279,13 @@ def ep_editauthor():
                 result,updatedAuthor=dbAddReplaceAuthor(editedAuthor)
                 if result:
                     if newEntry:
-                        flash('"%s" successfully added.' % str(updatedAuthor))
+                        flashMessage('info','Insertion successful','"%s"' % str(updatedAuthor))
                     else:
-                        flash('"%s" successfully updated.' % str(updatedAuthor))
+                        flashMessage('info','Update successful','"%s"' % str(updatedAuthor))
                 else:
-                    flash('Internal error updating the author table (error: %s).' % updatedAuthor)
+                    flashMessage('warning','Internal error', '"%s"' % updatedAuthor)
             else:
-                flash('User "%s" has no write privileges.' % user.name)
+                flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
             return redirect(url_for('ep_authors'))
     else:
         # HERE the form's additionals are set
@@ -424,14 +434,14 @@ def ep_login():
             #
             lastlogin=qUser.lastlogindate
             #
-            flash('Login successful. Welcome, %s! (last login: %s)' %
+            flashMessage('success','Login successful', 'welcome, %s! (last login: %s)' %
                 (qUser.name,lastlogin if lastlogin else 'first login'))
             #
             registerLogin(qUser.id)
             #
             return redirect(url_for('ep_index'))
         else:
-            flash('Invalid username/password provided')
+            flashMessage('warning','Cannot log in','invalid username/password provided')
             return redirect(url_for('ep_index'))
     return render_template('login.html', 
                            title='Log In',
@@ -441,7 +451,7 @@ def ep_login():
 @login_required
 def ep_logout():
     if g.user is not None and g.user.is_authenticated:
-        flash('Logged out successfully.')
+        flashMessage('success','Logged out successfully','goodbye')
         logout_user()
     return redirect(url_for('ep_index'))        
 
@@ -485,7 +495,7 @@ def ep_editbook():
                 form.booktype.data=qBook.booktype
                 form.languages.data=qBook.languages.split(',')
             else:
-                flash('Internal error retrieving book')
+                flashMessage('warning','Internal error', 'error retrieving book')
                 return redirect(url_for('ep_books'))
     else:
         formTitle='New Book'
@@ -557,7 +567,7 @@ def ep_editbook():
                             similarBooks.append(otBo)
                 #
             if similarBooks:
-                flash('One or more similar existing books found (%s). Please check "confirm" to proceed.' % ','.join(map(str,similarBooks)))
+                flashMessage('warning','Confirm operation','similar existing book(s) found (%s). Confirm to proceed.' % ','.join(map(str,similarBooks)))
                 # if not newEntry:
                 #     booklist=[{'id': bId, 'title': dbGetBook(bId).title} for bId in unrollStringList(editedAuthor.booklist)]
                 #     bookcount=qAuthor.bookcount
@@ -583,14 +593,14 @@ def ep_editbook():
                                         resolveParams=resolveParams())
                     if result:
                         if newEntry:
-                            flash('"%s" successfully added.' % str(updatedBook))
+                            flashMessage('info','Insert successful','"%s"' % str(updatedBook))
                         else:
-                            flash('"%s" successfully updated.' % str(updatedBook))
+                            flashMessage('info','Update successful','"%s"' % str(updatedBook))
                     else:
-                        flash('Internal error updating the book table (error: %s).' % updatedBook)
+                        flashMessage('warning','Internal error', '%s' % updatedBook)
                     return redirect(url_for('ep_books'))
                 else:
-                    flash('User "%s" has no write privileges.' % user.name)
+                    flashMessage('danger','Cannot proceed', 'user "%s" has no write privileges.' % user.name)
                     return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
@@ -654,9 +664,9 @@ def ep_usersettings():
         user.resultsperpage=int(form.resultsperpage.data)
         result,newuser=dbReplaceUser(user)
         if result:
-            flash('Settings updated successfully.')
+            flashMessage('success','Done','settings updated successfully.')
         else:
-            flash('An error occurred trying to update the settings.')
+            flashMessage('warning','Warning', 'an error occurred trying to update the settings.')
         return redirect(url_for('ep_index'))
     else:
         form.requireconfirmation.data=user.requireconfirmation
@@ -680,11 +690,11 @@ def ep_changepassword():
             user.passwordhash=User._hashString(form.newpassword.data)
             result,newuser=dbReplaceUser(user)
             if result:
-                flash('Password changed successfully')
+                flashMessage('success','Done','password changed successfully')
             else:
-                flash('An error occurred trying to change the password.')
+                flashMessage('warning','Warning','an error occurred trying to change the password.')
         else:
-            flash('Wrong password.')
+            flashMessage('warning','Warning','wrong password.')
         return redirect(url_for('ep_index'))
     else:
         return render_template  (
@@ -700,7 +710,7 @@ def ep_confirm(operation,value):
     user=g.user
     #
     if operation not in confirmOperations:
-        flash('Internal error in "confirm"')
+        flashMessage('danger','Error','internal error in "confirm"')
         return redirect(url_for('ep_index'))
     else:
         tOpe=confirmOperations[operation]
@@ -729,11 +739,12 @@ def ep_btest():
     form=BTestForm()
     if form.validate_on_submit():
         if form.yesButton.data:
-            return 'YES'
+            flashMessage('success','Done','The operation completed successfully.')
         elif form.noButton.data:
-            return 'NO'
+            flashMessage('warning','Try Again','It looks that your attempt temporarily failed.')
         else:
-            return 'WTF?'
+            flash('WTF?')
+        return redirect(url_for('ep_index'))
     else:
         form.text.data='Sample text.'
         return render_template('btest.html', form=form)

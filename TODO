@@ -5,6 +5,7 @@ TODO
         navbar DONE
         buttons DONE
         a common style with heading + contents for all pages
+        Buttons for pagination/search control, using the 12-ticks bstrap grid and fixed positions
 
 * searches, pagination and so on
     A (not-so-well-scaling, perhaps cumbersome) method to handle pagination is up and running.

@@ -379,9 +379,9 @@ def dbDeleteBook(id):
         dBook.delete()
         dbIncrementStatistic(db,'nbooks',-1)
         db.commit()
-        return id
+        return (1,id)
     except:
-        return None
+        return (0,'Cannot delete')
 
 def registerLogin(userId):
     '''
