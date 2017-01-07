@@ -24,7 +24,7 @@
           <span style="color: red;">[{{ error }}]</span>
         {% endfor %} <br>
         {% if user.canedit %}
-          <input type="submit" value="Save Author">
+          {{ form.submit(class_='btn btn-primary') }}
         {% endif %}
       </p>
       {% if id %}

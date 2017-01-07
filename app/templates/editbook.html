@@ -45,7 +45,7 @@
             {{ form.newauthors }}
             {% for error in form.newauthors.errors %}
               <span style="color: red;">[{{ error }}]</span>
-            {% endfor %} {{ form.additem }} <br>
+            {% endfor %} {{ form.additem(class_='btn btn-sm btn-primary') }} <br>
           {% endif %}
       </p>
       {% for item in items %}
@@ -56,12 +56,12 @@
             {{ form.delauthors }}
             {% for error in form.delauthors.errors %}
               <span style="color: red;">[{{ error }}]</span>
-            {% endfor %} {{ form.delitem }} <br>
+            {% endfor %} {{ form.delitem(class_='btn btn-sm btn-primary') }} <br>
           {% endif %}
       </p>
       <hr>
       <p>{% if user.canedit %}
-          {{ form.submit }}
+          {{ form.submit(class_='btn btn-primary') }}
       {% endif %}</p>
   </form>
 {% endblock %}

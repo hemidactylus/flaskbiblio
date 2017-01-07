@@ -25,6 +25,7 @@ def _sortAuthorPair(pairList):
 class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired(),AsciiOnly()])
     password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
+    login = SubmitField('Log In')
     remember_me = BooleanField('remember_me', default=False)
 
 class BTestForm(FlaskForm):
@@ -37,6 +38,7 @@ class EditAuthorForm(FlaskForm):
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
     authorid=HiddenField('authorid')
+    submit=SubmitField('Save Author')
 
 class ConfirmForm(FlaskForm):
     ok = SubmitField('OK')
@@ -44,7 +46,7 @@ class ConfirmForm(FlaskForm):
     redirecturl=HiddenField('redirecturl')
 
 class UserSettingsForm(FlaskForm):
-    #submit = SubmitField('Submit')
+    submit = SubmitField('Save')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[DataRequired(), NumberRange(min=1)])
 
