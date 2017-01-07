@@ -1,6 +1,8 @@
 TODO
 
 * nice-looking pages
+    Bootstrap: current problem. Buttons. when there are multiple ones in a page, how do we 
+    know which one was pressed to submit?
 
 * searches, pagination and so on
     A (not-so-well-scaling, perhaps cumbersome) method to handle pagination is up and running.
@@ -23,3 +25,7 @@ TODO
 * Some advanced stats in a dedicated subpage of 'index'
     E.g. book breakdown per genre
     E.g. percentage and number of books that are out
+
+* CLEANUPS
+    - all urls in template html's must be built with url_for
+    - remember_me checkbox, what to do with that?

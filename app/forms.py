@@ -27,6 +27,11 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
     remember_me = BooleanField('remember_me', default=False)
 
+class BTestForm(FlaskForm):
+    text=StringField('Text')
+    yesButton=SubmitField('Yes')
+    noButton=SubmitField('No')
+
 class EditAuthorForm(FlaskForm):
     force = BooleanField('force',default=False)
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
@@ -39,7 +44,7 @@ class ConfirmForm(FlaskForm):
     redirecturl=HiddenField('redirecturl')
 
 class UserSettingsForm(FlaskForm):
-    submit = SubmitField('Submit')
+    #submit = SubmitField('Submit')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[DataRequired(), NumberRange(min=1)])
 

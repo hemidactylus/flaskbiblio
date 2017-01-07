@@ -13,6 +13,7 @@ from .forms import (
                         ChangePasswordForm,
                         SearchBookForm,
                         SearchAuthorForm,
+                        BTestForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -722,7 +723,17 @@ def ep_confirm(operation,value):
                                         message=tOpe['message'](value),
                                     )
 
-@app.route('/btest')
+@app.route('/btest', methods=['GET','POST'])
 @login_required
 def ep_btest():
-    return render_template('btest.html')
+    form=BTestForm()
+    if form.validate_on_submit():
+        if form.yesButton.data:
+            return 'YES'
+        elif form.noButton.data:
+            return 'NO'
+        else:
+            return 'WTF?'
+    else:
+        form.text.data='Sample text.'
+        return render_template('btest.html', form=form)
