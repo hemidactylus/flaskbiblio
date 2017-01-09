@@ -2,18 +2,37 @@
 
 {% block content %}
     {{ super() }}
+
+<div class="container">
+  <h2>BiblioMansarda</h2>
+  <hr>
     {% if g.user.is_authenticated %}
-        <h1>Hi, {{ user.name }}!</h1>
-        <p>Manage <a href="{{url_for('ep_usersettings')}}">user settings</a></p>
-        <p>Change <a href="{{url_for('ep_changepassword')}}">password</a></p>
+        <h3>Hi, {{ user.name }}.</h3>
         {% if statistics %}
-            <p>Some Statistics<ul>
-                {% for qstat in statistics %}
-                    <li><i>{{ qstat.description }}:</i> {{ qstat.value }}</li>
-                {% endfor %}
-            </ul></p>
+            <div class="row"> 
+            <div class="col-sm-8">           
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th colspan="2">Some statistics</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for qstat in statistics %}
+                        <tr>
+                            <td>{{ qstat.description }}</td>
+                            <td>{{ qstat.value }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            </div>
         {% endif %}
     {% else %}
-        <h1>Welcome. Please log in</h1>
+        <h3>Welcome. Please <a href="{{url_for('ep_login')}}">log in</a></h3>
     {% endif %}
+
+</div>
+
 {% endblock %}

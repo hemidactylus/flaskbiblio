@@ -2,9 +2,25 @@
 
 {% block content %}
   {{ super() }}
-    <h2>Language list</h2>
-    <hr>
+
+<div class="container">
+  <h2>Languages</h2>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Language</th>
+      </tr>
+    </thead>
+    <tbody>
     {% for language in languages %}
-        <div><p>{{ language.tag }}: <b>{{ language.name }}</b></p></div>
+      <tr>
+          <td>{{ language.tag }}</td>
+          <td>{{ language.name }}</td>
+      </tr>
     {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 {% endblock %}

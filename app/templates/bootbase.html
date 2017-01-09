@@ -36,7 +36,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/index"><img src="/images/library.png" alt="Logo" height=160%></a>
+            <a class="navbar-brand" href="/index"><img class=".img-responsive" src="/images/library.png" alt="Logo" height=100%></a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -55,11 +55,12 @@
                   <ul class="dropdown-menu">
                     <li><a href="/usersettings">Settings</a></li>
                     <li><a href="/changepassword">Change Password</a></li>
-                    <li><a href="/logout">Log Out</a></li>
+                    <li role="separator" class="divider"></li>
+                    <li><a href="/logout">Log out</a></li>
                   </ul>
                 </li>
               {% else %}
-                <li><a href="{{ url_for('ep_login') }}">Log In</a></li>
+                <li><a href="{{ url_for('ep_login') }}">Log in</a></li>
               {% endif %}
             </ul>
           </div><!--/.nav-collapse -->

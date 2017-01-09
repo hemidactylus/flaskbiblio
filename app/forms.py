@@ -48,7 +48,7 @@ class ConfirmForm(FlaskForm):
 class UserSettingsForm(FlaskForm):
     submit = SubmitField('Save')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
-    resultsperpage = IntegerField('resultsperpage', validators=[DataRequired(), NumberRange(min=1)])
+    resultsperpage = IntegerField('resultsperpage', validators=[Required(),NumberRange(min=1)])
 
 class ChangePasswordForm(FlaskForm):
     submit = SubmitField('Change password')

@@ -2,24 +2,44 @@
 
 {% block content %}
   {{ super() }}
- <h1>Log In</h1>
+ <div class="container">
+  <h2>Log in</h2>
+  <hr>
   <form action="" method="post" name="login">
-      {{ form.hidden_tag() }}
-      <p>
-          Please enter your Username:<br>
-          {{ form.username(size=80) }}<br>
+     {{ form.hidden_tag() }}
+      <div class="row">
+        <div class="col-sm-2">
+          <label>
+            Username
+          </label>
+        </div>
+        <div class="col-sm-8">
+          {{ form.username(size=30) }}
           {% for error in form.username.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
-          Please enter your Password:<br>
-          {{ form.password(size=80) }}<br>
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-2">
+          <label>
+            Password
+          </label>
+        </div>
+        <div class="col-sm-8">
+          {{ form.password(size=30) }}
           {% for error in form.password.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-          {% endfor %}<br>
-      </p>
-      <p>{{ form.remember_me }} Remember Me</p>
-      <p>
-        {{ form.login(class_='btn btn-primary') }}
-      </p>
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="row">
+          <div class="col-sm-2">
+            {{ form.login(class_='btn btn-primary') }}
+          </div>
+        </div>
+      </div>
   </form>
+</div>
 {% endblock %}

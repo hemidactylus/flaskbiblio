@@ -2,20 +2,34 @@
 
 {% block content %}
   {{ super() }}
-  <h2>User settings for <i>{{ user.name }}</i></h2>
-  <form action="" method="post" name="usersettings">
-      {{ form.hidden_tag() }}
-      <p>
-        {{ form.requireconfirmation }} Require confirmation for sensitive operations
-      </p>
-      <p>
-        {{ form.resultsperpage(size=6) }} results per page
+<div class="container">
+  <h2>User settings</h2>
+  <hr>
+  <form class="form form-horizontal" method="post" role="form">
+    {{ form.hidden_tag() }}
+     <div class="row">
+      <div class="col-sm-6">
+        <label>
+          {{ form.requireconfirmation() }} Ask for confirmations
+        </label>
+      </div>
+    </div>
+     <div class="row">
+      <div class="col-sm-6">
+        <label class="control-label" for="resultsperpage">
+          Results per page
+        </label>
+        {{ form.resultsperpage(size=6) }}
         {% for error in form.resultsperpage.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}<br>
-      </p>
-      <p>
+          <span style="color: red;">{{ error }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-2">
         {{ form.submit(class_='btn btn-primary') }}
-      </p>
+      </div>
+    </div>
   </form>
+</div>
 {% endblock %}

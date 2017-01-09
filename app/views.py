@@ -447,7 +447,7 @@ def ep_login():
             flashMessage('warning','Cannot log in','invalid username/password provided')
             return redirect(url_for('ep_index'))
     return render_template('login.html', 
-                           title='Log In',
+                           title='Log in',
                            form=form)
 
 @app.route('/logout')
