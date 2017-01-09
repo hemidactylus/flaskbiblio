@@ -1,7 +1,7 @@
-<!-- extend base layout -->
-{% extends "base.html" %}
+{% extends "bootbase.html" %}
 
 {% block content %}
+  {{ super() }}
   <h2>User settings for <i>{{ user.name }}</i></h2>
   <form action="" method="post" name="usersettings">
       {{ form.hidden_tag() }}

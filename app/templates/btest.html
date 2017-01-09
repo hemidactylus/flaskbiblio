@@ -1,8 +1,8 @@
-<!-- extend base layout -->
-{% extends "base.html" %}
+{% extends "bootbase.html" %}
 
 {% block content %}
-  <h1>B Test</h1>
+  {{ super() }}
+ <h1>B Test</h1>
   <form action="" method="post" name="btest">
       {{ form.hidden_tag() }}
       <p>

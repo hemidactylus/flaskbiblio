@@ -1,8 +1,8 @@
-<!-- extend base layout -->
-{% extends "base.html" %}
+{% extends "bootbase.html" %}
 
 {% block content %}
-  <h2>Search authors</i></h2>
+{{ super() }}
+ <h2>Search authors</i></h2>
   <form action="" method="post" name="{{ url_for('ep_authorsearch') }}">
       {{ form.hidden_tag() }}
       <p>

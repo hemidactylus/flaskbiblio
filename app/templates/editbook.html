@@ -1,7 +1,7 @@
-<!-- extend base layout -->
-{% extends "base.html" %}
+{% extends "bootbase.html" %}
 
 {% block content %}
+  {{ super() }}
   <h1>{{ formtitle }}</h1>
   <form action="" method="post" name="{{url_for('ep_editbook',authorlist=authorlist)}}">
       {{ form.hidden_tag() }}

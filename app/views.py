@@ -2,6 +2,7 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import  login_user, logout_user, current_user, login_required
 from datetime import datetime
 from werkzeug.datastructures import MultiDict
+from markupsafe import Markup
 
 from app import app, db, lm
 from .forms import (
@@ -57,19 +58,10 @@ from app import (
 def flashMessage(msgType,msgHeading,msgBody):
     '''
         Enqueues a flashed structured message for use by the render template
+        
+            'msgType' can be: critical, error, warning, info
     '''
-    flash({'style':msgType,'heading':msgHeading, 'body': msgBody})
-
-here should format heading+body as a markup and ensure the
-style is among the ones allowed with this nicer flashmessage thing
-        flash('critical message', 'critical')
-        flash('error message', 'error')
-        flash('warning message', 'warning')
-        flash('info message', 'info')
-        flash('debug message', 'debug')
-        flash('different message', 'different')
-        flash('uncategorized message')
-
+    flash(Markup('<strong>%s: </strong> %s' % (msgHeading,msgBody)), msgType)
 
 @app.before_request
 def before_request():
@@ -137,7 +129,7 @@ def ep_deletebook(id, confirm=None):
                 flashMessage('warning','Could not delete book', delId)
         return redirect(url_for('ep_books'))
     else:
-        flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_books'))
 
 @app.route('/authors')
@@ -191,10 +183,10 @@ def ep_deleteauthor(id,confirm=None):
                 else:
                     flashMessage('warning','Could not delete author', delId)
         else:
-            flashMessage('warning','Could not delete author','author not found')
+            flashMessage('critical','Could not delete author','author not found')
         return redirect(url_for('ep_authors'))
     else:
-        flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_authors'))
 '''
     This call, similarly to the editbook below,
@@ -230,7 +222,7 @@ def ep_editauthor():
                 form.firstname.data=qAuthor.firstname
                 form.lastname.data=qAuthor.lastname
             else:
-                flashMessage('warning','Error','internal error retrieving author')
+                flashMessage('critical','Error','internal error retrieving author')
                 return redirect(url_for('ep_authors'))
     else:
         formTitle='New Author'
@@ -294,9 +286,9 @@ def ep_editauthor():
                     else:
                         flashMessage('info','Update successful','"%s"' % str(updatedAuthor))
                 else:
-                    flashMessage('warning','Internal error', '"%s"' % updatedAuthor)
+                    flashMessage('critical','Internal error', '"%s"' % updatedAuthor)
             else:
-                flashMessage('danger','Cannot proceed','user "%s" has no write privileges.' % user.name)
+                flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
             return redirect(url_for('ep_authors'))
     else:
         # HERE the form's additionals are set
@@ -445,7 +437,7 @@ def ep_login():
             #
             lastlogin=qUser.lastlogindate
             #
-            flashMessage('success','Login successful', 'welcome, %s! (last login: %s)' %
+            flashMessage('info','Login successful', 'welcome, %s! (last login: %s)' %
                 (qUser.name,lastlogin if lastlogin else 'first login'))
             #
             registerLogin(qUser.id)
@@ -462,7 +454,7 @@ def ep_login():
 @login_required
 def ep_logout():
     if g.user is not None and g.user.is_authenticated:
-        flashMessage('success','Logged out successfully','goodbye')
+        flashMessage('info','Logged out successfully','goodbye')
         logout_user()
     return redirect(url_for('ep_index'))        
 
@@ -506,7 +498,7 @@ def ep_editbook():
                 form.booktype.data=qBook.booktype
                 form.languages.data=qBook.languages.split(',')
             else:
-                flashMessage('warning','Internal error', 'error retrieving book')
+                flashMessage('critical','Internal error', 'error retrieving book')
                 return redirect(url_for('ep_books'))
     else:
         formTitle='New Book'
@@ -608,10 +600,10 @@ def ep_editbook():
                         else:
                             flashMessage('info','Update successful','"%s"' % str(updatedBook))
                     else:
-                        flashMessage('warning','Internal error', '%s' % updatedBook)
+                        flashMessage('critical','Internal error', '%s' % updatedBook)
                     return redirect(url_for('ep_books'))
                 else:
-                    flashMessage('danger','Cannot proceed', 'user "%s" has no write privileges.' % user.name)
+                    flashMessage('error','Cannot proceed', 'user "%s" has no write privileges.' % user.name)
                     return redirect(url_for('ep_books'))
     else:
         # HERE the form's additionals are set
@@ -675,9 +667,9 @@ def ep_usersettings():
         user.resultsperpage=int(form.resultsperpage.data)
         result,newuser=dbReplaceUser(user)
         if result:
-            flashMessage('success','Done','settings updated successfully.')
+            flashMessage('info','Done','settings updated successfully.')
         else:
-            flashMessage('warning','Warning', 'an error occurred trying to update the settings.')
+            flashMessage('critical','Warning', 'an error occurred trying to update the settings.')
         return redirect(url_for('ep_index'))
     else:
         form.requireconfirmation.data=user.requireconfirmation
@@ -701,7 +693,7 @@ def ep_changepassword():
             user.passwordhash=User._hashString(form.newpassword.data)
             result,newuser=dbReplaceUser(user)
             if result:
-                flashMessage('success','Done','password changed successfully')
+                flashMessage('info','Done','password changed successfully')
             else:
                 flashMessage('warning','Warning','an error occurred trying to change the password.')
         else:
@@ -721,7 +713,7 @@ def ep_confirm(operation,value):
     user=g.user
     #
     if operation not in confirmOperations:
-        flashMessage('danger','Error','internal error in "confirm"')
+        flashMessage('critical','Error','internal error in "confirm"')
         return redirect(url_for('ep_index'))
     else:
         tOpe=confirmOperations[operation]
@@ -750,7 +742,7 @@ def ep_btest():
     form=BTestForm()
     if form.validate_on_submit():
         if form.yesButton.data:
-            flashMessage('success','Done','The operation completed successfully.')
+            flashMessage('info','Done','The operation completed successfully.')
         elif form.noButton.data:
             flashMessage('warning','Try Again','It looks that your attempt temporarily failed.')
         else:
