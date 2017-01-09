@@ -60,6 +60,17 @@ def flashMessage(msgType,msgHeading,msgBody):
     '''
     flash({'style':msgType,'heading':msgHeading, 'body': msgBody})
 
+here should format heading+body as a markup and ensure the
+style is among the ones allowed with this nicer flashmessage thing
+        flash('critical message', 'critical')
+        flash('error message', 'error')
+        flash('warning message', 'warning')
+        flash('info message', 'info')
+        flash('debug message', 'debug')
+        flash('different message', 'different')
+        flash('uncategorized message')
+
+
 @app.before_request
 def before_request():
     g.user = current_user
@@ -748,3 +759,9 @@ def ep_btest():
     else:
         form.text.data='Sample text.'
         return render_template('btest.html', form=form)
+
+@app.route('/fbex')
+def ep_fbex():
+    from markupsafe import Markup
+    flash(Markup('<strong>Critical</strong> message'), 'critical')
+    return render_template('fbex.html', title='Aaa')

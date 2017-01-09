@@ -1,5 +1,7 @@
-{% extends "base.html" %}
+{% extends "bootbase.html" %}
+
 {% block content %}
+  {{ super() }}
     <h3>Books
         ({{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }})
         {% if prevquery %}
