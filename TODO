@@ -25,6 +25,11 @@ TODO
 * in the two addreplace calls, when updating: the list of attributes must be cleverly handled instead of a lot of
     explicit member copies that are now being done.
 
+* A separate setting for 'check for similar names'
+    its (futurely, a slider) settings
+
+* when 'cancel' on confirm-form, I should get back to the query if any and not to the full results
+
 * Some advanced stats in a dedicated subpage of 'index'
     E.g. book breakdown per genre
     E.g. percentage and number of books that are out
@@ -32,3 +37,4 @@ TODO
 * CLEANUPS
     - all urls in template html's must be built with url_for
     - remember_me checkbox, what to do with that?
+        restore remember me on visible login only when know how to treat it

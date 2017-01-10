@@ -2,23 +2,57 @@
 
 {% block content %}
 {{ super() }}
- <h2>Search authors</i></h2>
-  <form action="" method="post" name="{{ url_for('ep_authorsearch') }}">
+<div class="container">
+  <h2>Author search</h2>
+  <hr>
+  <form class="form form-horizontal" method="post" role="form" name="{{ url_for('ep_authorsearch') }}">
+    <div class="form-group">
       {{ form.hidden_tag() }}
-      <p>
-        Last name: {{ form.lastname(size=30) }}
-        {% for error in form.lastname.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <p>
-        First name: {{ form.firstname(size=30) }}
-        {% for error in form.firstname.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <hr>
-      Sort by {{ form.sortby }}
-      {{ form.submit(class_='btn btn-primary') }}
+       <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="firstname">
+            First name:
+          </label>
+        </div>
+        <div class="col-sm-4">
+          {{ form.firstname(size=30, class_="form-control", placeholder="Not mandatory") }}
+          {% for error in form.firstname.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}     
+        </div>
+      </div>
+       <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="lastname">
+            Last name:
+          </label>
+        </div>
+        <div class="col-sm-4">
+          {{ form.lastname(size=30, class_="form-control", placeholder="Not mandatory") }}
+          {% for error in form.lastname.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="sortby">
+            Sort by
+          </label>
+        </div>
+        <div class="col-sm-2">
+          {{ form.sortby(class_="form-control",width="50%") }}
+        </div>
+        <div class="col-sm-1">
+          {{ form.submit(class_='btn btn-primary') }}
+        </div>
+        <div class="col-sm-1">
+          <a class="btn btn-warning" href="{{url_for('ep_authors')}}" role="button">
+              Cancel
+          </a>
+        </div>
+      </div>
+    </div>
   </form>
+</div>
 {% endblock %}

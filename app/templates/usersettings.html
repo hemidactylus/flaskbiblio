@@ -6,28 +6,35 @@
   <h2>User settings</h2>
   <hr>
   <form class="form form-horizontal" method="post" role="form">
-    {{ form.hidden_tag() }}
-     <div class="row row-grid">
-      <div class="col-sm-6">
-        <label>
-          {{ form.requireconfirmation() }} Ask for confirmations
-        </label>
+    <div class="form-group">
+      {{ form.hidden_tag() }}
+       <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="requireconfirmation">
+            Ask for confirmations
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.requireconfirmation() }}
+        </div>
       </div>
-    </div>
-     <div class="row row-grid">
-      <div class="col-sm-6">
-        <label class="control-label" for="resultsperpage">
-          Results per page
-        </label>
-        {{ form.resultsperpage(size=6) }}
-        {% for error in form.resultsperpage.errors %}
-          <span style="color: red;">{{ error }}</span>
-        {% endfor %}
+       <div class="row row-grid">
+        <div class="col-sm-2">
+          <label class="control-label" for="resultsperpage">
+            Results per page
+          </label>
+        </div>
+        <div class="col-sm-4">
+          {{ form.resultsperpage(size=6, class_="form-control") }}
+          {% for error in form.resultsperpage.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
       </div>
-    </div>
-    <div class="row row-grid">
-      <div class="col-sm-2">
-        {{ form.submit(class_='btn btn-primary') }}
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          {{ form.submit(class_='btn btn-primary') }}
+        </div>
       </div>
     </div>
   </form>

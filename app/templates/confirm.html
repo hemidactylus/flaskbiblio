@@ -1,13 +1,29 @@
 {% extends "bootbase.html" %}
 
 {% block content %}
-  {{ super() }}
-  <h2>Confirm operation</h2>
-  <form action="" method="post" name="{{url_for(submiturl,value=value,operation=operation)}}">
-      {{ form.hidden_tag() }}
-      <p>
-        {{ message }}
-      </p>
-      {{ form.ok(class_='btn btn-sm btn-success') }} {{ form.cancel(class_='btn btn-sm btn-warning') }}
-  </form>
+    {{ super() }}
+<div class="container">
+    <h2>Confirm operation</h2>
+    <hr>
+    <form class="form form-horizontal" method="post" role="form"
+    name="{{url_for(submiturl,value=value,operation=operation)}}">
+        <div class="form-group">
+            {{ form.hidden_tag() }}
+            <div class="row row-grid">
+                <div class="col-sm-12">
+                    {{ message }}
+                </div>
+            </div>
+            <hr>
+            <div class="row row-grid">
+                <div class="col-sm-2">
+                    {{ form.ok(class_="btn btn-success") }}
+                </div>
+                <div class="col-sm-2">
+                    {{ form.cancel(class_="btn btn-warning") }}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 {% endblock %}

@@ -15,6 +15,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link href="/css/bibliomansarda.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" type="text/css">
     <link rel="icon" href="/images/library.png">
 
 {% endblock %}
@@ -37,16 +38,40 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/index"><img class=".img-responsive" src="/images/library.png" alt="Logo" height=100%></a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="/index">BiblioMansarda</a></li>
+              <li class="active">
+                <a href="/index">
+                  <img class=".img-responsive" src="/images/library.png" alt="Logo" height=25px>
+                  BiblioMansarda
+                </a>
+              </li>
               {% if g.user.is_authenticated %}
-                <li><a href="/books">Books</a></li>
-                <li><a href="/authors">Authors</a></li>
-                <li><a href="/booktypes">Booktypes</a></li>
-                <li><a href="/languages">Languages</a></li>
+                <li>
+                  <a href="/books">
+                    <i class="fa fa-book fa-lg" aria-hidden="true"></i>
+                    Books
+                  </a>
+                </li>
+                <li>
+                  <a href="/authors">
+                    <i class="fa fa-male fa-lg" aria-hidden="true"></i>
+                    Authors
+                  </a>
+                </li>
+                <li>
+                  <a href="/booktypes">
+                    <i class="fa fa-file-text fa-lg" aria-hidden="true"></i>
+                    Booktypes
+                  </a>
+                </li>
+                <li>
+                  <a href="/languages">
+                    <i class="fa fa-language fa-lg" aria-hidden="true"></i>
+                    Languages
+                  </a>
+                </li>
               {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -54,22 +79,22 @@
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" 
                         aria-expanded="false">
-                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                    <i class="fa fa-user fa-lg" aria-hidden="true"></i>
                     {{ g.user.name }}
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
                     <li><a href="/usersettings">
-                      <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                      <i class="fa fa-cog fa-lg" aria-hidden="true"></i>
                       Settings
                     </a></li>
                     <li><a href="/changepassword">
-                      <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+                      <i class="fa fa-key fa-lg" aria-hidden="true"></i>
                       Change Password
                     </a></li>
                     <li role="separator" class="divider"></li>
                     <li><a href="/logout">
-                      <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                      <i class="fa fa-power-off fa-lg" aria-hidden="true"></i>
                       Log out
                     </a></li>
                   </ul>

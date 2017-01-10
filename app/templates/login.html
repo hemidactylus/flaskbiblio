@@ -6,15 +6,16 @@
   <h2>Log in</h2>
   <hr>
   <form action="" method="post" name="login">
+    <div class="form-group">
      {{ form.hidden_tag() }}
       <div class="row row-grid">
         <div class="col-sm-2">
-          <label>
+          <label for="username">
             Username
           </label>
         </div>
         <div class="col-sm-8">
-          {{ form.username(size=30) }}
+          {{ form.username(size=30, class_="form-control") }}
           {% for error in form.username.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}
@@ -22,12 +23,12 @@
       </div>
       <div class="row row-grid"">
         <div class="col-sm-2">
-          <label>
+          <label for="password">
             Password
           </label>
         </div>
         <div class="col-sm-8">
-          {{ form.password(size=30) }}
+          {{ form.password(size=30, class_="form-control") }}
           {% for error in form.password.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}
@@ -38,6 +39,7 @@
           {{ form.login(class_='btn btn-primary') }}
         </div>
       </div>
+    </div>
   </form>
 </div>
 {% endblock %}

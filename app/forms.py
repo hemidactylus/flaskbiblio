@@ -46,7 +46,7 @@ class ConfirmForm(FlaskForm):
     redirecturl=HiddenField('redirecturl')
 
 class UserSettingsForm(FlaskForm):
-    submit = SubmitField('Save')
+    submit = SubmitField('Save settings')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[Required(),NumberRange(min=1)])
 
