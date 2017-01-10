@@ -18,6 +18,8 @@ from app.database.dbtools import    (
                                         dbGetUser,
                                         dbAddReplaceAuthor,
                                         dbAddReplaceBook,
+                                        dbDeleteBook,
+                                        dbDeleteAuthor,
                                     )
 from app.database.models import (
                                     tableToModel,
@@ -353,7 +355,11 @@ def erase_db_table(db,tableName):
     idList=[obj.id for obj in tObject.manager(db).all()]
     deleteds=[]
     for oId in idList:
-        tObject.manager(db).get(oId).delete()
+        if tableName=='book':
+            dbDeleteBook(oId)
+        elif tableName=='author':
+            dbDeleteAuthor(oId)
+        # tObject.manager(db).get(oId).delete()
         deleteds.append(oId)
     db.commit()
     return {'deleted_%s' % tableName: deleteds}

@@ -2,22 +2,48 @@
 
 {% block content %}
   {{ super() }}
-    <h3>Authors
-        ({{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }})
-        {% if prevquery %}
-            <a href="{{ url_for('ep_authors',**prevquery) }}">Prev</a>
-        {% endif %}
-        {% if nextquery %}
-            <a href="{{ url_for('ep_authors',**nextquery) }}">Next</a>
-        {% endif %}
-    </h3>
-    <h3>
-    <h3>
-        <a href="{{ url_for('ep_authorsearch') }}">New Search</a>
-        {% if user.canedit %}
-            <a href="{{ url_for('ep_editauthor') }}">Add new</a>
-        {% endif %}
-    </h3>
+<div class="container">
+    <div class="row row-grid">
+        <div class="col-sm-4">
+            <h2>Authors</h2>
+        </div>
+    </div>
+    <div class="row row-grid">
+        <div class="col-sm-2">
+            {{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }}
+        </div>
+        <div class="col-sm-1">
+            {% if prevquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_authors',**prevquery) }}"
+                    role="button" aria-label="Previous">
+                    <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-sm-1">
+            {% if nextquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_authors',**nextquery) }}"
+                role="button" aria-label="Next">
+                    <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-sm-2 col-sm-offset-1">
+            <a class="btn btn-success" href="{{ url_for('ep_authorsearch') }}" role="button">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                New search
+            </a>
+        </div>
+        <div class="col-sm-2">
+            {% if user.canedit %}
+                <a class="btn btn-success" href="{{ url_for('ep_editauthor') }}" role="button">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    Add new
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
     <hr>
     <ul>
     {% for author in authors %}
@@ -30,4 +56,7 @@
         </li>
     {% endfor %}
     </ul>
+
+</div>
+
 {% endblock %}
