@@ -2,66 +2,174 @@
 
 {% block content %}
   {{ super() }}
-  <h1>{{ formtitle }}</h1>
-  <form action="" method="post" name="{{url_for('ep_editbook',authorlist=authorlist)}}">
-      {{ form.hidden_tag() }}
-      <hr>
-      {% if showforce %}
-        {{ form.force }} Confirm operation<br>
-      {% endif %}
-      Book Title:<br>
-      {{ form.title(size=30) }}<br>
-      {% for error in form.title.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}<br>
-      Notes:<br>
-      {{ form.notes(size=30) }}<br>
-      {% for error in form.notes.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}<br>
-      Book Type:<br>
-      {{ form.booktype }}
-      {% for error in form.booktype.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}
-      In House:
-      {{ form.inhouse() }}<br>
-      {% for error in form.inhouse.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}
-      {{ form.inhousenotes(size=14) }}
-      {% for error in form.inhousenotes.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}<br>
-      Book Languages:<br>
-      {{ form.languages(size=80) }}<br>
-      {% for error in form.languages.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-      {% endfor %}
-      <hr>
-      <p>
-          {% if user.canedit %}
-            Add
-            {{ form.newauthors }}
-            {% for error in form.newauthors.errors %}
-              <span style="color: red;">[{{ error }}]</span>
-            {% endfor %} {{ form.additem(class_='btn btn-sm btn-primary') }} <br>
-          {% endif %}
-      </p>
-      {% for item in items %}
-          <div><p><i>&nbsp;&nbsp;&nbsp;{{ item.description }}</i></p></div>
-      {% endfor %}
-      <p>{% if user.canedit %}
-            Remove
-            {{ form.delauthors }}
-            {% for error in form.delauthors.errors %}
-              <span style="color: red;">[{{ error }}]</span>
-            {% endfor %} {{ form.delitem(class_='btn btn-sm btn-primary') }} <br>
-          {% endif %}
-      </p>
-      <hr>
-      <p>{% if user.canedit %}
-          {{ form.submit(class_='btn btn-primary') }}
-      {% endif %}</p>
+<div class="container">
+  <h2>
+    <i class="fa fa-pencil-square-o fa-lg" aria-hidden="true"></i>
+    {{ formtitle }}
+  </h2>
+  <hr>
+  <form action="" class="form form-horizontal" method="post"
+    role="form" name="{{url_for('ep_editbook',authorlist=authorlist)}}">
+<!-- AAAA -->
+    <div class="form-group">
+        {{ form.hidden_tag() }}
+        {% if showforce %}
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+                <label for="force">
+                    Confirm operation
+                </label>
+            </div>
+            <div class="col col-sm-4">
+                {{ form.force() }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+                <label for="title">
+                    Title
+                </label>
+            </div>
+            <div class="col col-sm-10">
+              {{ form.title(class_="form-control") }}
+              {% for error in form.title.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}<br>
+            </div>
+        </div>
+
+        <hr>
+        <div class="row row-grid">
+          <div class="col col-sm-2">
+              <label for="authorshow">
+                  Authors
+              </label>
+          </div>
+          <div class="col col-sm-6">
+            <div class="row row-grid">
+              <div class="col col-sm-4">
+                <ul class="list-unstyled">
+                    {% for item in items %}
+                        <li>
+                            {{ item.description }}
+                        </li>
+                    {% endfor %}
+                </ul>
+              </div>
+              <div class="col col-sm-8">
+                <div class="row row-grid">
+                  <div class="col col-sm-6">
+                    {% if user.canedit %}
+                      {{ form.newauthors(class_="form-control",width="50%") }}
+                      {% for error in form.newauthors.errors %}
+                        <span style="color: red;">{{ error }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <div class="col col-sm-6">
+                    {% if user.canedit %}
+                      {{ form.additem(class_='btn btn-sm btn-success') }} <br>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="row row-grid">
+                  <div class="col col-sm-6">
+                    {% if user.canedit %}
+                      {{ form.delauthors(class_="form-control",width="50%") }}
+                      {% for error in form.delauthors.errors %}
+                        <span style="color: red;">{{ error }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                  <div class="col col-sm-6">
+                    {% if user.canedit %}
+                      {{ form.delitem(class_='btn btn-sm btn-success') }} <br>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col col-sm-4">
+            <div class="row row-grid">
+              <div class="col col-sm-12">
+                <label for="languages">
+                  Languages
+                </label>
+              </div>
+            </div>
+            <div class="row row-grid">
+              <div class="col col-sm-12">
+                <small>
+                  {{ form.languages(size=80, class_="list-inline") }}
+                  {% for error in form.languages.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                  {% endfor %}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr>
+
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+              <label for="booktype">
+                Booktype
+              </label>
+            </div>
+            <div class="col col-sm-2">
+              {{ form.booktype(class_="form-control") }}
+              {% for error in form.booktype.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}
+            </div>
+            <div class="col col-sm-1 col-sm-offset-1">
+                {{ form.inhouse() }}
+            </div>
+            <div class="col col-sm-1">
+                <label for="inhouse">
+                  In-house
+                </label>
+            </div>
+            <div class="col col-sm-2">
+            {{ form.inhousenotes(class_="form-control",placeholder="Fill if away") }}
+            {% for error in form.inhousenotes.errors %}
+              <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+            </div>
+        </div>
+
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+                <label for="notes">
+                    Notes
+                </label>
+            </div>
+            <div class="col col-sm-10">
+              {{ form.notes(class_="form-control") }}<br>
+              {% for error in form.notes.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}
+            </div>
+        </div>
+
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+                {% if user.canedit %}
+                {{ form.submit(class_="btn btn-primary") }}
+                {% endif %}
+            </div>
+            <div class="col col-sm-2">
+                <a class="btn btn-warning" href="{{url_for('ep_books')}}" role="button">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+<!-- AAAA -->
   </form>
+</div>
 {% endblock %}

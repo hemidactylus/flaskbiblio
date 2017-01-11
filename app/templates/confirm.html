@@ -3,7 +3,10 @@
 {% block content %}
     {{ super() }}
 <div class="container">
-    <h2>Confirm operation</h2>
+    <h2>
+        <i class="fa fa-question-circle-o fa-lg" aria-hidden="true"></i>
+        Confirm operation
+    </h2>
     <hr>
     <form class="form form-horizontal" method="post" role="form"
     name="{{url_for(submiturl,value=value,operation=operation)}}">

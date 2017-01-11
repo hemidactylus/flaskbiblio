@@ -3,7 +3,10 @@
 {% block content %}
 {{ super() }}
 <div class="container">
-  <h2>Author search</h2>
+  <h2>
+    <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+    Author search
+  </h2>
   <hr>
   <form class="form form-horizontal" method="post" role="form" name="{{ url_for('ep_authorsearch') }}">
     <div class="form-group">

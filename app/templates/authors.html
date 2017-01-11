@@ -3,11 +3,10 @@
 {% block content %}
   {{ super() }}
 <div class="container">
-    <div class="row row-grid">
-        <div class="col-sm-4">
-            <h2>Authors</h2>
-        </div>
-    </div>
+    <h2>
+        <i class="fa fa-male fa-lg" aria-hidden="true"></i>
+        Authors
+    </h2>
     <div class="row row-grid">
         <div class="col-sm-2">
             {{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }}

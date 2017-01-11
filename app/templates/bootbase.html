@@ -100,7 +100,12 @@
                   </ul>
                 </li>
               {% else %}
-                <li><a href="{{ url_for('ep_login') }}">Log in</a></li>
+                <li>
+                  <a href="{{ url_for('ep_login') }}">
+                    <i class="fa fa-sign-in fa-lg" aria-hidden="true"></i>
+                    Log in
+                  </a>
+                </li>
               {% endif %}
             </ul>
           </div><!--/.nav-collapse -->

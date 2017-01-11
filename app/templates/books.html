@@ -3,11 +3,10 @@
 {% block content %}
   {{ super() }}
 <div class="container">
-    <div class="row row-grid">
-        <div class="col-sm-4">
-            <h2>Books</h2>
-        </div>
-    </div>
+    <h2>
+        <i class="fa fa-book fa-lg" aria-hidden="true"></i>
+        Books
+    </h2>
     <div class="row row-grid">
         <div class="col-sm-2">
             {{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }}
@@ -47,12 +46,12 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th class="col-sm-2">Title</th>
+                <th class="col-sm-3">Title</th>
                 <th class="col-sm-2">Authors</th>
                 <th class="col-sm-2"></th> <!-- notes -->
                 <th class="col-sm-1">Languages</th>
                 <th class="col-sm-1">Type</th>
-                <th class="col-sm-2">Status</th>
+                <th class="col-sm-1">Status</th>
                 <th class="col-sm-1"></th> <!-- delete icon -->
                 <th class="col-sm-1">Last edit</th>
             </tr>
@@ -73,7 +72,7 @@
                     </ul>
                 </td>
                 <td>
-                    <i>{{ book.notes }}</i>
+                    <small>{{ book.notes }}</small>
                 </td>
                 <td>
                     <ul class="list-unstyled">
@@ -92,7 +91,7 @@
                         <!-- nothing here -->
                     {% else %}
                         <i class="fa fa-plane" aria-hidden="true"></i>
-                        <strong>{{ book.inhousenotes }}</strong>
+                        <small><strong>{{ book.inhousenotes }}</strong></small>
                     {% endif %}
                 </td>
                 <td>
