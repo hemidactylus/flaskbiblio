@@ -2,48 +2,118 @@
 
 {% block content %}
   {{ super() }}
-    <h3>Books
-        ({{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }})
-        {% if prevquery %}
-            <a href="{{ url_for('ep_books',**prevquery) }}">Prev</a>
-        {% endif %}
-        {% if nextquery %}
-            <a href="{{ url_for('ep_books',**nextquery) }}">Next</a>
-        {% endif %}
-    </h3>
-    <h3>
-        <a href="{{ url_for('ep_booksearch') }}">New Search</a>
-        {% if user.canedit %}
-            <a href="{{ url_for('ep_editbook') }}">Add new</a>
-        {% endif %}
-    </h3>
-    <hr>
-    <ul>
-    {% for book in books %}
-        <li>
-            <a href="{{url_for('ep_editbook',id=book.id)}}">{{ book.title }}</a>
-            [
-                {% for auth in book.resAuthors %}
-                    <a href="{{url_for('ep_editauthor',id=auth.id)}}">{{auth.firstname }} {{ auth.lastname}}</a> 
-                {% endfor %}
-            ]
-            {% if book.inhouse %}
-                <!-- nothing here -->
-            {% else %}
-                <span style="color: red;">Out ({{ book.inhousenotes }})</span>
+<div class="container">
+    <div class="row row-grid">
+        <div class="col-sm-4">
+            <h2>Books</h2>
+        </div>
+    </div>
+    <div class="row row-grid">
+        <div class="col-sm-2">
+            {{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }}
+        </div>
+        <div class="col-sm-1">
+            {% if prevquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_books',**prevquery) }}"
+                    role="button" aria-label="Previous">
+                    <i class="fa fa-backward fa-lg" aria-hidden="true"></i>
+                </a>
             {% endif %}
-            <i>{{ book.notes }}</i>
-            [
-                {% for lang in book.resLanguages %}
-                    {{ lang.name }}
-                {% endfor %}
-            ]
-            {{ book.resBooktype.name }}
-            <b><span style="font-size: 10;">Last edit: {{ book.lastedit }}</span></b>
+        </div>
+        <div class="col-sm-1">
+            {% if nextquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_books',**nextquery) }}"
+                role="button" aria-label="Next">
+                    <i class="fa fa-forward fa-lg" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-sm-2 col-sm-offset-4">
+            <a class="btn btn-success" href="{{ url_for('ep_booksearch') }}" role="button">
+                <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                New search
+            </a>
+        </div>
+        <div class="col-sm-2">
             {% if user.canedit %}
-                <a href="{{url_for('ep_deletebook',id=book.id)}}">Delete</a>
+                <a class="btn btn-success" href="{{ url_for('ep_editbook') }}" role="button">
+                    <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+                    Add new
+                </a>
             {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="col-sm-2">Title</th>
+                <th class="col-sm-2">Authors</th>
+                <th class="col-sm-2"></th> <!-- notes -->
+                <th class="col-sm-1">Languages</th>
+                <th class="col-sm-1">Type</th>
+                <th class="col-sm-2">Status</th>
+                <th class="col-sm-1"></th> <!-- delete icon -->
+                <th class="col-sm-1">Last edit</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for book in books %}
+            <tr>
+                <td>
+                    <a href="{{url_for('ep_editbook',id=book.id)}}">{{ book.title }}</a>
+                </td>
+                <td>
+                    <ul class="list-unstyled">
+                        {% for auth in book.resAuthors %}
+                            <li>
+                                <a href="{{url_for('ep_editauthor',id=auth.id)}}">{{auth.firstname }} {{ auth.lastname}}</a> 
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    <i>{{ book.notes }}</i>
+                </td>
+                <td>
+                    <ul class="list-unstyled">
+                        {% for lang in book.resLanguages %}
+                            <li>
+                                {{ lang.name }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    {{ book.resBooktype.name }}
+                </td>
+                <td>
+                    {% if book.inhouse %}
+                        <!-- nothing here -->
+                    {% else %}
+                        <i class="fa fa-plane" aria-hidden="true"></i>
+                        <strong>{{ book.inhousenotes }}</strong>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.canedit %}
+                        <a href="{{url_for('ep_deletebook',id=book.id)}}">
+                            <i class="fa fa-trash fa-lg" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td>
+                    <ul class="list-unstyled">
+                        {% for leterm in book.lastedit %}
+                            <li>
+                                {{ leterm }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

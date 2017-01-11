@@ -2,41 +2,83 @@
 
 {% block content %}
   {{ super() }}
-  <h2>Search books</i></h2>
-  <form action="" method="post" name="{{ url_for('ep_booksearch') }}">
+<div class="container">
+  <h2>Book search</h2>
+  <hr>
+  <form class="form form-horizontal" method="post" role="form" name="{{ url_for('ep_booksearch') }}">
+    <div class="form-group">
       {{ form.hidden_tag() }}
-      <p>
-        Title: {{ form.title(size=30) }}
-        {% for error in form.title.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <p>
-        Author: {{ form.author }}
-        {% for error in form.author.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <p>
-        Booktype: {{ form.booktype }}
-        {% for error in form.booktype.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <p>
-        Language: {{ form.language }}
-        {% for error in form.language.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <p>
-        In house: {{ form.inhouse }}
-        {% for error in form.inhouse.errors %}
-          <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-      </p>
-      <hr>
-      Sort by {{ form.sortby }}
-      {{ form.submit(class_='btn btn-primary') }}
+
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="title">
+            Title:
+          </label>
+        </div>
+        <div class="col-sm-8">
+          {{ form.title(size=30, class_="form-control", placeholder="Not mandatory") }}
+          {% for error in form.title.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}     
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="author">
+            Author:
+          </label>
+        </div>
+        <div class="col-sm-8">
+          {{ form.author(class_="form-control",width="50%") }}
+        </div>
+      </div>
+
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="booktype">
+            Booktype:
+          </label>
+        </div>
+        <div class="col-sm-2">
+          {{ form.booktype(class_="form-control",width="50%") }}
+        </div>
+        <div class="col-sm-1">
+          <label for="language">
+            Language:
+          </label>
+        </div>
+        <div class="col-sm-2">
+          {{ form.language(class_="form-control") }}
+        </div>
+        <div class="col-sm-1">
+          <label for="inhouse">
+            In-House:
+          </label>
+        </div>
+        <div class="col-sm-2">
+          {{ form.inhouse(class_="form-control") }}
+        </div>
+      </div>
+
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="sortby">
+            Sort by
+          </label>
+        </div>
+        <div class="col-sm-2">
+          {{ form.sortby(class_="form-control") }}
+        </div>
+        <div class="col-sm-1 col-sm-offset-4">
+          {{ form.submit(class_='btn btn-primary') }}
+        </div>
+        <div class="col-sm-1">
+          <a class="btn btn-warning" href="{{url_for('ep_books')}}" role="button">
+              Cancel
+          </a>
+        </div>
+      </div>
+    </div>
   </form>
+</div>
 {% endblock %}

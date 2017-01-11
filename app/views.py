@@ -394,11 +394,11 @@ def ep_books():
     for bo in books:
         lasteditor=umap.get(int(bo.lasteditor))
         if lasteditor:
-            bo.lastedit=lasteditor.name
+            bo.lastedit=[lasteditor.name]
             if bo.lasteditdate:
                 try:
-                    bo.lastedit+=' (%s)' % datetime.strptime(str(bo.lasteditdate),
-                        DATETIME_STR_FORMAT).strftime(SHORT_DATETIME_STR_FORMAT)
+                    bo.lastedit+=[datetime.strptime(str(bo.lasteditdate),
+                        DATETIME_STR_FORMAT).strftime(SHORT_DATETIME_STR_FORMAT)]
                 except:
                     pass
         else:
