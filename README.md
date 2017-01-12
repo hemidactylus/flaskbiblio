@@ -9,6 +9,7 @@ Users operate on a database of books and authors via a web application. Mainly:
 * edit
 * remove
 * search
+
 on books and authors. Books can have zero, one or more authors (relations are enforced upon author deletion).
 
 Books have a _in-house_ attribute, marking whether the book is in its rightful location
@@ -44,41 +45,49 @@ is stored in Flask's `session` object.
 
 > Consider whether to handle differently the pagination issue (which does not scale well like it is)
 
-There is a nice import script to import from a formatted `csv` file: it proceeds in three steps, guiding
+There is a nice **import script** to import from a formatted `csv` file: it proceeds in three steps, guiding
 the user through some of the inconsistencies and warning involved.
 
-If authors or books are inserted (or edited) with name (or title) very similar to
-existing ones, a warning is raised and the user is asked to confirm her intentions
+If authors or books are inserted (or edited) with name (or title) very **similar to
+existing ones**, a warning is raised and the user is asked to confirm her intentions
 before completing the insertion (this behaviour can be configured away on a per-user basis).
 
-User settings page to customize interface.
+**User settings** page to customize interface.
 
 > A separate setting to enable/disable similarity-checks. It can also be, in the future, a similarity-severity slider.
 
 ## Major TODOs
 
+Author notes
 > Authors should bear a `notes` field for any use the librarian deems appropriate.
 
+MultiHousees
 > **MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to
 > a single house, each user is attached to _her_ house. When editing, she can edit everything
 > but gets a warning when touching somebody else's stuff. Books she inserts can only belong to her house.
 > User house is set in the settings page. Still, this does not interfere with the `in-house` settings.
 
+RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears
 > some code duplication. Consider rewriting the whole of it (also
 > including the confirm-checkbox) with more reuse!
 
+BetterConversions
 > Also make the request-to-arguments and form-to-request conversions more uniform
 > and streamlined.
 
+Similarity
 > Outsource the similar-thing issue completely to a separate module,
 > and perhaps implement digram vector space for more sensible behaviour.
 
+Deploy
 > Deploy on a real server (apache, nginx, lighty, etc)
 
+AddreplaceAutomate
 > in the two `addreplace` calls, when updating: the list of attributes must be cleverly handled instead
 > of doing, as is done now, a lot of explicit member copies.
 
+MoreStats
 > More advanced statistics (all transactionally handled) in the logged users' homepage.
 > E.g. book breakdown per genre, or percentage and number of books that are out
 
