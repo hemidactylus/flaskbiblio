@@ -1,12 +1,5 @@
 TODO
 
-* nice-looking pages
-    STATUS:
-        navbar DONE
-        buttons DONE
-        a common style with heading + contents for all pages
-        Buttons for pagination/search control, using the 12-ticks bstrap grid and fixed positions
-
 * searches, pagination and so on
     A (not-so-well-scaling, perhaps cumbersome) method to handle pagination is up and running.
 
@@ -27,8 +20,6 @@ TODO
 
 * A separate setting for 'check for similar names'
     its (futurely, a slider) settings
-
-* when 'cancel' on confirm-form, I should get back to the query if any and not to the full results
 
 * Some advanced stats in a dedicated subpage of 'index'
     E.g. book breakdown per genre

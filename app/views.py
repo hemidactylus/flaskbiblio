@@ -132,23 +132,32 @@ def ep_deletebook(id, confirm=None):
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_books'))
 
+@app.route('/authors/<restore>')
 @app.route('/authors')
 @login_required
-def ep_authors():
+def ep_authors(restore=None):
     user = g.user
-    #authors=sorted(list(dbGetAll('author')))
+    # store the last query for future use
+    if restore=='y':
+        reqargs=MultiDict(session['lastquery']['args'])
+        print('TYPE REQARGS = %s',type(reqargs))
+    else:
+        print('TYPE REQARGS = %s',type(request.args))
+        session['lastquery']={'page':'ep_authors','args': request.args}
+        reqargs=request.args
+    #
     result,authors=dbQueryAuthors   (
-                                        queryArgs=request.args,
+                                        queryArgs=reqargs,
                                         resultsperpage=user.resultsperpage,
                                     )
     # prepare arglist for pagination commands by keeping the rest of the multidict
     prevquery=None
     nextquery=None
     if 'nextstartfrom' in result:
-        nextquery=request.args.copy()
+        nextquery=reqargs.copy()
         nextquery['startfrom'] = result['nextstartfrom']
     if 'prevstartfrom' in result:
-        prevquery=request.args.copy()
+        prevquery=reqargs.copy()
         prevquery['startfrom'] = result['prevstartfrom']
     return render_template  (
                                 "authors.html",
@@ -379,13 +388,20 @@ def ep_booksearch():
                                     form=form,
                                 )
 
+@app.route('/books/<restore>')
 @app.route('/books')
 @login_required
-def ep_books():
+def ep_books(restore=None):
     user = g.user
+    # store the last request for future use
+    if restore=='y':
+        reqargs=MultiDict(session['lastquery']['args'])
+    else:
+        session['lastquery']={'page':'ep_books','args': request.args}
+        reqargs=request.args
     # perform live query
     result,books=dbQueryBooks   (
-                                    queryArgs=request.args,
+                                    queryArgs=reqargs,
                                     resultsperpage=user.resultsperpage,
                                     resolve=True,
                                     resolveParams=resolveParams(),
@@ -408,10 +424,10 @@ def ep_books():
     prevquery=None
     nextquery=None
     if 'nextstartfrom' in result:
-        nextquery=request.args.copy()
+        nextquery=reqargs.copy()
         nextquery['startfrom'] = result['nextstartfrom']
     if 'prevstartfrom' in result:
-        prevquery=request.args.copy()
+        prevquery=reqargs.copy()
         prevquery['startfrom'] = result['prevstartfrom']
     # render results list page
     return render_template  (
@@ -723,7 +739,7 @@ def ep_confirm(operation,value):
             if form.ok.data:
                 return redirect(url_for(tOpe['okurl'],id=value,confirm=1))
             else:
-                return redirect(url_for(tOpe['cancelurl']))
+                return redirect(url_for(tOpe['cancelurl'],restore='y'))
         else:
             form.redirecturl.data=str(value)
             return render_template  (
