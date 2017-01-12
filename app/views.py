@@ -132,6 +132,21 @@ def ep_deletebook(id, confirm=None):
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_books'))
 
+@app.route('/goback/<default>')
+@login_required
+def ep_goback(default='ep_books'):
+    '''
+        This is where the 'cancel' buttons lead, from
+        both a confirm-dialog and a cancel-edit button.
+        If there is a stored lastquery, we are
+        redirecting there; if there is no lastquery, the default prevails.
+    '''
+    if 'lastquery' in session:
+        goal=session['lastquery']['page']
+        return redirect(url_for(goal,restore='y'))
+    else:
+        return redirect(url_for(default))
+
 @app.route('/authors/<restore>')
 @app.route('/authors')
 @login_required
