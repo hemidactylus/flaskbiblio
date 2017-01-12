@@ -56,6 +56,19 @@
           {% endfor %}
         </div>
       </div>
+       <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="lastname">
+            Notes
+          </label>
+        </div>
+        <div class="col-sm-4">
+          {{ form.notes(size=30, class_="form-control") }}
+          {% for error in form.notes.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
+      </div>
       <div class="row row-grid">
         <div class="col-sm-2">
           {% if user.canedit %}

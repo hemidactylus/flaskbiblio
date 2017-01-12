@@ -43,10 +43,14 @@ are **paginated**. The DB however is queried for full results on every page requ
 well for large libraries). To implement the return-to-prev-page on hitting Cancel buttons, the last query
 is stored in Flask's `session` object.
 
-> Consider whether to handle differently the pagination issue (which does not scale well like it is)
+> Consider whether to handle differently the pagination issue (which does not scale well like it is).
+
+> Also the request args are stored as a dict for the return-from-cancel, hence possible multidict issues are lost. To fix.
 
 There is a nice **import script** to import from a formatted `csv` file: it proceeds in three steps, guiding
 the user through some of the inconsistencies and warning involved.
+
+> Develop this into an import/export feature of the app?
 
 If authors or books are inserted (or edited) with name (or title) very **similar to
 existing ones**, a warning is raised and the user is asked to confirm her intentions
@@ -57,9 +61,6 @@ before completing the insertion (this behaviour can be configured away on a per-
 > A separate setting to enable/disable similarity-checks. It can also be, in the future, a similarity-severity slider.
 
 ## Major TODOs
-
-Author notes
-> Authors should bear a `notes` field for any use the librarian deems appropriate.
 
 MultiHousees
 > **MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to

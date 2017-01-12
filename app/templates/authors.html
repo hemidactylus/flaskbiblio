@@ -46,9 +46,10 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th class="col-sm-6">Name</th>
+                <th class="col-sm-3">Name</th>
+                <th class="col-sm-3"></th> <!-- notes -->
                 <th class="col-sm-1">Books</th>
-                <th class="col-sm-2"></th>
+                <th class="col-sm-1"></th> <!-- actions -->
             </tr>
         </thead>
         <tbody>
@@ -59,7 +60,14 @@
                         {{ author.lastname }}, {{ author.firstname }}
                     </a>
                 </td>
-                <td>{{ author.bookcount }}</td>
+                <td>
+                    <small>
+                        {{ author.notes }}
+                    </small>
+                </td>
+                <td>
+                    {{ author.bookcount }}
+                </td>
                 <td>
                     {% if user.canedit %}
                         <a href="{{url_for('ep_deleteauthor',id=author.id)}}">

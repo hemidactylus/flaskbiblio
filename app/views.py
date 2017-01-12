@@ -155,9 +155,7 @@ def ep_authors(restore=None):
     # store the last query for future use
     if restore=='y':
         reqargs=MultiDict(session['lastquery']['args'])
-        print('TYPE REQARGS = %s',type(reqargs))
     else:
-        print('TYPE REQARGS = %s',type(request.args))
         session['lastquery']={'page':'ep_authors','args': request.args}
         reqargs=request.args
     #
@@ -236,6 +234,7 @@ def ep_editauthor():
         # HERE should set form local properties from request
         form.firstname.data=request.args.get('firstname')
         form.lastname.data=request.args.get('lastname')
+        form.notes.data=request.args.get('notes')
     else:
         paramId=form.authorid.data
     if paramId is not None and paramId!='':
@@ -245,6 +244,7 @@ def ep_editauthor():
             if qAuthor:
                 form.firstname.data=qAuthor.firstname
                 form.lastname.data=qAuthor.lastname
+                form.notes.data=qAuthor.notes
             else:
                 flashMessage('critical','Error','internal error retrieving author')
                 return redirect(url_for('ep_authors'))
@@ -255,6 +255,7 @@ def ep_editauthor():
         id=int(form.authorid.data) if form.authorid.data is not None and len(form.authorid.data)>0 else None,
         firstname=form.firstname.data,
         lastname=form.lastname.data,
+        notes=form.notes.data,
     )
     # if necessary, retrieve booklist/bookcount from DB
     if editedAuthor.id is not None:
@@ -313,7 +314,7 @@ def ep_editauthor():
                     flashMessage('critical','Internal error', '"%s"' % updatedAuthor)
             else:
                 flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
-            return redirect(url_for('ep_authors'))
+            return redirect(url_for('ep_goback',default='ep_authors'))
     else:
         # HERE the form's additionals are set
         form.authorid.data=paramId
@@ -632,10 +633,10 @@ def ep_editbook():
                             flashMessage('info','Update successful','"%s"' % str(updatedBook))
                     else:
                         flashMessage('critical','Internal error', '%s' % updatedBook)
-                    return redirect(url_for('ep_books'))
+                    return redirect(url_for('ep_goback',default='ep_books'))
                 else:
                     flashMessage('error','Cannot proceed', 'user "%s" has no write privileges.' % user.name)
-                    return redirect(url_for('ep_books'))
+                    return redirect(url_for('ep_goback',default='ep_books'))
     else:
         # HERE the form's additionals are set
         form.authorlist.data=','.join(authorIdList)

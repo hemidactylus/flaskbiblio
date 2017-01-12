@@ -89,6 +89,7 @@ class User(AutoModel):
 class Author(AutoModel):
     firstname=str
     lastname=str
+    notes=str
     bookcount=int
     booklist=str
 

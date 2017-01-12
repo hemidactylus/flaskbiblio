@@ -41,18 +41,22 @@ _testvalues={
                 {
                     'firstname': 'Jose',
                     'lastname': 'Saramago',
+                    'notes': '',
                 },
                 {
                     'firstname': 'Lev',
                     'lastname': 'Tolstoj',
+                    'notes': '',
                 },
                 {
                     'firstname': 'Gennaro',
                     'lastname': 'Sbucciapesche',
+                    'notes': '',
                 },
                 {
                     'firstname': 'Filippo',
                     'lastname': 'Roditorsoli',
+                    'notes': '',
                 },
             ],
     'language': [

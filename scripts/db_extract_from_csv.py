@@ -374,7 +374,7 @@ def insert_authors_from_json(inFile):
     report={}
     for nAu in auList:
         # insert new author
-        newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'])
+        newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'],notes='')
         status,nObj=dbAddReplaceAuthor(newAuthor)
         # register the map
         if status:

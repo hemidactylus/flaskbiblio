@@ -37,6 +37,7 @@ class EditAuthorForm(FlaskForm):
     force = BooleanField('force',default=False)
     firstname = StringField('authorfirstname', validators=[AsciiOnly()])
     lastname = StringField('authorlastname', validators=[DataRequired(),AsciiOnly()])
+    notes=StringField('authornotes')
     authorid=HiddenField('authorid')
     submit=SubmitField('Save Author')
 
