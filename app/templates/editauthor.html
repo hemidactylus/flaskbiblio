@@ -19,11 +19,15 @@
        <div class="row row-grid">
         <div class="col-sm-2">
           <label for="force">
-            Confirm operation
+            <span style="color:red">
+              Confirm operation
+            </span>
           </label>
         </div>
         <div class="col-sm-4">
+          <span style="color:red">
             {{ form.force() }}
+          </span>
         </div>
       </div>
       {% endif %}

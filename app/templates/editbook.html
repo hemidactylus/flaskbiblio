@@ -17,11 +17,15 @@
         <div class="row row-grid">
             <div class="col col-sm-2">
                 <label for="force">
+                  <span style="color:red">
                     Confirm operation
+                  </span>
                 </label>
             </div>
             <div class="col col-sm-4">
-                {{ form.force() }}
+              <span style="color:red">
+                {{ form.force(color="red") }}
+              </span>
             </div>
         </div>
         {% endif %}
@@ -70,7 +74,7 @@
                   </div>
                   <div class="col col-sm-6">
                     {% if user.canedit %}
-                      {{ form.additem(class_='btn btn-sm btn-success') }} <br>
+                      {{ form.additem(class_='btn btn-sm btn-success btn-block') }} <br>
                     {% endif %}
                   </div>
                 </div>
@@ -85,7 +89,7 @@
                   </div>
                   <div class="col col-sm-6">
                     {% if user.canedit %}
-                      {{ form.delitem(class_='btn btn-sm btn-success') }} <br>
+                      {{ form.delitem(class_='btn btn-sm btn-success btn-block') }} <br>
                     {% endif %}
                   </div>
                 </div>
