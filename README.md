@@ -58,9 +58,7 @@ before completing the insertion (this behaviour can be configured away on a per-
 
 **User settings** page to customize interface.
 
-> A separate setting to enable/disable similarity-checks. It can also be, in the future, a similarity-severity slider.
-
-## Major TODOs
+## Major/Future TODOs
 
 MultiHousees
 > **MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to
@@ -91,6 +89,9 @@ AddreplaceAutomate
 MoreStats
 > More advanced statistics (all transactionally handled) in the logged users' homepage.
 > E.g. book breakdown per genre, or percentage and number of books that are out
+
+SimilaritySlider
+> The threshold for author/book similarity can become a slider one day.
 
 ## Cleanups to do
 

@@ -49,6 +49,7 @@ class ConfirmForm(FlaskForm):
 class UserSettingsForm(FlaskForm):
     submit = SubmitField('Save settings')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
+    checksimilarity = BooleanField('checksimilarity', default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[Required(),NumberRange(min=1)])
 
 class ChangePasswordForm(FlaskForm):

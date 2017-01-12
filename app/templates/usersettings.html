@@ -11,7 +11,7 @@
   <form class="form form-horizontal" method="post" role="form">
     <div class="form-group">
       {{ form.hidden_tag() }}
-       <div class="row row-grid">
+      <div class="row row-grid">
         <div class="col-sm-2">
           <label for="requireconfirmation">
             Ask for confirmations
@@ -21,7 +21,17 @@
             {{ form.requireconfirmation() }}
         </div>
       </div>
-       <div class="row row-grid">
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          <label for="checksimilarity">
+            Check for similar items
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.checksimilarity() }}
+        </div>
+      </div>
+      <div class="row row-grid">
         <div class="col-sm-2">
           <label class="control-label" for="resultsperpage">
             Results per page

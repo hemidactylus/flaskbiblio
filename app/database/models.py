@@ -56,6 +56,7 @@ class User(AutoModel):
     canedit=int
     resultsperpage=int
     requireconfirmation=int # (bool)
+    checksimilarity=int # (bool)
 
     @staticmethod
     def _hashString(message):

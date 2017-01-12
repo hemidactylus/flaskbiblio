@@ -41,13 +41,9 @@ from app.utils.string_vectorizer import (
 langFinder=re.compile('\[([A-Z]{2,2})\]')
 abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
 
-importingUser='Stefano'
-
 # validity w.r.t. test values
 validLanguages=[lang['tag'] for lang in _testvalues['language']]
 validBooktypes=[booktype['tag'] for booktype in _testvalues['booktype']]
-if len(list(filter(lambda u: u['name']==importingUser,_testvalues['user'])))==0:
-    raise ValueError('User %s not found.' % importingUser)
 
 # used to make strings into a vector
 MIN_COSINE_ALERT=0.9 # to raise a similarity error
@@ -383,7 +379,7 @@ def insert_authors_from_json(inFile):
             raise ValueError()
     return report
 
-def insert_books_from_json(inFile,authorMap):
+def insert_books_from_json(inFile,authorMap,importingUser):
     '''
         Given a map (lastname,firstname)->authorId, book insertions are done.
         Returned is a list of IDs in the insertion order.
@@ -393,7 +389,7 @@ def insert_books_from_json(inFile,authorMap):
     report=[]
     for nBo in boList:
         # resolve references, adjust fields
-        nBo['lasteditor']=dbGetUser(nBo['lasteditor']).id
+        nBo['lasteditor']=dbGetUser(importingUser).id
         _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
         nBo['authors']=_auList
         nBo['lasteditdate']=datetime.strptime(nBo['lasteditdate'],DATETIME_STR_FORMAT)
@@ -424,8 +420,8 @@ if __name__=='__main__':
             EXTRACT: from csv to book list
         (2) -a inputBooks.csv outputAuthors.json
             AUTHORLIST: check and normalize the authors found throughout books
-        (3) -i inputBooks.json inputAuthors.jsos
-            INSERT: read books/authors's jsons and insert data into the DB
+        (3) -i inputBooks.json inputAuthors.json userName
+            INSERT: read books/authors's jsons and insert data into the DB as 'userName'
 '''
 
     # a valid csv file must be provided
@@ -482,25 +478,30 @@ if __name__=='__main__':
         elif sys.argv[1]=='-i':
             print('-i or INSERT mode.')
 
-            if len(sys.argv)>3:
+            if len(sys.argv)>4:
                 bookFile=sys.argv[2]
                 authorFile=sys.argv[3]
+                importingUser=sys.argv[4]
                 if clearToImport(bookFile,authorFile):
-                    db=logDo(lambda: dbGetDatabase(),'Opening DB')
-                    operationLog={}
-                    for tableToDelete in ['author','book']:
-                        operationLog.update(logDo(lambda: erase_db_table(db,tableToDelete),
-                                                  'Erasing table "%s"' % tableToDelete))
-                    deletionLog=', '.join(map(lambda kv: '%s[%i]' % (kv[0],len(kv[1])),operationLog.items()))
-                    print('Deletions: %s' % deletionLog)
-                    authorToId=logDo(lambda: insert_authors_from_json(authorFile), 'Inserting authors from "%s"' % authorFile)
-                    bookInsertLog=logDo(lambda: insert_books_from_json(bookFile,authorToId),'Inserting books from "%s"' % bookFile)
-                    print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
-                    print('Finished.')
+                    testUser=logDo(lambda:dbGetUser(importingUser),'Checking for user validity')
+                    if testUser is not None:
+                        db=logDo(lambda: dbGetDatabase(),'Opening DB')
+                        operationLog={}
+                        for tableToDelete in ['author','book']:
+                            operationLog.update(logDo(lambda: erase_db_table(db,tableToDelete),
+                                                      'Erasing table "%s"' % tableToDelete))
+                        deletionLog=', '.join(map(lambda kv: '%s[%i]' % (kv[0],len(kv[1])),operationLog.items()))
+                        print('Deletions: %s' % deletionLog)
+                        authorToId=logDo(lambda: insert_authors_from_json(authorFile), 'Inserting authors from "%s"' % authorFile)
+                        bookInsertLog=logDo(lambda: insert_books_from_json(bookFile,authorToId,importingUser),'Inserting books from "%s"' % bookFile)
+                        print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
+                        print('Finished.')
+                    else:
+                        print('User <%s> not recognised. Operation failed')
                 else:
                     print('Operation aborted.')
             else:
-                print('Two cmdline args are required: inputBookJSON, inputAuthorsJSON.')
+                print('Three cmdline args are required: inputBookJSON, inputAuthorsJSON, userName.')
                 print(_helpMsg)
         else:
             print('No valid operation provided. Quitting.')

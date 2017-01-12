@@ -268,7 +268,7 @@ def ep_editauthor():
         newEntry=editedAuthor.id is None
         # Here almost-duplicates could be detected
         similarAuthors=[]
-        if user.requireconfirmation and not form.force.data:
+        if user.checksimilarity and not form.force.data:
             aVecs={
                 'last': makeIntoVector(editedAuthor.lastname),
                 'full': makeIntoVector(editedAuthor.firstname+editedAuthor.lastname)
@@ -588,7 +588,7 @@ def ep_editbook():
             newEntry=editedBook.id is None
             # Here almost-duplicates could be detected
             similarBooks=[]
-            if user.requireconfirmation and not form.force.data:
+            if user.checksimilarity and not form.force.data:
                 bVecs={
                     'full': makeIntoVector(editedBook.title)
                 }
@@ -696,6 +696,7 @@ def ep_usersettings():
     #
     if form.validate_on_submit():
         user.requireconfirmation=int(form.requireconfirmation.data)
+        user.checksimilarity=int(form.checksimilarity.data)
         user.resultsperpage=int(form.resultsperpage.data)
         result,newuser=dbReplaceUser(user)
         if result:
@@ -704,6 +705,7 @@ def ep_usersettings():
             flashMessage('critical','Warning', 'an error occurred trying to update the settings.')
         return redirect(url_for('ep_index'))
     else:
+        form.checksimilarity.data=user.checksimilarity
         form.requireconfirmation.data=user.requireconfirmation
         form.resultsperpage.data=str(user.resultsperpage)
         return render_template  (

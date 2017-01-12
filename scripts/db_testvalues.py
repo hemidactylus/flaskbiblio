@@ -21,6 +21,7 @@ _testvalues={
                     'canedit': 1,
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
+                    'checksimilarity': 1,
                 },
                 {
                     'name': 'Fiorenza',
@@ -28,6 +29,7 @@ _testvalues={
                     'canedit': 0,
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
+                    'checksimilarity': 1,
                 },
                 {
                     'name': 'Carla',
@@ -35,6 +37,7 @@ _testvalues={
                     'canedit': 1,
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
+                    'checksimilarity': 1,
                 },
             ],
     'author': [
