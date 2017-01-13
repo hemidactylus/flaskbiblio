@@ -18,8 +18,8 @@ SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'
 SIMILAR_USE_DIGRAMS=True # otherwise: use single-letter grams
 # Different thresholds are required depending on the type of vectoring
 if SIMILAR_USE_DIGRAMS:
-    SIMILAR_AUTHOR_THRESHOLD=0.8
-    SIMILAR_BOOK_THRESHOLD=0.6
+    SIMILAR_AUTHOR_THRESHOLD=0.7
+    SIMILAR_BOOK_THRESHOLD=0.7
 else:
     SIMILAR_AUTHOR_THRESHOLD=0.90
     SIMILAR_BOOK_THRESHOLD=0.93

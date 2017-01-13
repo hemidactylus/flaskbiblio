@@ -336,6 +336,7 @@ def extract_author_list(inFile):
     bookList=json.load(open(inFile))
     for bStr in bookList:
         for au in bStr['authors']:
+            au['notes']=au.get('notes','')
             # handle insertion of author 'au' to the full list
             # found=False
             found=insert_author_to_list(au,authorList,bStr['_linenumber'])
@@ -370,6 +371,7 @@ def extract_author_list(inFile):
                 # check if the first name is only punctuated abbreviations
                 if isOnlyAbbreviations(au['firstname']):
                     addWarningToStruct(au,'abbreviations',au['firstname'])
+                    au['notes']='First name abbreviated'
                 #
                 authorList.append(au)
     # remove the norm information
