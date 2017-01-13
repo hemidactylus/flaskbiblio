@@ -447,7 +447,7 @@ def insert_books_from_json(inFile,authorMap,importingUser):
         if status:
             report.append(nBookReturned.id)
         else:
-            raise ValueError()
+            raise ValueError('Could not insert book "%s" (error: %s' % (newBookObject.title,nBookReturned))
     return report
 
 if __name__=='__main__':

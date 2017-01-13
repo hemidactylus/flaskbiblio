@@ -6,7 +6,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 from datetime import datetime
 
-from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT
+from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT, ALLOW_DUPLICATE_BOOKS
 from app.utils.stringlists import   (
                                         rollStringList,
                                         unrollStringList,
@@ -283,21 +283,24 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
 
         if book.id is None:
             Attempts adding a book and returns the new Book object.
-            returns None if duplicates are detected
         else:
             overwrites the fields of the book with the specified id
-            Returns None if not found (or other errors)
 
         Takes care of authors' bookcounters
+
+        Always returns a 2-uple (status,object), where:
+            status = 0,1 for failure,success
+            object = errormessage or book_object, resp.
     '''
     db=dbGetDatabase()
     newBook.lasteditdate=datetime.now().strftime(DATETIME_STR_FORMAT)
     Book.db=db
     if newBook.id is None:
-        # if new-insertion, check for duplicates then proceed
-        for qBook in Book.manager(db).all():
-            if qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower(): # TODO: here check ordering and tricks
-                return (0,'Duplicate detected.')
+        if not ALLOW_DUPLICATE_BOOKS:
+            # if new-insertion, check for duplicates then proceed
+            for qBook in Book.manager(db).all():
+                if qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower(): # TODO: here check ordering and tricks
+                    return (0,'Duplicate detected.')
         newBook.forceAscii()
         prevAuthorList=''
         dbIncrementStatistic(db,'nbooks',1)
@@ -306,9 +309,10 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
     else:
         # if replacement, find the replacee and proceed
         for qBook in Book.manager(db).all():
-            if qBook.id != newBook.id and \
-                    (qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower()):
-                return (0,'Duplicate detected.')
+            if not ALLOW_DUPLICATE_BOOKS:
+                if qBook.id != newBook.id and \
+                        (qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower()):
+                    return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
             # automatic handling of object attributes except those handled manually:

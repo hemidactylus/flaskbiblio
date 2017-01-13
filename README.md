@@ -55,6 +55,9 @@ the user through some of the inconsistencies and warning involved.
 If authors or books are inserted (or edited) with name (or title) very **similar to
 existing ones**, a warning is raised and the user is asked to confirm her intentions
 before completing the insertion (this behaviour can be configured away on a per-user basis).
+At the moment *no duplicates are allowed* (in the exact sense) as far as authors are concerned, while for 
+books this requirement is relaxed, relying on the sole similarity-warnings (think for example of two
+copies of the same books with the same title but in two languages).
 
 **User settings** page to customize interface.
 
