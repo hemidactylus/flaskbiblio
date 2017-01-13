@@ -15,5 +15,11 @@ DATETIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
 SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'
 
 # similarity thresholds for author (last- and complete-) names
-SIMILAR_AUTHOR_THRESHOLD=0.9
-SIMILAR_BOOK_THRESHOLD=0.93
+SIMILAR_USE_DIGRAMS=True # otherwise: use single-letter grams
+# Different thresholds are required depending on the type of vectoring
+if SIMILAR_USE_DIGRAMS:
+    SIMILAR_AUTHOR_THRESHOLD=0.7
+    SIMILAR_BOOK_THRESHOLD=0.6
+else:
+    SIMILAR_AUTHOR_THRESHOLD=0.90
+    SIMILAR_BOOK_THRESHOLD=0.93

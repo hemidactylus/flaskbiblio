@@ -10,7 +10,7 @@ from datetime import datetime
 from collections import Counter
 
 import env
-from config import DATETIME_STR_FORMAT
+from config import DATETIME_STR_FORMAT, SIMILAR_AUTHOR_THRESHOLD, SIMILAR_BOOK_THRESHOLD
 from app.utils.interactive import ask_for_confirmation, logDo
 from db_testvalues import _testvalues
 from app.database.dbtools import    (
@@ -138,22 +138,24 @@ def guessAuthors(auRest):
     authors=list(filter(lambda p: p is not None,[au for pc in auPieces for au in parseAuthor(pc,comma=False)]))
     return authors
 
-def normalizeParsedLine(pLine,iUser,iDate):
+def normalizeParsedLine(pLine,bListSoFar,iUser,iDate):
     '''
         converts a base structure into a proper structure, modulo references among tables.
-        Returns a structure encoding errors/warnings as well as the result
+        Returns a structure encoding errors/warnings as well as the result.
+
+        Requires the already-done-lines list to check for similarities
     '''
     bookStructure={
-        'title':         None,                  # HANDLED
-        'authors':       [],                    # HANDLED
-        'booktype':      None,                  # HANDLED
-        'inhouse':       None,                  # HANDLED
-        'notes':         '',                    # HANDLED
-        'inhousenotes':  None,                  # HANDLED
-        'languages':     [],                    # HANDLED
-        'lasteditor':    iUser,                 # HANDLED
-        'lasteditdate':  iDate,                 # HANDLED
-        '_linenumber':   pLine['linenumber'],   # HANDLED
+        'title':         None,
+        'authors':       [],
+        'booktype':      None,
+        'inhouse':       None,
+        'notes':         '',
+        'inhousenotes':  None,
+        'languages':     [],
+        'lasteditor':    iUser,
+        'lasteditdate':  iDate,
+        '_linenumber':   pLine['linenumber'],
     }
     # languages
     _langlist=langFinder.findall(pLine['languages'])
@@ -207,6 +209,20 @@ def normalizeParsedLine(pLine,iUser,iDate):
         addWarningToStruct(bookStructure,'notes-title',pLine['title'])
     else:
         bookStructure['title']=pLine['title']
+    # similarity checks:
+    bookStructure.update(makeBookIntoVector(bookStructure['title']))
+    scalsT=[]
+    def _copyBo(bo):
+        return {'title': bo['title'], '_linenumber': bo['_linenumber']}
+    for pBo in bListSoFar:
+        scalsT.append((scalProd(pBo['_normTitle'],bookStructure['_normTitle']),_copyBo(pBo)))
+    scalsT=list(filter(lambda t: t[0]>=SIMILAR_BOOK_THRESHOLD,sorted(scalsT,key=itemgetter(0),reverse=True)))
+    if len(scalsT) > 0:
+        finalWarnings=[]
+        for _,wBo in scalsT:
+            finalWarnings.append(_copyBo(wBo))
+        for wbo in finalWarnings:
+            addWarningToStruct(bookStructure,'similarity',wbo)
     # author(s)
     if _author is not None:
         bookStructure['authors']+=parseAuthor(_author)
@@ -233,7 +249,7 @@ def collectCharacters(pLines):
                     for v in pLine.values()
                     for char in list(v) if isinstance(v,str) or isinstance(v,unicode)])
 
-def read_and_parse_csv(inFile):
+def read_and_parse_csv(inFile,importingUser):
     '''
         main driver of the extraction. Handles the top-level operations
     '''
@@ -246,8 +262,15 @@ def read_and_parse_csv(inFile):
         raise ValueError('Some untreated special chars to check: "%s"' % ''.join(sorted(list(untreatedCharSet))))
     # 2. apply a normalisation function to each line
     importDate=datetime.now().strftime(DATETIME_STR_FORMAT)
-    normalizer=lambda pL: normalizeParsedLine(pL,importingUser,importDate)
-    bookList=list(map(normalizer,parsedLines))
+    normalizer=lambda pL,listSoFar: normalizeParsedLine(pL,listSoFar,importingUser,importDate)
+    # the book list is built incrementally so that similarities are detectable
+    bookList=[]
+    for pLi in parsedLines:
+        bookList.append(normalizer(pLi,bookList))
+    # clean out similarity-vector fields
+    for qBo in bookList:
+        if '_normTitle' in qBo:
+            del qBo['_normTitle']
 
     # 3. format the result as a large json-encoded  and return it along with some other info
     return {
@@ -278,7 +301,15 @@ def makeAuthorIntoVector(lName,fName):
     '''
     return {
         '_normLast': makeIntoVector(lName),
-        '_normFull': makeIntoVector('%s%s' % (lName,fName))
+        '_normFull': makeIntoVector('%s %s' % (lName,fName))
+    }
+
+def makeBookIntoVector(bTitle):
+    '''
+        generates a unitary-norm vector from the book title
+    '''
+    return {
+        '_normTitle': makeIntoVector(bTitle),
     }
 
 def insert_author_to_list(newA,aList,linenumber=None):
@@ -317,8 +348,8 @@ def extract_author_list(inFile):
                 for pAu in authorList:
                     scalsL.append((scalProd(pAu['_normLast'],au['_normLast']),_copyAu(pAu)))
                     scalsF.append((scalProd(pAu['_normFull'],au['_normFull']),_copyAu(pAu)))
-                scalsL=list(filter(lambda t: t[0]>=MIN_COSINE_ALERT,sorted(scalsL,key=itemgetter(0),reverse=True)))
-                scalsF=list(filter(lambda t: t[0]>=MIN_COSINE_ALERT,sorted(scalsF,key=itemgetter(0),reverse=True)))
+                scalsL=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsL,key=itemgetter(0),reverse=True)))
+                scalsF=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsF,key=itemgetter(0),reverse=True)))
                 if (len(scalsL)+len(scalsF)) > 0:
                     finalWarnings=[]
                     for _,wAu in scalsL+scalsF:
@@ -416,10 +447,10 @@ if __name__=='__main__':
 
     _helpMsg='''Usage: python script.py ARGS.
     Args can specify the import mode:
-        (1) -e input.csv outputBooks.json
-            EXTRACT: from csv to book list
-        (2) -a inputBooks.csv outputAuthors.json
-            AUTHORLIST: check and normalize the authors found throughout books
+        (1) -e input.csv outputBooks.json userName
+            EXTRACT: from csv to book list as 'userName'
+        (2) -a inputBooks.csv outputAuthors.json userName
+            AUTHORLIST: check and normalize the authors found throughout books as 'userName'
         (3) -i inputBooks.json inputAuthors.json userName
             INSERT: read books/authors's jsons and insert data into the DB as 'userName'
 '''
@@ -428,27 +459,38 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         if sys.argv[1]=='-e':
             print('-e or EXTRACT mode.')
-            if len(sys.argv)>3:
+            if len(sys.argv)>4:
                 inFile=sys.argv[2]
                 outFile=sys.argv[3]
+                importingUser=sys.argv[4]
                 if clearToExtract(inFile,outFile):
-                    parsedCSV=logDo(lambda: read_and_parse_csv(inFile),'Reading from "%s"' % inFile)
+                    parsedCSV=logDo(lambda: read_and_parse_csv(inFile,importingUser),'Reading from "%s"' % inFile)
                     logDo(lambda: open(outFile,'w').write('%s\n' % parsedCSV['json']),'Saving to json "%s"' % outFile)
                     # stats
                     warningBooks=len(list(filter(lambda bs: '_warnings' in bs,parsedCSV['booklist'])))
                     if warningBooks:
                         print('Books with warning: %s. Go and fix them.' % warningBooks)
+                        print('Similarity:')
+                        # clashing books explicit print
+                        def _boformat(bo):
+                            return '%-30s' % ('%s' % (bo['title']))
+                        for bo in parsedCSV['booklist']:
+                            if '_warnings' in bo and 'similarity' in bo['_warnings']:
+                                print('    %s' % _boformat(bo))
+                                for wbo in bo['_warnings']['similarity']:
+                                    print('        %s' % _boformat(wbo))
                     print('Finished.')
                 else:
                     print('Operation aborted.')
             else:
-                print('Two cmdline args are required: inputCSV, outputBookJSON.')
+                print('Three cmdline args are required: inputCSV, outputBookJSON, userName.')
                 print(_helpMsg)
         elif sys.argv[1]=='-a':
             print('-a or AUTHORLIST mode.')
-            if len(sys.argv)>3:
+            if len(sys.argv)>4:
                 inFile=sys.argv[2]
                 outFile=sys.argv[3]
+                importingUser=sys.argv[4]
                 if clearToExtract(inFile,outFile):
                     authorList=logDo(lambda: extract_author_list(inFile),'Extracting authors from "%s"' % inFile)
                     logDo(lambda: open(outFile,'w').write('%s\n' % authorList['json']),'Saving to json "%s"' % outFile)
@@ -474,7 +516,7 @@ if __name__=='__main__':
                     print('Operation aborted.')
                     print(_helpMsg)
             else:
-                print('Two cmdline args are required: inputBookJSON, outputAuthorsJSON.')
+                print('Three cmdline args are required: inputBookJSON, outputAuthorsJSON, userName.')
         elif sys.argv[1]=='-i':
             print('-i or INSERT mode.')
 
@@ -497,7 +539,7 @@ if __name__=='__main__':
                         print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
                         print('Finished.')
                     else:
-                        print('User <%s> not recognised. Operation failed')
+                        print('User <%s> not recognised. Operation failed' % importingUser)
                 else:
                     print('Operation aborted.')
             else:

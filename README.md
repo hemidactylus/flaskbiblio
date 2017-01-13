@@ -98,3 +98,7 @@ SimilaritySlider
 * all urls in template html's must be built with `url_for`
 
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
+
+## Currently doing:
+
+(to start) multihouses!
