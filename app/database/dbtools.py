@@ -277,7 +277,7 @@ def dbReplaceUser(newUser):
     else:
         return (0,None)
 
-def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
+def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
     '''
         Add/Replace a book to DB
 
@@ -291,8 +291,15 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
         Always returns a 2-uple (status,object), where:
             status = 0,1 for failure,success
             object = errormessage or book_object, resp.
+
+        Passing db: it is the caller's responsibility
+        to ensure no lockup is achieved via proper commit()
     '''
-    db=dbGetDatabase()
+    if db is None:
+        doCommit=True
+        db=dbGetDatabase()
+    else:
+        doCommit=False
     newBook.lasteditdate=datetime.now().strftime(DATETIME_STR_FORMAT)
     Book.db=db
     if newBook.id is None:
@@ -336,7 +343,8 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None):
     lostAuthors=oldAuthorSet-newAuthorSet
     updateBookCounters(db,nBook.id,lost=lostAuthors,won=wonAuthors)
     #
-    db.commit()
+    if doCommit:
+        db.commit()
 
     if resolve:
         return (1,nBook.resolveReferences(**resolveParams))
@@ -368,13 +376,17 @@ def updateBookCounters(dbSession,bookId,lost,won):
         else:
             raise ValueError
 
-def dbDeleteBook(id):
+def dbDeleteBook(id,db=None):
     '''
         attempts deletion of a book. If deletion succeeds, returns True
         It also takes care of deregistering authors associated to that book,
         transactionally
     '''
-    db=dbGetDatabase()
+    if db is None:
+        doCommit=True
+        db=dbGetDatabase()
+    else:
+        doCommit=False
     Book.db=db
     try:
         dBook=Book.manager(db).get(id)
@@ -382,7 +394,8 @@ def dbDeleteBook(id):
         updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
         dBook.delete()
         dbIncrementStatistic(db,'nbooks',-1)
-        db.commit()
+        if doCommit:
+            db.commit()
         return (1,id)
     except:
         return (0,'Cannot delete')
@@ -403,7 +416,7 @@ def registerLogin(userId):
     except:
         return ''
 
-def dbDeleteAuthor(id):
+def dbDeleteAuthor(id,db=None):
     '''
         attempts deletion of an author. If deletion succeeds, returns its id
         Always a 2-uple (success,stuff)
@@ -411,7 +424,11 @@ def dbDeleteAuthor(id):
         It must deregister author as author of all its books before deleting it,
         transactionally.
     '''
-    db=dbGetDatabase()
+    if db is None:
+        doCommit=True
+        db=dbGetDatabase()
+    else:
+        doCommit=False
     Author.db=db
     try:
         dAuthor=Author.manager(db).get(id)
@@ -424,7 +441,8 @@ def dbDeleteAuthor(id):
         #
         dbIncrementStatistic(db,'nauthors',-1)
         dAuthor.delete()
-        db.commit()
+        if doCommit:
+            db.commit()
         return (1,id)
     except:
         return (0,'Cannot delete')
@@ -447,7 +465,7 @@ def dbGetByIdFactory(className):
 dbGetAuthor=dbGetByIdFactory(Author)
 dbGetBook=dbGetByIdFactory(Book)
 
-def dbAddReplaceAuthor(newAuthor):
+def dbAddReplaceAuthor(newAuthor, db=None):
     '''
         Add/Replace an author to DB
 
@@ -457,8 +475,15 @@ def dbAddReplaceAuthor(newAuthor):
         else:
             overwrites the fields of the author with the requested id
             Returns None if not found (or other errors)
+
+        Passing db: it is the caller's responsibility
+        to ensure no lockup is achieved via proper commit()
     '''
-    db=dbGetDatabase()
+    if db is None:
+        doCommit=True
+        db=dbGetDatabase()
+    else:
+        doCommit=False
     Author.db=db
     if newAuthor.id is None:
         # new insertion: check for duplicates then proceed
@@ -490,5 +515,6 @@ def dbAddReplaceAuthor(newAuthor):
             nAuthor.update()
         else:
             return (0,'Not found')
-    db.commit()
+    if doCommit:
+        db.commit()
     return (1,nAuthor)

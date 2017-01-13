@@ -395,15 +395,14 @@ def erase_db_table(db,tableName):
     deleteds=[]
     for oId in idList:
         if tableName=='book':
-            dbDeleteBook(oId)
+            dbDeleteBook(oId,db=db)
         elif tableName=='author':
-            dbDeleteAuthor(oId)
-        # tObject.manager(db).get(oId).delete()
+            dbDeleteAuthor(oId,db=db)
         deleteds.append(oId)
     db.commit()
     return {'deleted_%s' % tableName: deleteds}
 
-def insert_authors_from_json(inFile):
+def insert_authors_from_json(inFile,db):
     '''
         Reads an author list off a json file
         and inserts all authors to DB.
@@ -413,16 +412,17 @@ def insert_authors_from_json(inFile):
     report={}
     for nAu in auList:
         # insert new author
-        newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'],notes='')
-        status,nObj=dbAddReplaceAuthor(newAuthor)
+        newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'],notes=nAu.get('notes',''))
+        status,nObj=dbAddReplaceAuthor(newAuthor,db=db)
         # register the map
         if status:
             report[(nAu['lastname'],nAu['firstname'])]=nObj.id
         else:
             raise ValueError()
+    db.commit()
     return report
 
-def insert_books_from_json(inFile,authorMap,importingUser):
+def insert_books_from_json(inFile,authorMap,importingUser,db):
     '''
         Given a map (lastname,firstname)->authorId, book insertions are done.
         Returned is a list of IDs in the insertion order.
@@ -445,11 +445,12 @@ def insert_books_from_json(inFile,authorMap,importingUser):
         #
         newBookObject=Book(**nBo)
         #
-        status,nBookReturned=dbAddReplaceBook(newBookObject)
+        status,nBookReturned=dbAddReplaceBook(newBookObject,db=db)
         if status:
             report.append(nBookReturned.id)
         else:
             raise ValueError('Could not insert book "%s" (error: %s' % (newBookObject.title,nBookReturned))
+    db.commit()
     return report
 
 if __name__=='__main__':
@@ -553,8 +554,8 @@ if __name__=='__main__':
                                                       'Erasing table "%s"' % tableToDelete))
                         deletionLog=', '.join(map(lambda kv: '%s[%i]' % (kv[0],len(kv[1])),operationLog.items()))
                         print('Deletions: %s' % deletionLog)
-                        authorToId=logDo(lambda: insert_authors_from_json(authorFile), 'Inserting authors from "%s"' % authorFile)
-                        bookInsertLog=logDo(lambda: insert_books_from_json(bookFile,authorToId,importingUser),'Inserting books from "%s"' % bookFile)
+                        authorToId=logDo(lambda: insert_authors_from_json(authorFile,db), 'Inserting authors from "%s"' % authorFile)
+                        bookInsertLog=logDo(lambda: insert_books_from_json(bookFile,authorToId,importingUser,db),'Inserting books from "%s"' % bookFile)
                         print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
                         print('Finished.')
                     else:
