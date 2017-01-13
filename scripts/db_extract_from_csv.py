@@ -45,9 +45,6 @@ abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
 validLanguages=[lang['tag'] for lang in _testvalues['language']]
 validBooktypes=[booktype['tag'] for booktype in _testvalues['booktype']]
 
-# used to make strings into a vector
-MIN_COSINE_ALERT=0.9 # to raise a similarity error
-
 def clearToExtract(inFile,outFile):
     '''
         Asks for confirmation of the extraction CSV -> structure in plain text
@@ -213,14 +210,19 @@ def normalizeParsedLine(pLine,bListSoFar,iUser,iDate):
     bookStructure.update(makeBookIntoVector(bookStructure['title']))
     scalsT=[]
     def _copyBo(bo):
-        return {'title': bo['title'], '_linenumber': bo['_linenumber']}
+        return {
+            'title': bo['title'],
+            '_linenumber': bo['_linenumber'],
+        }
     for pBo in bListSoFar:
         scalsT.append((scalProd(pBo['_normTitle'],bookStructure['_normTitle']),_copyBo(pBo)))
     scalsT=list(filter(lambda t: t[0]>=SIMILAR_BOOK_THRESHOLD,sorted(scalsT,key=itemgetter(0),reverse=True)))
     if len(scalsT) > 0:
         finalWarnings=[]
-        for _,wBo in scalsT:
-            finalWarnings.append(_copyBo(wBo))
+        for normVal,wBo in scalsT:
+            boToInsert=_copyBo(wBo)
+            boToInsert['_norm']=normVal
+            finalWarnings.append(boToInsert)
         for wbo in finalWarnings:
             addWarningToStruct(bookStructure,'similarity',wbo)
     # author(s)
@@ -341,20 +343,28 @@ def extract_author_list(inFile):
                 au.update(makeAuthorIntoVector(au['lastname'],au['firstname']))
                 au['_books']=[bStr['_linenumber']]
                 # check if the new author is too similar to any existing one
-                scalsL=[]
-                scalsF=[]
+                scalsA=[]
                 def _copyAu(au):
-                    return {'firstname': au['firstname'], 'lastname': au['lastname']}
+                    return {    
+                        'firstname': au['firstname'],
+                        'lastname': au['lastname'],
+                    }
                 for pAu in authorList:
-                    scalsL.append((scalProd(pAu['_normLast'],au['_normLast']),_copyAu(pAu)))
-                    scalsF.append((scalProd(pAu['_normFull'],au['_normFull']),_copyAu(pAu)))
-                scalsL=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsL,key=itemgetter(0),reverse=True)))
-                scalsF=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsF,key=itemgetter(0),reverse=True)))
-                if (len(scalsL)+len(scalsF)) > 0:
+                    scalsA.append((
+                        max(
+                            scalProd(pAu['_normLast'],au['_normLast']),
+                            scalProd(pAu['_normFull'],au['_normFull']),
+                        ),
+                        _copyAu(pAu)
+                    ))
+                scalsA=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsA,key=itemgetter(0),reverse=True)))
+                if len(scalsA) > 0:
                     finalWarnings=[]
-                    for _,wAu in scalsL+scalsF:
+                    for normVal,wAu in scalsA:
                         if not insert_author_to_list(wAu,finalWarnings):
-                            finalWarnings.append(_copyAu(wAu))
+                            auToInsert=_copyAu(wAu)
+                            auToInsert['_norm']=normVal
+                            finalWarnings.append(auToInsert)
                     for wau in finalWarnings:
                         addWarningToStruct(au,'similarity',wau)
                 # check if the first name is only punctuated abbreviations
@@ -472,13 +482,16 @@ if __name__=='__main__':
                         print('Books with warning: %s. Go and fix them.' % warningBooks)
                         print('Similarity:')
                         # clashing books explicit print
-                        def _boformat(bo):
-                            return '%-30s' % ('%s' % (bo['title']))
+                        def _boFormatMaster(bo,addendum):
+                            titString=bo['title'] if len(bo['title'])<50 else '%s ...' % bo['title'][:46]
+                            return '%-50s %s' % (titString,addendum) if addendum else '%-50s' % titString
+                        _boformatPlain=lambda bo: _boFormatMaster(bo,None)
+                        _boformatPlus=lambda bo: _boFormatMaster(bo,'%4.2f' % bo['_norm'])
                         for bo in parsedCSV['booklist']:
                             if '_warnings' in bo and 'similarity' in bo['_warnings']:
-                                print('    %s' % _boformat(bo))
+                                print('    %s' % _boformatPlain(bo))
                                 for wbo in bo['_warnings']['similarity']:
-                                    print('        %s' % _boformat(wbo))
+                                    print('        %s' % _boformatPlus(wbo))
                     print('Finished.')
                 else:
                     print('Operation aborted.')
@@ -500,17 +513,21 @@ if __name__=='__main__':
                         print('Authors with warning: %s. Go and check them.' % warningAuthors)
                         print('Similarity:')
                         # clashing authors explicit print
-                        def _auformat(au):
-                            return '%-40s' % ('%s, %s' % (au['lastname'],au['firstname']))
+                        def _auFormatMaster(au,addendum):
+                            _auString='%s, %s' % (au['lastname'],au['firstname'])
+                            auString=_auString if len(_auString)<40 else '%s ...' % _auString[:36]
+                            return '%-40s %s' % (auString,addendum) if addendum else '%-40s' % auString
+                        _auFormatBase=lambda au: _auFormatMaster(au,None)
+                        _auFormatPlus=lambda au: _auFormatMaster(au,'(%4.2f)' % au['_norm'])
                         for au in authorList['authorlist']:
                             if '_warnings' in au and 'similarity' in au['_warnings']:
-                                print('    %s' % _auformat(au))
+                                print('    %s' % _auFormatBase(au))
                                 for wau in au['_warnings']['similarity']:
-                                    print('        %s' % _auformat(wau))
+                                    print('        %s' % _auFormatPlus(wau))
                         print('Shortname:')
                         for au in authorList['authorlist']:
                             if '_warnings' in au and 'abbreviations' in au['_warnings']:
-                                print('    %s' % _auformat(au))
+                                print('    %s' % _auFormatBase(au))
                     print('Finished.')
                 else:
                     print('Operation aborted.')
