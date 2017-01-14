@@ -89,12 +89,21 @@ AddreplaceAutomate
 > in the two `addreplace` calls, when updating: the list of attributes must be cleverly handled instead
 > of doing, as is done now, a lot of explicit member copies.
 
+CancelEscape
+> set the no and cancel buttons so that they respond to Esc as the Enter key activates the Save/Yes.
+
 MoreStats
 > More advanced statistics (all transactionally handled) in the logged users' homepage.
 > E.g. book breakdown per genre, or percentage and number of books that are out
 
 SimilaritySlider
 > The threshold for author/book similarity can become a slider one day.
+
+BetterGoBackTo
+> e.g. if user goes to book-edit from the author-view page, where to lead it back to? (both on save and cancel)
+
+DisabledEdits
+> For users who have canedit=False, all fields are disabled (so that the `edit` windows become cards to inspect)
 
 ## Cleanups to do
 
@@ -104,4 +113,14 @@ SimilaritySlider
 
 ## Currently doing:
 
-(to start) multihouses!
+Multihouses:
+* there exists a table Houses (id, name, description) **DONE**
+* an endpoint/tablepage with Houses **DONE**
+* each user has a House and can change it **DONE**
+* each user has a 'default searches are limited to my house' setting **DONE**
+* books have a 'house' field: database, creation, import, search, listing, addnew
+* New books can be created only as sitting in the user's house
+* Existing books can be relocated only if from user's house
+* All searches are possible; whether by default the search is only-my-house or all-houses is configurable
+
+fix bug when saving settings!

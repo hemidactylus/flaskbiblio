@@ -1,0 +1,53 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+
+<div class="container">
+  <h2>
+    <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+    Houses
+  </h2>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th class="col col-sm-4">Name</th>
+        <th class="col col-sm-6">Description</th>
+        <th class="col col-sm-2">Users</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for house in houses %}
+      <tr>
+          <td>
+            {{ house.name }}
+          </td>
+          <td>
+            {{ house.description }}
+          </td>
+          <td>
+            {% if user.canedit %}
+              <ul class="list-unstyled">
+                {% for quser in house.users %}
+                  <li>
+                    {% if quser.strong %}
+                      <strong>
+                    {% endif %}
+                    {{ quser.name }}
+                    {% if quser.strong %}
+                      </strong>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              {{ house.users }}
+            {% endif %}
+          </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

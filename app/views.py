@@ -53,6 +53,8 @@ from app import (
                     languagesDict,
                     booktypes,
                     booktypesDict,
+                    houses,
+                    housesDict,
                 )
 
 def flashMessage(msgType,msgHeading,msgBody):
@@ -107,6 +109,30 @@ def ep_booktypes():
                                 title='Book Types',
                                 user=user,
                                 booktypes=booktypes,
+                            )
+
+@app.route('/houses')
+@login_required
+def ep_houses():
+    user = g.user
+    # equip house-objects with the 'users' list
+    allUsers=list(dbGetAll('user'))
+    for hObj in houses:
+        if user.canedit:
+            hObj.users=[]
+            for qU in sorted(u for u in allUsers if u.house==hObj.name):
+                hObj.users.append({
+                        'name': qU.name,
+                        'strong': qU.name==user.name,
+                    })
+        else:
+            hObj.users=len([u for u in allUsers if u.house==hObj.name])
+    #
+    return render_template  (
+                                "houses.html",
+                                title='Houses',
+                                user=user,
+                                houses=houses,
                             )
 
 @app.route('/deletebook/<id>/<confirm>')
@@ -693,11 +719,13 @@ confirmOperations={
 def ep_usersettings():
     user=g.user
     form=UserSettingsForm()
-    #
+    form.setHouses(housesDict.values())
     if form.validate_on_submit():
-        user.requireconfirmation=int(form.requireconfirmation.data)
-        user.checksimilarity=int(form.checksimilarity.data)
+        user.requireconfirmation=bool(form.requireconfirmation.data)
+        user.checksimilarity=bool(form.checksimilarity.data)
+        user.defaulthousesearch=bool(form.defaulthousesearch.data)
         user.resultsperpage=int(form.resultsperpage.data)
+        user.house=form.house.data
         result,newuser=dbReplaceUser(user)
         if result:
             flashMessage('info','Done','settings updated successfully.')
@@ -708,6 +736,8 @@ def ep_usersettings():
         form.checksimilarity.data=user.checksimilarity
         form.requireconfirmation.data=user.requireconfirmation
         form.resultsperpage.data=str(user.resultsperpage)
+        form.defaulthousesearch.data=user.defaulthousesearch
+        form.house.data=user.house
         return render_template  (
                                     'usersettings.html',
                                     title='User settings',

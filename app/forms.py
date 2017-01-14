@@ -17,6 +17,8 @@ from app.utils.validators import AsciiOnly
 # utility functions to sort out list population
 def _sortTagNamePair(pairList):
     return sorted(map(lambda la: (la.tag, la.name), pairList),key=lambda p: p[1])
+def _sortNameDescPair(pairList):
+    return sorted(map(lambda la: (la.name, la.description), pairList),key=lambda p: p[0])
 def _sortAuthorPair(pairList):
     # either here id->string, or in the form coerce=int (and other conversions) must be done
     # see: http://stackoverflow.com/questions/13964152/not-a-valid-choice-for-dynamic-select-field-wtforms#13964913
@@ -50,7 +52,11 @@ class UserSettingsForm(FlaskForm):
     submit = SubmitField('Save settings')
     requireconfirmation = BooleanField('requireconfirmation', default=True)
     checksimilarity = BooleanField('checksimilarity', default=True)
+    defaulthousesearch = BooleanField('defaulthousesearch',default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[Required(),NumberRange(min=1)])
+    house=SelectField('house')
+    def setHouses(self,auPairList):
+        self.house.choices=_sortNameDescPair(auPairList)
 
 class ChangePasswordForm(FlaskForm):
     submit = SubmitField('Change password')

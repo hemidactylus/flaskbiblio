@@ -10,7 +10,6 @@
   <hr>
   <form action="" class="form form-horizontal" method="post"
     role="form" name="{{url_for('ep_editbook',authorlist=authorlist)}}">
-<!-- AAAA -->
     <div class="form-group">
         {{ form.hidden_tag() }}
         {% if showforce %}
@@ -130,12 +129,9 @@
                 <span style="color: red;">{{ error }}</span>
               {% endfor %}
             </div>
-            <div class="col col-sm-1 col-sm-offset-1">
-                {{ form.inhouse() }}
-            </div>
-            <div class="col col-sm-1">
+            <div class="col col-sm-2">
                 <label for="inhouse">
-                  In-house
+                  {{ form.inhouse() }} In-house
                 </label>
             </div>
             <div class="col col-sm-2">
@@ -173,7 +169,6 @@
             </div>
         </div>
     </div>
-<!-- AAAA -->
   </form>
 </div>
 {% endblock %}

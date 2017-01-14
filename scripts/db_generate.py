@@ -26,6 +26,8 @@ from app.database.models import (
 from app.database.dbtools import    (
                                         dbAddReplaceAuthor,
                                         dbAddReplaceBook,
+                                        dbGetUser,
+                                        dbGetHouse,
                                     )
 
 def clearToProceed(dbfilename):
@@ -58,12 +60,22 @@ def populate_db(db):
     '''
     print('')
     # populate other tables
-    for qTable,qModel in filter(lambda qtP: qtP[0] not in ['book','author'], tableToModel.items()):
+    for qTable,qModel in filter(lambda qtP: qtP[0] not in ['book','author','user'], tableToModel.items()):
         print('    %s' % qTable)
         qModel.db=db
         for item in _testvalues[qTable]:
             qObject=qModel(**item)
             qObject.save()
+    db.commit()
+    # add users
+    User.db=db
+    print('    %s' % 'user')
+    for item in _testvalues['user']:
+        # check if house is valid
+        if dbGetHouse(item['house']) is None:
+            raise ValueError()
+        nUser=User(**item)
+        nUser.save()
     db.commit()
     # add authors
     auLNameMap={} # used later for books
@@ -84,6 +96,7 @@ def populate_db(db):
         authorList=','.join(map(str, sorted([auLNameMap[auLName] for auLName in item['authors'].split(',')])))
         #
         del item['authors']
+        item['lasteditor']=dbGetUser(item['lasteditor']).id
         nBook=Book  (
                         id=None,
                         authors=authorList,

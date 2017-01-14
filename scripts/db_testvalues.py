@@ -14,6 +14,16 @@ _testvalues={
                     'value': '0',
                 },
             ],
+    'house':[
+                {
+                    'name': 'VillaMu',
+                    'description': 'Villa Musichins',
+                },
+                {
+                    'name': 'Mansarda',
+                    'description': 'Mansarda San Giovanni Bosco',
+                },
+            ],
     'user': [
                 {
                     'name': 'Stefano',
@@ -22,6 +32,8 @@ _testvalues={
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
                     'checksimilarity': 1,
+                    'house': 'VillaMu',
+                    'defaulthousesearch': 0,
                 },
                 {
                     'name': 'Fiorenza',
@@ -30,6 +42,8 @@ _testvalues={
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
                     'checksimilarity': 1,
+                    'house': 'VillaMu',
+                    'defaulthousesearch': 1,
                 },
                 {
                     'name': 'Carla',
@@ -38,6 +52,8 @@ _testvalues={
                     'resultsperpage': 10,
                     'requireconfirmation': 1,
                     'checksimilarity': 1,
+                    'house': 'Mansarda',
+                    'defaulthousesearch': 0,
                 },
             ],
     'author': [
@@ -131,7 +147,7 @@ _testvalues={
                     'inhousenotes':  '',
                     'notes':         'Carino',
                     'languages':     'PT,IT',
-                    'lasteditor':    1,
+                    'lasteditor':    'Stefano',
                     'lasteditdate':  '',
                 },
                 {
@@ -142,7 +158,7 @@ _testvalues={
                     'inhousenotes':  'Nel frutteto',
                     'notes':         'Mediocre',
                     'languages':     'IT',
-                    'lasteditor':    1,
+                    'lasteditor':    'Stefano',
                     'lasteditdate':  '',
                 },
             ],

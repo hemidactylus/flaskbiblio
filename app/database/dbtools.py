@@ -21,6 +21,7 @@ from app.database.models import (
                                     Booktype,
                                     Book,
                                     Statistic,
+                                    House,
                                 )
 
 def dbIncrementStatistic(db,statName,statDelta):
@@ -248,6 +249,16 @@ def dbMakeDict(objList, fieldname='id'):
     return {getattr(obj,fieldname): obj for obj in objList}
 
 # table-specific tools
+def dbGetHouse(name):
+    '''
+        Returns a user object from its name,
+        None if not found
+    '''
+    db=dbGetDatabase()
+    for qHouse in House.manager(db).all():
+        if qHouse.name==name:
+            return qHouse
+
 def dbGetUser(name):
     '''
         Returns a user object from its name,

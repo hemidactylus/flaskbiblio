@@ -12,7 +12,7 @@
     <div class="form-group">
       {{ form.hidden_tag() }}
       <div class="row row-grid">
-        <div class="col-sm-2">
+        <div class="col-sm-4">
           <label for="requireconfirmation">
             Ask for confirmations
           </label>
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="row row-grid">
-        <div class="col-sm-2">
+        <div class="col-sm-4">
           <label for="checksimilarity">
             Check for similar items
           </label>
@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="row row-grid">
-        <div class="col-sm-2">
+        <div class="col-sm-4">
           <label class="control-label" for="resultsperpage">
             Results per page
           </label>
@@ -44,6 +44,29 @@
           {% endfor %}
         </div>
       </div>
+      <hr>
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="house">
+              <i class="fa fa-home fa-lg" aria-hidden="true"></i>
+              House
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.house(class_="form-control") }}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="defaulthousesearch">
+            Default search is house-specific
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.defaulthousesearch() }}
+        </div>
+      </div>
+      <hr>
       <div class="row row-grid">
         <div class="col-sm-2">
           {{ form.submit(class_='btn btn-primary') }}

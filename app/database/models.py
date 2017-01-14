@@ -23,6 +23,13 @@ class Statistic(AutoModel):
     description=str
     value=str
 
+class House(AutoModel):
+    name=str
+    description=str
+
+    def __lt__(self,other):
+        return self.name.lower() < other.name.lower()
+
 class Book(AutoModel):
     title=str
     authors=str
@@ -57,6 +64,11 @@ class User(AutoModel):
     resultsperpage=int
     requireconfirmation=int # (bool)
     checksimilarity=int # (bool)
+    defaulthousesearch=int # (bool)
+    house = str
+
+    def __lt__(self,other):
+        return self.name.lower() < other.name.lower()
 
     @staticmethod
     def _hashString(message):
@@ -128,4 +140,5 @@ tableToModel={
     'booktype': Booktype,
     'book': Book,
     'statistic': Statistic,
+    'house': House,
 }
