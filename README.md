@@ -58,13 +58,15 @@ before completing the insertion (this behaviour can be configured away on a per-
 At the moment *no duplicates are allowed* (in the exact sense) as far as authors are concerned, while for 
 books this requirement is relaxed, relying on the sole similarity-warnings (think for example of two
 copies of the same books with the same title but in two languages).
+It works on a digram basis of letters-only, but can be reconfigured (in the `config.py`) to fall
+back to single-letter vector space.
 
 **User settings** page to customize interface.
 
-**MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to
-a single house, each user is attached to _her_ house. When editing, she can edit everything
-but gets a warning when touching somebody else's stuff. Books she inserts can only belong to her house.
-User house is set in the settings page. Still, this does not interfere with the `in-house` settings.
+**MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is "registered" to
+a single house, each user is attached to _her_ house. When editing, she can edit only her stuff.
+Books she inserts can only belong to her house.
+User house is set in the settings page. Still, this does not interfere with the _in-house_ settings.
 * there exists a table Houses (id, name, description) **DONE**
 * an endpoint/tablepage with Houses **DONE**
 * each user has a House and can change it **DONE**
@@ -80,6 +82,8 @@ User house is set in the settings page. Still, this does not interfere with the 
 * Existing books can be relocated only if from user's house **DONE**
 * All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
 * There are house-specific book counters, updated transactionally **DONE**
+Note that one can still edit and work on other houses, but this is made deliberately difficult, so that
+one has to know what she is doing. By temporarily changing her house in the settings, the user can access other houses' stuff.
 
 ## Major/Future TODOs
 
@@ -91,10 +95,6 @@ RewriteEdits
 BetterConversions
 > Also make the request-to-arguments and form-to-request conversions more uniform
 > and streamlined.
-
-Similarity
-> Outsource the similar-thing issue completely to a separate module,
-> and perhaps implement digram vector space for more sensible behaviour.
 
 Deploy
 > Deploy on a real server (apache, nginx, lighty, etc)
