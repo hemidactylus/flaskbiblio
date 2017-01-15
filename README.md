@@ -67,6 +67,8 @@ back to single-letter vector space.
 a single house, each user is attached to _her_ house. When editing, she can edit only her stuff.
 Books she inserts can only belong to her house.
 User house is set in the settings page. Still, this does not interfere with the _in-house_ settings.
+Note that one can still edit and work on other houses, but this is made deliberately difficult, so that
+one has to know what she is doing. By temporarily changing her house in the settings, the user can access other houses' stuff.  
 * there exists a table Houses (id, name, description) **DONE**
 * an endpoint/tablepage with Houses **DONE**
 * each user has a House and can change it **DONE**
@@ -82,8 +84,7 @@ User house is set in the settings page. Still, this does not interfere with the 
 * Existing books can be relocated only if from user's house **DONE**
 * All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
 * There are house-specific book counters, updated transactionally **DONE**
-Note that one can still edit and work on other houses, but this is made deliberately difficult, so that
-one has to know what she is doing. By temporarily changing her house in the settings, the user can access other houses' stuff.
+
 
 ## Major/Future TODOs
 
