@@ -61,13 +61,27 @@ copies of the same books with the same title but in two languages).
 
 **User settings** page to customize interface.
 
-## Major/Future TODOs
+**MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to
+a single house, each user is attached to _her_ house. When editing, she can edit everything
+but gets a warning when touching somebody else's stuff. Books she inserts can only belong to her house.
+User house is set in the settings page. Still, this does not interfere with the `in-house` settings.
+* there exists a table Houses (id, name, description) **DONE**
+* an endpoint/tablepage with Houses **DONE**
+* each user has a House and can change it **DONE**
+* each user has a 'default searches are limited to my house' setting **DONE**
+* books have a 'house' field:
+    * database, **DONE**
+    * creation/edit in dbtools **DONE**
+    * import **DONE**
+    * search, **DONE**
+    * listing, **DONE**
+    * addnew/edit **DONE**
+* New books can be created only as sitting in the user's house **DONE**
+* Existing books can be relocated only if from user's house **DONE**
+* All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
+* There are house-specific book counters, updated transactionally **DONE**
 
-MultiHousees
-> **MultiHouses**: a single db dealing with multiple users and multiple houses. Each book is `registered` to
-> a single house, each user is attached to _her_ house. When editing, she can edit everything
-> but gets a warning when touching somebody else's stuff. Books she inserts can only belong to her house.
-> User house is set in the settings page. Still, this does not interfere with the `in-house` settings.
+## Major/Future TODOs
 
 RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears
@@ -112,20 +126,3 @@ DisabledEdits
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-
-Multihouses:
-* there exists a table Houses (id, name, description) **DONE**
-* an endpoint/tablepage with Houses **DONE**
-* each user has a House and can change it **DONE**
-* each user has a 'default searches are limited to my house' setting **DONE**
-* books have a 'house' field:
-    * database, DONE
-    * creation/edit in dbtools DONE
-    * import DONE
-    * search, DONE
-    * listing, DONE
-    * addnew/edit DONE
-* New books can be created only as sitting in the user's house **DONE**
-* Existing books can be relocated only if from user's house **DONE**
-* All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
-* There are house-specific book counters, updated transactionally **DONE**
