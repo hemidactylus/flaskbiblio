@@ -69,21 +69,21 @@ Books she inserts can only belong to her house.
 User house is set in the settings page. Still, this does not interfere with the _in-house_ settings.
 Note that one can still edit and work on other houses, but this is made deliberately difficult, so that
 one has to know what she is doing. By temporarily changing her house in the settings, the user can access other houses' stuff.  
-* there exists a table Houses (id, name, description) **DONE**
-* an endpoint/tablepage with Houses **DONE**
-* each user has a House and can change it **DONE**
-* each user has a 'default searches are limited to my house' setting **DONE**
+* there exists a table Houses (id, name, description)
+* an endpoint/tablepage with Houses
+* each user has a House and can change it
+* each user has a 'default searches are limited to my house' setting
 * books have a 'house' field:
-    * database, **DONE**
-    * creation/edit in dbtools **DONE**
-    * import **DONE**
-    * search, **DONE**
-    * listing, **DONE**
-    * addnew/edit **DONE**
-* New books can be created only as sitting in the user's house **DONE**
-* Existing books can be relocated only if from user's house **DONE**
-* All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
-* There are house-specific book counters, updated transactionally **DONE**
+    * database,
+    * creation/edit in dbtools
+    * import
+    * search,
+    * listing,
+    * addnew/edit
+* New books can be created only as sitting in the user's house
+* Existing books can be relocated only if from user's house
+* All searches are possible; whether by default the search is only-my-house or all-houses is configurable
+* There are house-specific book counters, updated transactionally
 
 
 ## Major/Future TODOs
