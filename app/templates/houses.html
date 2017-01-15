@@ -21,7 +21,9 @@
     {% for house in houses %}
       <tr>
           <td>
-            {{ house.name }}
+            <a href="{{url_for('ep_books',house=house.name)}}">
+              {{ house.name }}
+            </a>
           </td>
           <td>
             {{ house.description }}

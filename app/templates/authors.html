@@ -66,7 +66,9 @@
                     </small>
                 </td>
                 <td>
-                    {{ author.bookcount }}
+                    <a href="{{url_for('ep_books',author=author.id)}}">
+                        {{ author.bookcount }}
+                    </a>
                 </td>
                 <td>
                     {% if user.canedit %}
