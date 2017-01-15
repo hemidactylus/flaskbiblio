@@ -23,7 +23,11 @@
     {% for booktype in booktypes %}
       <tr>
           <td>{{ booktype.tag }}</td>
-          <td>{{ booktype.name }}</td>
+          <td>
+            <a href="{{ url_for('ep_books',booktype=booktype.tag) }}">
+              {{ booktype.name }}
+            </a>
+          </td>
       </tr>
     {% endfor %}
     </tbody>

@@ -23,7 +23,11 @@
     {% for language in languages %}
       <tr>
           <td>{{ language.tag }}</td>
-          <td>{{ language.name }}</td>
+          <td>
+            <a href="{{ url_for('ep_books',language=language.tag) }}">
+              {{ language.name }}
+            </a>
+          </td>
       </tr>
     {% endfor %}
     </tbody>

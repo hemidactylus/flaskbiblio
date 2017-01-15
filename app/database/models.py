@@ -26,6 +26,7 @@ class Statistic(AutoModel):
 class House(AutoModel):
     name=str
     description=str
+    nbooks=int
 
     def __lt__(self,other):
         return self.name.lower() < other.name.lower()
@@ -40,6 +41,7 @@ class Book(AutoModel):
     languages=str
     lasteditor=str
     lasteditdate=str
+    house=str
 
     def resolveReferences(self,authors={},languages={},booktypes={}):
         self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if len(aID)>0 and int(aID) in authors])

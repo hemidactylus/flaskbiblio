@@ -87,15 +87,26 @@
                     {{ book.resBooktype.name }}
                 </td>
                 <td>
-                    {% if book.inhouse %}
-                        <!-- nothing here -->
-                    {% else %}
-                        <i class="fa fa-plane" aria-hidden="true"></i>
-                        <small><strong>{{ book.inhousenotes }}</strong></small>
-                    {% endif %}
+                    <ul class="list-unstyled">
+                        <!-- belongs to user's house? -->
+                        {% if book.house == user.house %}
+                            <li>
+                                <i class="fa fa-home" aria-hidden="true"></i>
+                            </li>
+                        {% endif %}
+                        <!-- in house? -->
+                        {% if book.inhouse %}
+                            <!-- nothing here -->
+                        {% else %}
+                            <li>
+                                <i class="fa fa-plane" aria-hidden="true"></i>
+                                <small><strong>{{ book.inhousenotes }}</strong></small>
+                            </li>
+                        {% endif %}
+                    </ul>
                 </td>
                 <td>
-                    {% if user.canedit %}
+                    {% if user.canedit and book.house == user.house %}
                         <a href="{{url_for('ep_deletebook',id=book.id)}}">
                             <i class="fa fa-trash fa-lg" aria-hidden="true"></i>
                         </a>

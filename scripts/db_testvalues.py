@@ -18,10 +18,12 @@ _testvalues={
                 {
                     'name': 'VillaMu',
                     'description': 'Villa Musichins',
+                    'nbooks': 0,
                 },
                 {
                     'name': 'Mansarda',
                     'description': 'Mansarda San Giovanni Bosco',
+                    'nbooks': 0,
                 },
             ],
     'user': [
@@ -70,12 +72,12 @@ _testvalues={
                 {
                     'firstname': 'Gennaro',
                     'lastname': 'Sbucciapesche',
-                    'notes': '',
+                    'notes': 'Inventato',
                 },
                 {
                     'firstname': 'Filippo',
                     'lastname': 'Roditorsoli',
-                    'notes': '',
+                    'notes': 'Erfunden',
                 },
             ],
     'language': [
@@ -149,6 +151,7 @@ _testvalues={
                     'languages':     'PT,IT',
                     'lasteditor':    'Stefano',
                     'lasteditdate':  '',
+                    'house':         'VillaMu',
                 },
                 {
                     'title':         'Guida alle bucce',
@@ -160,6 +163,7 @@ _testvalues={
                     'languages':     'IT',
                     'lasteditor':    'Stefano',
                     'lasteditdate':  '',
+                    'house':         'Mansarda',
                 },
             ],
 }

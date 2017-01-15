@@ -432,7 +432,9 @@ def insert_books_from_json(inFile,authorMap,importingUser,db):
     report=[]
     for nBo in boList:
         # resolve references, adjust fields
-        nBo['lasteditor']=dbGetUser(importingUser).id
+        insertorUser=dbGetUser(importingUser)
+        nBo['lasteditor']=insertorUser.id
+        nBo['house']=insertorUser.house
         _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
         nBo['authors']=_auList
         nBo['lasteditdate']=datetime.strptime(nBo['lasteditdate'],DATETIME_STR_FORMAT)

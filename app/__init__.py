@@ -24,8 +24,6 @@ languages=sorted(list(dbGetAll('language')))
 languagesDict=dbMakeDict(languages,'tag')
 booktypes=sorted(list(dbGetAll('booktype')))
 booktypesDict=dbMakeDict(booktypes,'tag')
-houses=sorted(list(dbGetAll('house')))
-housesDict=dbMakeDict(houses,'name')
 
 # this must be AFTER the above, otherwise 'db' is circularly not found in the imports
 from app import views

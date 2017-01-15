@@ -53,8 +53,6 @@ from app import (
                     languagesDict,
                     booktypes,
                     booktypesDict,
-                    houses,
-                    housesDict,
                 )
 
 def flashMessage(msgType,msgHeading,msgBody):
@@ -116,6 +114,8 @@ def ep_booktypes():
 def ep_houses():
     user = g.user
     # equip house-objects with the 'users' list
+    # reload houses and users
+    houses=sorted(list(dbGetAll('house')))
     allUsers=list(dbGetAll('user'))
     for hObj in houses:
         if user.canedit:
@@ -148,7 +148,7 @@ def ep_deletebook(id, confirm=None):
                                     )
                             )
         else:
-            status,delId=dbDeleteBook(int(id))
+            status,delId=dbDeleteBook(int(id),userHouse=user.house)
             if status:
                 flashMessage('info','Success','Book successfully deleted.')
             else:
@@ -404,6 +404,8 @@ def ep_booksearch():
     form=SearchBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
+    houses=sorted(list(dbGetAll('house')))
+    form.setHouses(houses)
     allAuthors=sorted(list(dbGetAll('author')))
     form.setAuthors(allAuthors)
     if form.validate_on_submit():
@@ -416,6 +418,8 @@ def ep_booksearch():
             bookSearchArgs['author']=form.author.data
         if form.booktype.data!='-1':
             bookSearchArgs['booktype']=form.booktype.data
+        if form.house.data!='-1':
+            bookSearchArgs['house']=form.house.data
         if form.language.data!='-1':
             bookSearchArgs['language']=form.language.data
         if form.inhouse.data!='-1':
@@ -441,6 +445,12 @@ def ep_books(restore=None):
     else:
         session['lastquery']={'page':'ep_books','args': request.args}
         reqargs=request.args
+    #
+    if 'house' not in reqargs:
+        if user.defaulthousesearch:
+            # ugly workaround to prepare default search criterion here and pass it fully prepared
+            # to the DB primitive
+            reqargs=MultiDict({k:v for k,v in list(reqargs.items())+[('house',user.house)]})
     # perform live query
     result,books=dbQueryBooks   (
                                     queryArgs=reqargs,
@@ -520,6 +530,7 @@ def ep_logout():
 @login_required
 def ep_editbook():
     user=g.user
+    houses=sorted(list(dbGetAll('house')))
     form=EditBookForm()
     form.setBooktypes(resolveParams()['booktypes'].values())
     form.setLanguages(resolveParams()['languages'].values())
@@ -534,6 +545,7 @@ def ep_editbook():
         form.title.data=request.args.get('title')
         form.inhouse.data=int(request.args.get('inhouse','1'))
         form.notes.data=request.args.get('notes')
+        form.house.data=request.args.get('house')
         form.inhousenotes.data=request.args.get('inhousenotes')
         form.booktype.data=request.args.get('booktype')
         if len(request.args.get('languages',''))>0:
@@ -544,9 +556,9 @@ def ep_editbook():
         paramId=form.bookid.data
         authorParameter=form.authorlist.data
     if paramId is not None and paramId!='':
-        formTitle='Edit Book'
+        # editing an existing book
+        qBook=dbGetBook(int(paramId))
         if form.title.data is None:
-            qBook=dbGetBook(int(paramId))
             if qBook:
                 authorParameter=qBook.authors
                 form.title.data=qBook.title
@@ -554,12 +566,19 @@ def ep_editbook():
                 form.notes.data=qBook.notes
                 form.inhousenotes.data=qBook.inhousenotes
                 form.booktype.data=qBook.booktype
+                form.house.data=qBook.house
                 form.languages.data=qBook.languages.split(',')
             else:
                 flashMessage('critical','Internal error', 'error retrieving book')
                 return redirect(url_for('ep_books'))
+        form.setHouses(houses)
+        bookEditable=user.canedit and user.house==qBook.house
+        formTitle='Edit Book' if bookEditable else 'View Book'
     else:
+        # new book
         formTitle='New Book'
+        form.setHouses([h for h in houses if h.name==user.house])
+        bookEditable=user.canedit
     # parse the list
     if authorParameter:
         authorIdList=authorParameter.split(',')
@@ -578,6 +597,7 @@ def ep_editbook():
         title=form.title.data,
         inhouse=int(form.inhouse.data),
         notes=form.notes.data,
+        house=form.house.data,
         inhousenotes=form.inhousenotes.data,
         booktype=form.booktype.data,
         languages=','.join(form.languages.data) if form.languages.data is not None else '',
@@ -604,6 +624,7 @@ def ep_editbook():
                                         inhouse=editedBook.inhouse,
                                         inhousenotes=editedBook.inhousenotes,
                                         notes=editedBook.notes,
+                                        house=editedBook.house,
                                         booktype=editedBook.booktype,
                                         languages=editedBook.languages,
                                         authors=editedBook.authors,
@@ -637,21 +658,25 @@ def ep_editbook():
                 #     bookcount=None
                 form.authorlist.data=','.join(authorIdList)
                 form.bookid.data=paramId
-                return render_template( 'editbook.html',
+                return render_template  (
+                                        'editbook.html',
                                         title=formTitle,
                                         formtitle=formTitle,
                                         form=form,
                                         user=user,
                                         items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
                                         authorlist=','.join(authorIdList),
-                                        showforce=True)
+                                        showforce=True,
+                                        editable=bookEditable,
+                                    )
             else:
                 # HERE the actual save/update is triggered
                 newEntry=editedBook.id is None
-                if user.canedit:
+                if bookEditable:
                     result,updatedBook=dbAddReplaceBook(editedBook,
                                         resolve=True,
-                                        resolveParams=resolveParams())
+                                        resolveParams=resolveParams(),
+                                        userHouse=user.house)
                     if result:
                         if newEntry:
                             flashMessage('info','Insert successful','"%s"' % str(updatedBook))
@@ -667,13 +692,16 @@ def ep_editbook():
         # HERE the form's additionals are set
         form.authorlist.data=','.join(authorIdList)
         form.bookid.data=paramId
-        return render_template( 'editbook.html',
-                                title=formTitle,
-                                formtitle=formTitle,
-                                form=form,
-                                user=user,
-                                items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
-                                authorlist=','.join(authorIdList))
+        return render_template  (
+                                    'editbook.html',
+                                    title=formTitle,
+                                    formtitle=formTitle,
+                                    form=form,
+                                    user=user,
+                                    items=[{'description': str(au), 'id': au.id} for au in presentAuthors],
+                                    authorlist=','.join(authorIdList),
+                                    editable=bookEditable,
+                                )
 
 # Generic do-you-want-to-proceed 'dialog' (intermediate form).
 # This is called to confirm an operation, handles a Y/N answer retrieval
@@ -719,7 +747,8 @@ confirmOperations={
 def ep_usersettings():
     user=g.user
     form=UserSettingsForm()
-    form.setHouses(housesDict.values())
+    houses=sorted(list(dbGetAll('house')))
+    form.setHouses(houses)
     if form.validate_on_submit():
         user.requireconfirmation=bool(form.requireconfirmation.data)
         user.checksimilarity=bool(form.checksimilarity.data)

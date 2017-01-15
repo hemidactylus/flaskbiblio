@@ -55,8 +55,8 @@ class UserSettingsForm(FlaskForm):
     defaulthousesearch = BooleanField('defaulthousesearch',default=True)
     resultsperpage = IntegerField('resultsperpage', validators=[Required(),NumberRange(min=1)])
     house=SelectField('house')
-    def setHouses(self,auPairList):
-        self.house.choices=_sortNameDescPair(auPairList)
+    def setHouses(self,hoPairList):
+        self.house.choices=_sortNameDescPair(hoPairList)
 
 class ChangePasswordForm(FlaskForm):
     submit = SubmitField('Change password')
@@ -81,6 +81,9 @@ class SearchBookForm(FlaskForm):
     booktype=SelectField('booktype')
     language=SelectField('language')
     inhouse=SelectField('inhouse',choices=[('-1','<Optional>'),('1','In-house'),('0','Out')])
+    house=SelectField('house')
+    def setHouses(self,hoPairList):
+        self.house.choices=[('-1','<Optional>'),('-2','(Include all houses)')]+_sortNameDescPair(hoPairList)
     # sorting options
     sortby=SelectField('sortby', choices=[('title','Title'),('booktype','Booktype')])
     #
@@ -110,7 +113,10 @@ class EditBookForm(FlaskForm):
     delauthors=SelectField('delauthors')
     authorlist=HiddenField('authorlist')
     bookid=HiddenField('bookid')
+    house=SelectField('house')
 
+    def setHouses(self,hoPairList):
+        self.house.choices=_sortNameDescPair(hoPairList)
     def validate(self):
         rv=FlaskForm.validate(self)
         if not rv:

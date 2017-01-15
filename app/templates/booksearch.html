@@ -18,7 +18,7 @@
             Title:
           </label>
         </div>
-        <div class="col-sm-8">
+        <div class="col-sm-10">
           {{ form.title(size=30, class_="form-control", placeholder="Not mandatory") }}
           {% for error in form.title.errors %}
             <span style="color: red;">{{ error }}</span>
@@ -31,35 +31,48 @@
             Author:
           </label>
         </div>
-        <div class="col-sm-8">
+        <div class="col-sm-10">
           {{ form.author(class_="form-control",width="50%") }}
         </div>
       </div>
 
       <div class="row row-grid">
         <div class="col-sm-2">
+          <label>
+            Other
+          </label>
+        </div>
+        <div class="col-sm-2">
           <label for="booktype">
             Booktype:
           </label>
-        </div>
+<!--         </div>
         <div class="col-sm-2">
-          {{ form.booktype(class_="form-control",width="50%") }}
+ -->          {{ form.booktype(class_="form-control",width="50%") }}
         </div>
-        <div class="col-sm-1">
+        <div class="col-sm-3">
           <label for="language">
             Language:
           </label>
+<!--         </div>
+        <div class="col-sm-2">
+ -->          {{ form.language(class_="form-control") }}
+        </div>
+        <div class="col-sm-3">
+          <label for="inhouse">
+            House:
+          </label>
+<!--         </div>
+        <div class="col-sm-1">
+ -->          {{ form.house(class_="form-control",width="75%") }}
         </div>
         <div class="col-sm-2">
-          {{ form.language(class_="form-control") }}
-        </div>
-        <div class="col-sm-1">
           <label for="inhouse">
             In-House:
           </label>
-        </div>
-        <div class="col-sm-2">
-          {{ form.inhouse(class_="form-control") }}
+<!--         </div>
+        <div class="col-sm-1">
+ -->          {{ form.inhouse(class_="form-control",width="75%") }}
         </div>
       </div>
 

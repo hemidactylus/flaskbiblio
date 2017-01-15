@@ -118,9 +118,14 @@ Multihouses:
 * an endpoint/tablepage with Houses **DONE**
 * each user has a House and can change it **DONE**
 * each user has a 'default searches are limited to my house' setting **DONE**
-* books have a 'house' field: database, creation, import, search, listing, addnew
-* New books can be created only as sitting in the user's house
-* Existing books can be relocated only if from user's house
-* All searches are possible; whether by default the search is only-my-house or all-houses is configurable
-
-fix bug when saving settings!
+* books have a 'house' field:
+    * database, DONE
+    * creation/edit in dbtools DONE
+    * import DONE
+    * search, DONE
+    * listing, DONE
+    * addnew/edit DONE
+* New books can be created only as sitting in the user's house **DONE**
+* Existing books can be relocated only if from user's house **DONE**
+* All searches are possible; whether by default the search is only-my-house or all-houses is configurable **DONE**
+* There are house-specific book counters, updated transactionally **DONE**

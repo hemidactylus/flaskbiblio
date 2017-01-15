@@ -115,6 +115,15 @@ def makeBookFilter(fName,fValue):
         def ihfinder(bo,v=fValue):
             return bool(bo.inhouse)==bool(int(v))
         return ihfinder
+    elif fName=='house':
+        if fValue!='-2':
+            def hofinder(bo,v=fValue):
+                return bo.house==v
+        else:
+            # special all-house filter
+            def hofinder(bo,v=fValue):
+                return True
+        return hofinder
     else:
         return lambda: True
 
@@ -288,7 +297,7 @@ def dbReplaceUser(newUser):
     else:
         return (0,None)
 
-def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
+def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None, userHouse=None):
     '''
         Add/Replace a book to DB
 
@@ -305,6 +314,9 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
 
         Passing db: it is the caller's responsibility
         to ensure no lockup is achieved via proper commit()
+
+        If userHouse is passed, the constraint is enforced
+        that only users sharing the book's house can edit it
     '''
     if db is None:
         doCommit=True
@@ -319,11 +331,16 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
             for qBook in Book.manager(db).all():
                 if qBook.title.lower()==newBook.title.lower() and qBook.authors.lower()==newBook.authors.lower(): # TODO: here check ordering and tricks
                     return (0,'Duplicate detected.')
-        newBook.forceAscii()
-        prevAuthorList=''
-        dbIncrementStatistic(db,'nbooks',1)
-        newBook.save()
-        nBook=newBook
+        if userHouse is None or userHouse==newBook.house:
+            newBook.forceAscii()
+            prevAuthorList=''
+            oldHouse=None
+            newHouse=newBook.house
+            dbIncrementStatistic(db,'nbooks',1)
+            newBook.save()
+            nBook=newBook
+        else:
+            return (0,'Houses mismatch')
     else:
         # if replacement, find the replacee and proceed
         for qBook in Book.manager(db).all():
@@ -333,18 +350,23 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
                     return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
+            oldHouse=nBook.house
+            newHouse=newBook.house
             # automatic handling of object attributes except those handled manually:
-            prevAuthorList=''
-            for k,q in newBook.__dict__.items():
-                if k == 'authors':
-                    prevAuthorList=getattr(nBook,k)
-                    _auIdSet={au.id for au in dbGetAll('author')}
-                    _bookAuList=rollStringList(set(unrollStringList(q)) & _auIdSet)
-                    setattr(nBook,k,_bookAuList)
-                else:
-                    setattr(nBook,k,q)
-            nBook.forceAscii()
-            nBook.update()
+            if userHouse is None or userHouse==nBook.house:
+                prevAuthorList=''
+                for k,q in newBook.__dict__.items():
+                    if k == 'authors':
+                        prevAuthorList=getattr(nBook,k)
+                        _auIdSet={au.id for au in dbGetAll('author')}
+                        _bookAuList=rollStringList(set(unrollStringList(q)) & _auIdSet)
+                        setattr(nBook,k,_bookAuList)
+                    else:
+                        setattr(nBook,k,q)
+                nBook.forceAscii()
+                nBook.update()
+            else:
+                return (0,'Houses mismatch')
         else:
             return (0,'Not found.')
     # reflect authorlist changes to the authors table. Current book's id is nBook.id
@@ -353,6 +375,9 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
     wonAuthors=newAuthorSet-oldAuthorSet
     lostAuthors=oldAuthorSet-newAuthorSet
     updateBookCounters(db,nBook.id,lost=lostAuthors,won=wonAuthors)
+    if oldHouse:
+        dbIncrementHouseBookCount(db,oldHouse,-1)
+    dbIncrementHouseBookCount(db,newHouse,1)
     #
     if doCommit:
         db.commit()
@@ -361,6 +386,17 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None):
         return (1,nBook.resolveReferences(**resolveParams))
     else:
         return (1,nBook)
+
+def dbIncrementHouseBookCount(dbSession,houseName,delta):
+    '''
+        Updates the nbooks house attribute for the given
+        house by applying the provided delta to the counter
+    '''
+    House.db=dbSession
+    for qHouse in House.manager(dbSession).all():
+        if qHouse.name==houseName:
+            qHouse.nbooks+=delta
+            qHouse.update()
 
 def updateBookCounters(dbSession,bookId,lost,won):
     '''
@@ -387,11 +423,14 @@ def updateBookCounters(dbSession,bookId,lost,won):
         else:
             raise ValueError
 
-def dbDeleteBook(id,db=None):
+def dbDeleteBook(id,db=None,userHouse=None):
     '''
         attempts deletion of a book. If deletion succeeds, returns True
         It also takes care of deregistering authors associated to that book,
-        transactionally
+        transactionally.
+
+        If userHouse is provided, the constraint if enforced that
+        only the users housed in the same house as the book can proceed
     '''
     if db is None:
         doCommit=True
@@ -401,13 +440,18 @@ def dbDeleteBook(id,db=None):
     Book.db=db
     try:
         dBook=Book.manager(db).get(id)
-        oldAuthorSet=set(unrollStringList(dBook.authors))
-        updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
-        dBook.delete()
-        dbIncrementStatistic(db,'nbooks',-1)
-        if doCommit:
-            db.commit()
-        return (1,id)
+        if userHouse is None or dBook.house==userHouse:
+            oldAuthorSet=set(unrollStringList(dBook.authors))
+            oldHouse=dBook.house
+            updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
+            dBook.delete()
+            dbIncrementStatistic(db,'nbooks',-1)
+            dbIncrementHouseBookCount(db,oldHouse,-1)
+            if doCommit:
+                db.commit()
+            return (1,id)
+        else:
+            return (0,'Houses mismatch')
     except:
         return (0,'Cannot delete')
 

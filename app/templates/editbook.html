@@ -42,7 +42,30 @@
               {% endfor %}<br>
             </div>
         </div>
-
+        <div class="row row-grid">
+            <div class="col col-sm-2">
+              <label for="booktype">
+                Booktype
+              </label>
+            </div>
+            <div class="col col-sm-2">
+              {{ form.booktype(class_="form-control") }}
+              {% for error in form.booktype.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}
+            </div>
+            <div class="col col-sm-1">
+                <label for="notes">
+                    Notes
+                </label>
+            </div>
+            <div class="col col-sm-7">
+              {{ form.notes(class_="form-control") }}<br>
+              {% for error in form.notes.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}
+            </div>
+        </div>
         <hr>
         <div class="row row-grid">
           <div class="col col-sm-2">
@@ -64,7 +87,7 @@
               <div class="col col-sm-8">
                 <div class="row row-grid">
                   <div class="col col-sm-6">
-                    {% if user.canedit %}
+                    {% if editable %}
                       {{ form.newauthors(class_="form-control",width="50%") }}
                       {% for error in form.newauthors.errors %}
                         <span style="color: red;">{{ error }}</span>
@@ -72,14 +95,14 @@
                     {% endif %}
                   </div>
                   <div class="col col-sm-6">
-                    {% if user.canedit %}
+                    {% if editable %}
                       {{ form.additem(class_='btn btn-sm btn-success btn-block') }} <br>
                     {% endif %}
                   </div>
                 </div>
                 <div class="row row-grid">
                   <div class="col col-sm-6">
-                    {% if user.canedit %}
+                    {% if editable %}
                       {{ form.delauthors(class_="form-control",width="50%") }}
                       {% for error in form.delauthors.errors %}
                         <span style="color: red;">{{ error }}</span>
@@ -87,7 +110,7 @@
                     {% endif %}
                   </div>
                   <div class="col col-sm-6">
-                    {% if user.canedit %}
+                    {% if editable %}
                       {{ form.delitem(class_='btn btn-sm btn-success btn-block') }} <br>
                     {% endif %}
                   </div>
@@ -119,15 +142,17 @@
 
         <div class="row row-grid">
             <div class="col col-sm-2">
-              <label for="booktype">
-                Booktype
-              </label>
+                <label>
+                  Housing status
+                </label>
             </div>
-            <div class="col col-sm-2">
-              {{ form.booktype(class_="form-control") }}
-              {% for error in form.booktype.errors %}
-                <span style="color: red;">{{ error }}</span>
-              {% endfor %}
+            <div class="col col-sm-1 col-sm-offset-2">
+                <label for="house">
+                  House
+                </label>
+            </div>
+            <div class="col col-sm-3">
+                  {{ form.house(class_="form-control") }}
             </div>
             <div class="col col-sm-2">
                 <label for="inhouse">
@@ -135,31 +160,16 @@
                 </label>
             </div>
             <div class="col col-sm-2">
-            {{ form.inhousenotes(class_="form-control",placeholder="Fill if away") }}
+            {{ form.inhousenotes(class_="form-control",placeholder="Specify if away") }}
             {% for error in form.inhousenotes.errors %}
               <span style="color: red;">{{ error }}</span>
             {% endfor %}
             </div>
         </div>
-
         <div class="row row-grid">
             <div class="col col-sm-2">
-                <label for="notes">
-                    Notes
-                </label>
-            </div>
-            <div class="col col-sm-10">
-              {{ form.notes(class_="form-control") }}<br>
-              {% for error in form.notes.errors %}
-                <span style="color: red;">{{ error }}</span>
-              {% endfor %}
-            </div>
-        </div>
-
-        <div class="row row-grid">
-            <div class="col col-sm-2">
-                {% if user.canedit %}
-                {{ form.submit(class_="btn btn-primary") }}
+                {% if editable %}
+                  {{ form.submit(class_="btn btn-primary") }}
                 {% endif %}
             </div>
             <div class="col col-sm-2">

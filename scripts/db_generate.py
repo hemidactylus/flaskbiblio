@@ -82,7 +82,7 @@ def populate_db(db):
     Author.db=db
     print('    %s' % 'author')
     for item in _testvalues['author']:
-        nAuthor=Author(id=None,firstname=item['firstname'],lastname=item['lastname'])
+        nAuthor=Author(id=None,**item)
         result,newAu=dbAddReplaceAuthor(nAuthor)
         if not result:
             raise ValueError()
