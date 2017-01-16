@@ -4,7 +4,7 @@ from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from markupsafe import Markup
 
-from app import app, db, lm
+from app import app, lm
 from .forms import (
                         LoginForm,
                         EditAuthorForm,
@@ -41,6 +41,7 @@ from app.database.dbtools import    (
                                         dbReplaceUser,
                                         dbQueryBooks,
                                         dbQueryAuthors,
+                                        dbGetUserById,
                                     )
 from app.database.models import (
                                     tableToModel, 
@@ -70,7 +71,7 @@ def before_request():
 # user loader function given to flask_login. This queries the db to fetch a user by id
 @lm.user_loader
 def load_user(id):
-    return User.manager(db).get(int(id))
+    return dbGetUserById(id)
 
 @app.route('/')
 @app.route('/index')

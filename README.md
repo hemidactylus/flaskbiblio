@@ -117,11 +117,6 @@ AddreplaceAutomate
 > in the two `addreplace` calls, when updating: the list of attributes must be cleverly handled instead
 > of doing, as is done now, a lot of explicit member copies.
 
-CancelEscape
-> set the no and cancel buttons so that they respond to Esc as the Enter key activates the Save/Yes.
-> Also the tab index is set and fixed but it'd be nice to pass a variable to the tabindex in the book edit form
-> so that the tab cycles through the individual checkboxes
-
 MoreStats
 > More advanced statistics (all transactionally handled) in the logged users' homepage.
 > E.g. book breakdown per genre, or percentage and number of books that are out
@@ -129,13 +124,9 @@ MoreStats
 SimilaritySlider
 > The threshold for author/book similarity can become a slider one day.
 
-BetterGoBackTo
-> e.g. if user goes to book-edit from the author-view page, where to lead it back to? (both on save and cancel)
-
 ## Cleanups to do
-
-* all urls in template html's must be built with `url_for`
 
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
+Figuring out how to properly set up a deploy with lighttpd. At the moment: app more or less works in a sub-address 'run_wsgi.fcgi', but some endpoints are not properly translated, one would like to have a different prefix, and STATICS DON'T WORK

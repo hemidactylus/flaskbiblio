@@ -42,38 +42,38 @@
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
               <li class="active">
-                <a href="/index">
+                <a href="{{ url_for('ep_index') }}">
                   <img class=".img-responsive" src="/images/library.png" alt="Logo" height=25px>
                   BiblioMansarda
                 </a>
               </li>
               {% if g.user.is_authenticated %}
                 <li>
-                  <a href="/books">
+                  <a href="{{ url_for('ep_books') }}">
                     <i class="fa fa-book fa-lg" aria-hidden="true"></i>
                     Books
                   </a>
                 </li>
                 <li>
-                  <a href="/authors">
+                  <a href="{{ url_for('ep_authors') }}">
                     <i class="fa fa-male fa-lg" aria-hidden="true"></i>
                     Authors
                   </a>
                 </li>
                 <li>
-                  <a href="/booktypes">
+                  <a href="{{ url_for('ep_booktypes') }}">
                     <i class="fa fa-file-text fa-lg" aria-hidden="true"></i>
                     Booktypes
                   </a>
                 </li>
                 <li>
-                  <a href="/languages">
+                  <a href="{{ url_for('ep_languages') }}">
                     <i class="fa fa-language fa-lg" aria-hidden="true"></i>
                     Languages
                   </a>
                 </li>
                 <li>
-                  <a href="/houses">
+                  <a href="{{ url_for('ep_houses') }}">
                     <i class="fa fa-home fa-lg" aria-hidden="true"></i>
                     Houses
                   </a>
@@ -90,16 +90,16 @@
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                    <li><a href="/usersettings">
+                    <li><a href="{{ url_for('ep_usersettings') }}">
                       <i class="fa fa-cog fa-lg" aria-hidden="true"></i>
                       Settings
                     </a></li>
-                    <li><a href="/changepassword">
+                    <li><a href="{{ url_for('ep_changepassword') }}">
                       <i class="fa fa-key fa-lg" aria-hidden="true"></i>
                       Change Password
                     </a></li>
                     <li role="separator" class="divider"></li>
-                    <li><a href="/logout">
+                    <li><a href="{{ url_for('ep_logout') }}">
                       <i class="fa fa-power-off fa-lg" aria-hidden="true"></i>
                       Log out
                     </a></li>

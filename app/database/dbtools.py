@@ -278,6 +278,13 @@ def dbGetUser(name):
         if qUser.name==name:
             return qUser
 
+def dbGetUserById(id):
+    '''
+        Returns a user object from its id.
+    '''
+    db=dbGetDatabase()
+    return User.manager(db).get(id)
+
 def dbReplaceUser(newUser):
     '''
         updates an existing User object given its id

@@ -19,7 +19,6 @@ lm = LoginManager()
 lm.init_app(app)
 
 # global static init lists and db
-db=dbGetDatabase()
 languages=sorted(list(dbGetAll('language')))
 languagesDict=dbMakeDict(languages,'tag')
 booktypes=sorted(list(dbGetAll('booktype')))
