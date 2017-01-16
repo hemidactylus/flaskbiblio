@@ -36,7 +36,11 @@
                 </label>
             </div>
             <div class="col col-sm-10">
-              {{ form.title(class_="form-control") }}
+              {% if editable %}
+                {{ form.title(class_="form-control") }}
+              {% else %}
+                {{ form.title(class_="form-control",readonly='readonly') }}
+              {% endif %}
               {% for error in form.title.errors %}
                 <span style="color: red;">{{ error }}</span>
               {% endfor %}<br>
@@ -49,7 +53,11 @@
               </label>
             </div>
             <div class="col col-sm-2">
-              {{ form.booktype(class_="form-control") }}
+              {% if editable %}
+                {{ form.booktype(class_="form-control") }}
+              {% else %}
+                {{ form.booktype(class_="form-control",disabled='disabled') }}
+              {% endif %}
               {% for error in form.booktype.errors %}
                 <span style="color: red;">{{ error }}</span>
               {% endfor %}
@@ -60,7 +68,11 @@
                 </label>
             </div>
             <div class="col col-sm-7">
-              {{ form.notes(class_="form-control") }}<br>
+              {% if editable %}
+                {{ form.notes(class_="form-control") }}
+              {% else %}
+                {{ form.notes(class_="form-control",readonly='readonly') }}
+              {% endif %}
               {% for error in form.notes.errors %}
                 <span style="color: red;">{{ error }}</span>
               {% endfor %}
@@ -129,7 +141,11 @@
             <div class="row row-grid">
               <div class="col col-sm-12">
                 <small>
-                  {{ form.languages(size=80, class_="list-inline") }}
+                  {% if editable %}
+                    {{ form.languages(size=80, class_="list-inline") }}
+                  {% else %}
+                    {{ form.languages(size=80, class_="list-inline",disabled='disabled') }}
+                  {% endif %}
                   {% for error in form.languages.errors %}
                     <span style="color: red;">{{ error }}</span>
                   {% endfor %}
@@ -152,18 +168,31 @@
                 </label>
             </div>
             <div class="col col-sm-3">
-                  {{ form.house(class_="form-control") }}
+                  {% if editable %}
+                    {{ form.house(class_="form-control") }}
+                  {% else %}
+                    {{ form.house(class_="form-control",disabled='disabled') }}
+                  {% endif %}
             </div>
             <div class="col col-sm-2">
+                  {% if editable %}
+                    {{ form.inhouse() }}
+                  {% else %}
+                    {{ form.inhouse(disabled='disabled') }}
+                  {% endif %}
                 <label for="inhouse">
-                  {{ form.inhouse() }} In-house
+                  In-house
                 </label>
             </div>
             <div class="col col-sm-2">
-            {{ form.inhousenotes(class_="form-control",placeholder="Specify if away") }}
-            {% for error in form.inhousenotes.errors %}
-              <span style="color: red;">{{ error }}</span>
-            {% endfor %}
+              {% if editable %}
+                {{ form.inhousenotes(class_="form-control",placeholder="Specify if away") }}
+              {% else %}
+                {{ form.inhousenotes(class_="form-control",placeholder="Specify if away",readonly='readonly') }}
+              {% endif %}
+              {% for error in form.inhousenotes.errors %}
+                <span style="color: red;">{{ error }}</span>
+              {% endfor %}
             </div>
         </div>
         <div class="row row-grid">

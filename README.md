@@ -13,7 +13,8 @@ Users operate on a database of books and authors via a web application. Mainly:
 on books and authors. Books can have zero, one or more authors (relations are enforced upon author deletion).
 
 Books have a _in-house_ attribute, marking whether the book is in its rightful location
-or if it is elsewhere.
+or if it is elsewhere. Also, the system includes several "houses", representing different
+libraries.
 
 Searches can combine a number of search criteria and results are presented paginated.
 
@@ -28,6 +29,7 @@ As of now it is STILL IN DEVELOPMENT MODE (e.g. all static files are served by t
 the secret key is fake, etc).
 
 To generate the DB, meddle with the `db_testvalues.py` contents and run the `db_generate.py` script.
+Additionally, to import a `csv` file, see the remars on the import procedure below.
 
 ## Technical specifications
 
@@ -49,8 +51,6 @@ is stored in Flask's `session` object.
 
 There is a nice **import script** to import from a formatted `csv` file: it proceeds in three steps, guiding
 the user through some of the inconsistencies and warning involved.
-
-> Develop this into an import/export feature of the app?
 
 If authors or books are inserted (or edited) with name (or title) very **similar to
 existing ones**, a warning is raised and the user is asked to confirm her intentions
@@ -85,8 +85,21 @@ one has to know what she is doing. By temporarily changing her house in the sett
 * All searches are possible; whether by default the search is only-my-house or all-houses is configurable
 * There are house-specific book counters, updated transactionally
 
+**DisabledEdits**
+When user cannot edit the book (canedit=False or the book belong to a foreign house),
+the edit-book view has disabled fields: text-boxes ('readonly' html attribute),
+checkboxes and lists ('disabled' attribute) and - most cumbersome - the multi-checkbox
+representing the languages. To address the latter, a custom render chain is implemented
+in MultiCheckboxField.py which passes down the 'disabled' attribute from the container
+multi-checkbox widgets down to the individual checkbox html code.
 
 ## Major/Future TODOs
+
+StructuredImport
+> Split the erase-books-and-authors and the import-stuff functions and think carefully
+> about the authorlist phase, so that several lists of books can be imported
+> sequentially, possibly belonging to different houses.
+> **Later**, make this an import/export feature of the app?
 
 RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears
@@ -116,9 +129,6 @@ SimilaritySlider
 
 BetterGoBackTo
 > e.g. if user goes to book-edit from the author-view page, where to lead it back to? (both on save and cancel)
-
-DisabledEdits
-> For users who have canedit=False, all fields are disabled (so that the `edit` windows become cards to inspect)
 
 ## Cleanups to do
 
