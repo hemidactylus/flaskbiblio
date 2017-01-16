@@ -18,7 +18,7 @@
           </label>
         </div>
         <div class="col-sm-4">
-          {{ form.firstname(size=30, class_="form-control", placeholder="Not mandatory") }}
+          {{ form.firstname(size=30, class_="form-control", placeholder="Not mandatory",tabindex=1) }}
           {% for error in form.firstname.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}     
@@ -31,7 +31,7 @@
           </label>
         </div>
         <div class="col-sm-4">
-          {{ form.lastname(size=30, class_="form-control", placeholder="Not mandatory") }}
+          {{ form.lastname(size=30, class_="form-control", placeholder="Not mandatory",tabindex=2) }}
           {% for error in form.lastname.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}
@@ -44,13 +44,13 @@
           </label>
         </div>
         <div class="col-sm-2">
-          {{ form.sortby(class_="form-control",width="50%") }}
+          {{ form.sortby(class_="form-control",width="50%",tabindex=3) }}
         </div>
         <div class="col-sm-1">
-          {{ form.submit(class_='btn btn-primary') }}
+          {{ form.submit(class_='btn btn-primary',tabindex=4) }}
         </div>
         <div class="col-sm-1">
-          <a class="btn btn-warning" href="{{url_for('ep_authors')}}" role="button">
+          <a class="btn btn-warning" href="{{url_for('ep_authors')}}" role="button" tabindex=5>
               Cancel
           </a>
         </div>

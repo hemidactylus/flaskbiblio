@@ -119,6 +119,8 @@ AddreplaceAutomate
 
 CancelEscape
 > set the no and cancel buttons so that they respond to Esc as the Enter key activates the Save/Yes.
+> Also the tab index is set and fixed but it'd be nice to pass a variable to the tabindex in the book edit form
+> so that the tab cycles through the individual checkboxes
 
 MoreStats
 > More advanced statistics (all transactionally handled) in the logged users' homepage.

@@ -23,7 +23,7 @@
             </div>
             <div class="col col-sm-4">
               <span style="color:red">
-                {{ form.force(color="red") }}
+                {{ form.force(color="red",tabindex=1) }}
               </span>
             </div>
         </div>
@@ -37,9 +37,9 @@
             </div>
             <div class="col col-sm-10">
               {% if editable %}
-                {{ form.title(class_="form-control") }}
+                {{ form.title(class_="form-control",tabindex=2) }}
               {% else %}
-                {{ form.title(class_="form-control",readonly='readonly') }}
+                {{ form.title(class_="form-control",readonly='readonly',tabindex=2) }}
               {% endif %}
               {% for error in form.title.errors %}
                 <span style="color: red;">{{ error }}</span>
@@ -54,9 +54,9 @@
             </div>
             <div class="col col-sm-2">
               {% if editable %}
-                {{ form.booktype(class_="form-control") }}
+                {{ form.booktype(class_="form-control",tabindex=3) }}
               {% else %}
-                {{ form.booktype(class_="form-control",disabled='disabled') }}
+                {{ form.booktype(class_="form-control",disabled='disabled',tabindex=3) }}
               {% endif %}
               {% for error in form.booktype.errors %}
                 <span style="color: red;">{{ error }}</span>
@@ -69,9 +69,9 @@
             </div>
             <div class="col col-sm-7">
               {% if editable %}
-                {{ form.notes(class_="form-control") }}
+                {{ form.notes(class_="form-control",tabindex=4) }}
               {% else %}
-                {{ form.notes(class_="form-control",readonly='readonly') }}
+                {{ form.notes(class_="form-control",readonly='readonly',tabindex=4) }}
               {% endif %}
               {% for error in form.notes.errors %}
                 <span style="color: red;">{{ error }}</span>
@@ -100,7 +100,7 @@
                 <div class="row row-grid">
                   <div class="col col-sm-6">
                     {% if editable %}
-                      {{ form.newauthors(class_="form-control",width="50%") }}
+                      {{ form.newauthors(class_="form-control",width="50%",tabindex=5) }}
                       {% for error in form.newauthors.errors %}
                         <span style="color: red;">{{ error }}</span>
                       {% endfor %}
@@ -108,14 +108,14 @@
                   </div>
                   <div class="col col-sm-6">
                     {% if editable %}
-                      {{ form.additem(class_='btn btn-sm btn-success btn-block') }} <br>
+                      {{ form.additem(class_='btn btn-sm btn-success btn-block',tabindex=6) }} <br>
                     {% endif %}
                   </div>
                 </div>
                 <div class="row row-grid">
                   <div class="col col-sm-6">
                     {% if editable %}
-                      {{ form.delauthors(class_="form-control",width="50%") }}
+                      {{ form.delauthors(class_="form-control",width="50%",tabindex=7) }}
                       {% for error in form.delauthors.errors %}
                         <span style="color: red;">{{ error }}</span>
                       {% endfor %}
@@ -123,7 +123,7 @@
                   </div>
                   <div class="col col-sm-6">
                     {% if editable %}
-                      {{ form.delitem(class_='btn btn-sm btn-success btn-block') }} <br>
+                      {{ form.delitem(class_='btn btn-sm btn-success btn-block',tabindex=8) }} <br>
                     {% endif %}
                   </div>
                 </div>
@@ -142,9 +142,9 @@
               <div class="col col-sm-12">
                 <small>
                   {% if editable %}
-                    {{ form.languages(size=80, class_="list-inline") }}
+                    {{ form.languages(size=80, class_="list-inline",tabindex=9) }}
                   {% else %}
-                    {{ form.languages(size=80, class_="list-inline",disabled='disabled') }}
+                    {{ form.languages(size=80, class_="list-inline",disabled='disabled',tabindex=9) }}
                   {% endif %}
                   {% for error in form.languages.errors %}
                     <span style="color: red;">{{ error }}</span>
@@ -169,16 +169,16 @@
             </div>
             <div class="col col-sm-3">
                   {% if editable %}
-                    {{ form.house(class_="form-control") }}
+                    {{ form.house(class_="form-control",tabindex=10) }}
                   {% else %}
-                    {{ form.house(class_="form-control",disabled='disabled') }}
+                    {{ form.house(class_="form-control",disabled='disabled',tabindex=10) }}
                   {% endif %}
             </div>
             <div class="col col-sm-2">
                   {% if editable %}
-                    {{ form.inhouse() }}
+                    {{ form.inhouse(tabindex=11) }}
                   {% else %}
-                    {{ form.inhouse(disabled='disabled') }}
+                    {{ form.inhouse(disabled='disabled',tabindex=11) }}
                   {% endif %}
                 <label for="inhouse">
                   In-house
@@ -186,9 +186,10 @@
             </div>
             <div class="col col-sm-2">
               {% if editable %}
-                {{ form.inhousenotes(class_="form-control",placeholder="Specify if away") }}
+                {{ form.inhousenotes(class_="form-control",placeholder="Specify if away",tabindex=12) }}
               {% else %}
-                {{ form.inhousenotes(class_="form-control",placeholder="Specify if away",readonly='readonly') }}
+                {{ form.inhousenotes(class_="form-control",
+                  placeholder="Specify if away",readonly='readonly',tabindex=12) }}
               {% endif %}
               {% for error in form.inhousenotes.errors %}
                 <span style="color: red;">{{ error }}</span>
@@ -198,11 +199,12 @@
         <div class="row row-grid">
             <div class="col col-sm-2">
                 {% if editable %}
-                  {{ form.submit(class_="btn btn-primary") }}
+                  {{ form.submit(class_="btn btn-primary",tabindex=13) }}
                 {% endif %}
             </div>
             <div class="col col-sm-2">
-                <a class="btn btn-warning" href="{{url_for('ep_goback',default='ep_books')}}" role="button">
+                <a class="btn btn-warning" tabindex=14
+                  href="{{url_for('ep_goback',default='ep_books')}}" role="button">
                     Cancel
                 </a>
             </div>
