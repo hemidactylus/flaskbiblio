@@ -154,10 +154,10 @@ def ep_deletebook(id, confirm=None):
                 flashMessage('info','Success','Book successfully deleted.')
             else:
                 flashMessage('warning','Could not delete book', delId)
-        return redirect(url_for('ep_books'))
+        return redirect(url_for('ep_books',restore='y'))
     else:
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
-        return redirect(url_for('ep_books'))
+        return redirect(url_for('ep_books',restore='y'))
 
 @app.route('/goback/<default>')
 @login_required
@@ -233,10 +233,10 @@ def ep_deleteauthor(id,confirm=None):
                     flashMessage('warning','Could not delete author', delId)
         else:
             flashMessage('critical','Could not delete author','author not found')
-        return redirect(url_for('ep_authors'))
+        return redirect(url_for('ep_authors',restore='y'))
     else:
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
-        return redirect(url_for('ep_authors'))
+        return redirect(url_for('ep_authors',restore='y'))
 '''
     This call, similarly to the editbook below,
     handles both 'new' and 'edit' operations. It supports
