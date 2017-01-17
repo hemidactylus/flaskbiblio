@@ -11,7 +11,7 @@ from app.database.dbtools import    (
                                         dbMakeDict,
                                     )
 
-app = Flask(__name__,static_folder='static', static_url_path='')
+app = Flask(__name__,static_folder='static', static_url_path='/static')
 Bootstrap(app)
 app.config.from_object('config')
 

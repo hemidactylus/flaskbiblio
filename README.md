@@ -130,3 +130,43 @@ SimilaritySlider
 
 ## Currently doing:
 Figuring out how to properly set up a deploy with lighttpd. At the moment: app more or less works in a sub-address 'run_wsgi.fcgi', but some endpoints are not properly translated, one would like to have a different prefix, and STATICS DON'T WORK
+
+Deploy Notes:
+    * the biblio.db file must be owned by the right user, i.e. the 'www-data' for lighttpd, otherwise we get errors on
+    write operations.
+    * there's a prefix and not all links have it anyway
+    * still the statics don't work:
+        Must place all statics in a subdir so that the redirect is done by the fcgi-specific
+        config in a clean manner?
+    * sample conf file for lighttpd:
+#################
+#################
+#################
+
+server.modules += ( "mod_redirect" )
+server.modules += ( "mod_rewrite" )
+server.modules += ( "mod_alias" )
+
+fastcgi.debug = 1
+
+fastcgi.server+=("/wsgi_run.fcgi" =>
+    ((
+        "socket" => "/home/stefano/personal/programming/Python/flaskbiblio/fcgi.sock",
+        "bin-path" => "/home/stefano/personal/programming/Python/flaskbiblio/wsgi_run.fcgi",
+        "check-local" => "disable",
+        "max-procs" => 1
+    ))
+)
+
+alias.url += (
+    "/static/" => "/home/stefano/personal/programming/Python/flaskbiblio/app/static/"
+)
+
+url.rewrite-once = (
+    "^(/static($|/.*))$" => "$1",
+#    "^(/.*)$" => "/wsgi_run.fcgi$1"
+)
+
+#################
+#################
+#################
