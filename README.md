@@ -93,6 +93,13 @@ representing the languages. To address the latter, a custom render chain is impl
 in MultiCheckboxField.py which passes down the 'disabled' attribute from the container
 multi-checkbox widgets down to the individual checkbox html code.
 
+**Deploy**
+* With lighttpd **DONE**:
+    * the biblio.db file must be writable by the right user (www-data for lighty) or read-only-error
+        would be raised upon DB write operations.
+    * sample conf file for lighttpd, see docs directory
+> To do for apache with htaccess
+
 ## Major/Future TODOs
 
 StructuredImport
@@ -110,9 +117,6 @@ BetterConversions
 > Also make the request-to-arguments and form-to-request conversions more uniform
 > and streamlined.
 
-Deploy
-> Deploy on a real server (apache, nginx, lighty, etc)
-
 AddreplaceAutomate
 > in the two `addreplace` calls, when updating: the list of attributes must be cleverly handled instead
 > of doing, as is done now, a lot of explicit member copies.
@@ -129,39 +133,3 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-
-Deploy(lighttpd):
-    * the biblio.db file must be writable by the right user (www-data for lighty) or read-only-error
-        would be raised upon DB write operations.
-    * there's an ugly prefix to all urls
-    * sample conf file for lighttpd:
-#################
-#################
-#################
-server.modules += ( "mod_redirect" )
-server.modules += ( "mod_rewrite" )
-server.modules += ( "mod_alias" )
-
-fastcgi.debug = 1
-
-fastcgi.server+=("/wsgi_run.fcgi" =>
-    ((
-        "socket" => "/home/stefano/personal/programming/Python/flaskbiblio/fcgi.sock",
-        "bin-path" => "/home/stefano/personal/programming/Python/flaskbiblio/wsgi_run.fcgi",
-        "check-local" => "disable",
-        "max-procs" => 1
-    ))
-)
-
-alias.url += (
-    "/static/" => "/home/stefano/personal/programming/Python/flaskbiblio/app/static/"
-)
-
-url.rewrite-once = (
-    "^(/static($|/.*))$" => "$1",
-#    "^(/.*)$" => "/wsgi_run.fcgi$1"
-)
-
-#################
-#################
-#################

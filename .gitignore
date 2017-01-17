@@ -2,7 +2,6 @@ __pycache__
 *.pyc
 *.json
 *.csv
+sensible_config.py
 app/database/biblio.db
-wsgi_run.fcgi
 tests_utils/BibliotecaMansarda.csv
-

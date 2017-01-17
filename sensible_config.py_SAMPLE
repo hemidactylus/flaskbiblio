@@ -1,0 +1,16 @@
+'''
+    sensible_config.py:
+        Here are all settings (dir names, keys etc)
+        that we do not wish to leave in the repo.
+
+    ** THIS IS A SAMPLE FILE, COPY IT TO 'sensible_config.py **
+
+'''
+
+# Flask csrf for wtforms
+SECRET_KEY = 'TestSecretKey_NotForProduction'
+
+# directory names
+
+# 'site-packages' dir of the virtualenv within the whole app runs
+VENV_SITE_PACKAGES_DIR='/home/SOMETHING/.virtualenvs/SOMETHING...SOMETHING/site-packages'

@@ -8,7 +8,7 @@ DB_NAME='biblio.db'
 
 # stuff for Flask
 WTF_CSRF_ENABLED = True
-SECRET_KEY = 'TestSecretKey_NotForProduction'
+from sensible_config import SECRET_KEY
 
 # formats, etc
 DATETIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
