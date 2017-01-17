@@ -129,20 +129,15 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-Figuring out how to properly set up a deploy with lighttpd. At the moment: app more or less works in a sub-address 'run_wsgi.fcgi', but some endpoints are not properly translated, one would like to have a different prefix, and STATICS DON'T WORK
 
-Deploy Notes:
-    * the biblio.db file must be owned by the right user, i.e. the 'www-data' for lighttpd, otherwise we get errors on
-    write operations.
-    * there's a prefix and not all links have it anyway
-    * still the statics don't work:
-        Must place all statics in a subdir so that the redirect is done by the fcgi-specific
-        config in a clean manner?
+Deploy(lighttpd):
+    * the biblio.db file must be writable by the right user (www-data for lighty) or read-only-error
+        would be raised upon DB write operations.
+    * there's an ugly prefix to all urls
     * sample conf file for lighttpd:
 #################
 #################
 #################
-
 server.modules += ( "mod_redirect" )
 server.modules += ( "mod_rewrite" )
 server.modules += ( "mod_alias" )
