@@ -29,7 +29,7 @@ def statFromBook(qBook):
     for lang in qBook.languages.split(','):
         statList[('G_language',lang)]=1
     # inhouse
-    statList[('G_inhouse',bool(int(qBook.inhouse)))]=1
+    statList[('G_inhouse',str(bool(qBook.inhouse)))]=1
     # house
     statList[('G_house',qBook.house)]=1
     # done
