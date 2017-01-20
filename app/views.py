@@ -78,7 +78,7 @@ def load_user(id):
 def ep_index():
     user = g.user
     if user is not None:
-        message=[{'description': 'TBD', 'value': qStat.value} for qStat in dbGetAll('statistic')]
+        message=[{'description': ('%s (%s)' % (qStat.name,qStat.subtype)), 'value': qStat.value} for qStat in dbGetAll('statistic')]
     else:
         message=None
     return render_template(
