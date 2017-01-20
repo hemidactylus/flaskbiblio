@@ -23,24 +23,41 @@ from app.database.models import (
                                     Statistic,
                                     House,
                                 )
+from app.statistics.statistics import statFromBook, statFromAuthor
 
-def dbIncrementStatistic(db,statName,statDelta):
+def dbIncrementStatistic(db,statDeltasMinus,statDeltasPlus):
     '''
-        Increments/decrements a statistic stored
+        Increments/decrements a list of statistics stored
         in the DB.
         It assumes it is called within a transaction
         hence it does not invoke any commit()
 
-        If statName is not found, an error is raised
+        statDeltas' are maps of: (name,subtype) -> delta
+        and are going to be algebraically summed
     '''
+    # prepare a map of the plus-minus pruning zeroes
+    statDeltas={
+        h:w for h,w in
+        {
+            k: statDeltasPlus.get(k,0)-statDeltasMinus.get(k,0)
+            for k in set(statDeltasMinus.keys()) | set(statDeltasPlus.keys())
+        }.items()
+        if w!=0
+    }
+    #
     Statistic.db=db
-    stat=[istat for istat in Statistic.manager(db).all() if istat.name==statName]
-    if len(stat)!=1:
-        raise ValueError('Error with statistic name "%s".' % statName)
-    else:
-        istat=stat[0]
-        istat.value=str(int(istat.value)+statDelta)
-        istat.update()
+    keysDone=set()
+    # all items already present -> updates
+    for stat in Statistic.manager(db).all():
+        thisKey=(stat.name,stat.subtype)
+        if thisKey in statDeltas:
+            stat.value+=statDeltas[thisKey]
+            keysDone.add(thisKey)
+            stat.update()
+    # new items -> create
+    for newKey in set(statDeltas.keys())-keysDone:
+        nStat=Statistic(name=newKey[0],subtype=newKey[1],value=statDeltas[newKey])
+        nStat.save()
 
 def dbGetDatabase():
     '''
@@ -331,6 +348,8 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None, userHou
     else:
         doCommit=False
     newBook.lasteditdate=datetime.now().strftime(DATETIME_STR_FORMAT)
+    oldBookStats={}
+    newBookStats=statFromBook(newBook)
     Book.db=db
     if newBook.id is None:
         if not ALLOW_DUPLICATE_BOOKS:
@@ -343,7 +362,6 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None, userHou
             prevAuthorList=''
             oldHouse=None
             newHouse=newBook.house
-            dbIncrementStatistic(db,'nbooks',1)
             newBook.save()
             nBook=newBook
         else:
@@ -357,6 +375,7 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None, userHou
                     return (0,'Duplicate detected.')
         nBook=Book.manager(db).get(newBook.id)
         if nBook is not None:
+            oldBookStats=statFromBook(nBook)
             oldHouse=nBook.house
             newHouse=newBook.house
             # automatic handling of object attributes except those handled manually:
@@ -381,6 +400,9 @@ def dbAddReplaceBook(newBook,resolve=False, resolveParams=None, db=None, userHou
     newAuthorSet=set(unrollStringList(nBook.authors))
     wonAuthors=newAuthorSet-oldAuthorSet
     lostAuthors=oldAuthorSet-newAuthorSet
+    # apply stats update
+    dbIncrementStatistic(db,oldBookStats,newBookStats)
+    #
     updateBookCounters(db,nBook.id,lost=lostAuthors,won=wonAuthors)
     if oldHouse:
         dbIncrementHouseBookCount(db,oldHouse,-1)
@@ -450,9 +472,9 @@ def dbDeleteBook(id,db=None,userHouse=None):
         if userHouse is None or dBook.house==userHouse:
             oldAuthorSet=set(unrollStringList(dBook.authors))
             oldHouse=dBook.house
+            dbIncrementStatistic(db,statFromBook(dBook),{})
             updateBookCounters(db,dBook.id,lost=oldAuthorSet,won=set())
             dBook.delete()
-            dbIncrementStatistic(db,'nbooks',-1)
             dbIncrementHouseBookCount(db,oldHouse,-1)
             if doCommit:
                 db.commit()
@@ -501,7 +523,7 @@ def dbDeleteAuthor(id,db=None):
             qBook.authors,_=expungeFromStringList(qBook.authors,id)
             qBook.update()
         #
-        dbIncrementStatistic(db,'nauthors',-1)
+        dbIncrementStatistic(db,statFromAuthor(dAuthor),{})
         dAuthor.delete()
         if doCommit:
             db.commit()
@@ -541,6 +563,8 @@ def dbAddReplaceAuthor(newAuthor, db=None):
         Passing db: it is the caller's responsibility
         to ensure no lockup is achieved via proper commit()
     '''
+    oldAuthorStats={}
+    newAuthorStats=statFromAuthor(newAuthor)
     if db is None:
         doCommit=True
         db=dbGetDatabase()
@@ -556,7 +580,6 @@ def dbAddReplaceAuthor(newAuthor, db=None):
         newAuthor.bookcount=0
         newAuthor.booklist=''
         newAuthor.forceAscii()
-        dbIncrementStatistic(db,'nauthors',1)
         newAuthor.save()
         nAuthor=newAuthor
     else:
@@ -568,6 +591,8 @@ def dbAddReplaceAuthor(newAuthor, db=None):
         nAuthor=Author.manager(db).get(newAuthor.id)
         if nAuthor is not None:
 
+            oldAuthorStats=statFromAuthor(nAuthor)
+
             for k,q in newAuthor.__dict__.items():
                 if k in ['bookcount','booklist']:
                     pass
@@ -577,6 +602,9 @@ def dbAddReplaceAuthor(newAuthor, db=None):
             nAuthor.update()
         else:
             return (0,'Not found')
+    # apply stat changes
+    dbIncrementStatistic(db,oldAuthorStats,newAuthorStats)
+    #
     if doCommit:
         db.commit()
     return (1,nAuthor)

@@ -77,8 +77,8 @@ def load_user(id):
 @app.route('/index')
 def ep_index():
     user = g.user
-    if user:
-        message=[{'description': qStat.description, 'value': qStat.value} for qStat in dbGetAll('statistic')]
+    if user is not None:
+        message=[{'description': 'TBD', 'value': qStat.value} for qStat in dbGetAll('statistic')]
     else:
         message=None
     return render_template(

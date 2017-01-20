@@ -20,8 +20,8 @@ class AutoModel(Model):
 
 class Statistic(AutoModel):
     name=str
-    description=str
-    value=str
+    subtype=str
+    value=int
 
 class House(AutoModel):
     name=str
