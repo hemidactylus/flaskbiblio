@@ -81,6 +81,47 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <hr>
+    <div class="row row-grid">
+        <div class="col-sm-2">
+            {{ queryresult.firstitem + 1 }} - {{ queryresult.lastitem + 1}} of {{ queryresult.ntotal }}
+        </div>
+        <div class="col-sm-1">
+            {% if prevquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_authors',**prevquery) }}"
+                    role="button" aria-label="Previous">
+                    <i class="fa fa-backward fa-lg" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-sm-1">
+            {% if nextquery %}
+                <a class="btn btn-primary" href="{{ url_for('ep_authors',**nextquery) }}"
+                role="button" aria-label="Next">
+                    <i class="fa fa-forward fa-lg" aria-hidden="true"></i>
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-sm-2 col-sm-offset-4">
+            <a class="btn btn-success" href="{{ url_for('ep_authorsearch') }}" role="button">
+                <i class="fa fa-search fa-lg" aria-hidden="true"></i>
+                New search
+            </a>
+        </div>
+        <div class="col-sm-2">
+            {% if user.canedit %}
+                <a class="btn btn-success" href="{{ url_for('ep_editauthor') }}" role="button">
+                    <i class="fa fa-plus fa-lg" aria-hidden="true"></i>
+                    Add new
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+    <div class="row row-grid">
+    </div>
+
 </div>
 
 {% endblock %}
