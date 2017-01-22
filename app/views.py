@@ -1,8 +1,10 @@
-from flask import render_template, flash, redirect, session, url_for, request, g
+from flask import render_template, flash, redirect, session, url_for, request, g, send_file
 from flask_login import  login_user, logout_user, current_user, login_required
 from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from markupsafe import Markup
+from io import BytesIO
+import json
 
 from app import app, lm
 from .forms import (
@@ -23,6 +25,7 @@ from config import (
                         SHORT_DATETIME_STR_FORMAT,
                         SIMILAR_AUTHOR_THRESHOLD,
                         SIMILAR_BOOK_THRESHOLD,
+                        FILENAME_DATETIME_STR_FORMAT,
                     )
 
 from app.utils.string_vectorizer import makeIntoVector, scalProd
@@ -806,6 +809,41 @@ def ep_changepassword():
                                     user=user,
                                 )
 
+@app.route('/advanced')
+@login_required
+def ep_advanced():
+    user=g.user
+    return render_template  (
+                                'advanced.html',
+                                title='Advanced operations',
+                                user=user,
+                            )
+
+@app.route('/exportdata')
+@login_required
+def ep_exportdata():
+    user=g.user
+    resParams=resolveParams()
+    userList=dbMakeDict(dbGetAll('user'))
+    # prepare and export the whole structure
+    exportedFileName='exportedBiblio_%s.json' % datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
+    bookList=[bk.exportableDict(resolveParams=resParams, userList=userList) for bk in sorted(dbGetAll('book'))]
+    authorList=[au.exportableDict(resolveParams=resParams) for au in sorted(dbGetAll('author'))]
+    exportableStructure={'books': bookList, 'authors': authorList}
+    bIO = BytesIO()
+    bIO.write(json.dumps(exportableStructure,indent=4).encode('utf-8'))
+    bIO.seek(0)
+    return send_file    (
+                            bIO,
+                            attachment_filename=exportedFileName,
+                            as_attachment=True,
+                        )
+
+@app.route('/importdata')
+@login_required
+def ep_importdata():
+    return 'ToDo'
+
 @app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
 @login_required
 def ep_confirm(operation,value):
@@ -834,25 +872,3 @@ def ep_confirm(operation,value):
                                         operation=operation,
                                         message=tOpe['message'](value),
                                     )
-
-@app.route('/btest', methods=['GET','POST'])
-@login_required
-def ep_btest():
-    form=BTestForm()
-    if form.validate_on_submit():
-        if form.yesButton.data:
-            flashMessage('info','Done','The operation completed successfully.')
-        elif form.noButton.data:
-            flashMessage('warning','Try Again','It looks that your attempt temporarily failed.')
-        else:
-            flash('WTF?')
-        return redirect(url_for('ep_index'))
-    else:
-        form.text.data='Sample text.'
-        return render_template('btest.html', form=form)
-
-@app.route('/fbex')
-def ep_fbex():
-    from markupsafe import Markup
-    flash(Markup('<strong>Critical</strong> message'), 'critical')
-    return render_template('fbex.html', title='Aaa')

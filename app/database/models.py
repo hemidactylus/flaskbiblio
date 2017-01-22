@@ -39,14 +39,41 @@ class Book(AutoModel):
     inhousenotes=str
     notes=str
     languages=str
-    lasteditor=str
+    lasteditor=int
     lasteditdate=str
     house=str
+
+    def exportableDict(self, resolveParams, userList):
+        '''
+            returns a serializable dict object for export.
+            Resolves all referential data.
+        '''
+        self.resolveReferences(**resolveParams)
+        return {
+            'title': self.title,
+            'authors': [
+                {
+                    'firstname': au.firstname,
+                    'lastname': au.lastname,
+                }
+                for au in self.resAuthors
+            ],
+            'notes': self.notes,
+            'booktype': self.resBooktype.name,
+            'inhouse': bool(int(self.inhouse)),
+            'languages': [
+                lang.name for lang in self.resLanguages
+            ],
+            'house': self.resHouse.name,
+            'lasteditor': userList[self.lasteditor].name,
+            'lasteditdate': self.lasteditdate,
+        }
 
     def resolveReferences(self,authors={},languages={},booktypes={},houses={}):
         self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if len(aID)>0 and int(aID) in authors])
         self.resLanguages=sorted([languages[lID] for lID in self.languages.split(',') if lID in languages])
         self.resBooktype=booktypes.get(self.booktype,'')
+        self.resHouse=houses.get(self.house,'')
         return self
 
     def __str__(self):
@@ -108,7 +135,17 @@ class Author(AutoModel):
     bookcount=int
     booklist=str
 
-    def resolveReferences(self,books={}):
+    def exportableDict(self,resolveParams):
+        '''
+            returns a dict for exporting authors
+        '''
+        return {
+            'lastname': self.lastname,
+            'firstname': self.firstname,
+            'notes': self.notes,
+        }
+
+    def resolveReferences(self,books={}, **kwargs):
         self.resBooks=sorted([books[bID] for bID in unrollStringList(self.booklist) if bID in books])
         return self
 

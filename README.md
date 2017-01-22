@@ -104,13 +104,17 @@ multi-checkbox widgets down to the individual checkbox html code.
 into a vector of counters. Those are applied algebraically and displayed in a sorted-grouped manner on the
 index page.
 
+**Export Biblio Data** done to a single-file json structure with all references resolved.
+> To do: select whether to export from my-house-only or all-houses
+
 ## Major/Future TODOs
 
 StructuredImport
 > Split the erase-books-and-authors and the import-stuff functions and think carefully
 > about the authorlist phase, so that several lists of books can be imported
 > sequentially, possibly belonging to different houses.
-> **Later**, make this an import/export feature of the app?
+> Make this an import/export feature of the app
+> This is now to be aligned with the export one-json format!
 
 RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears

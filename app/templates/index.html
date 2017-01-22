@@ -14,15 +14,17 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th colspan="2">Some statistics</th>
+                    <th  class="col col-sm-6">Some statistics</th>
+                    <th  class="col col-sm-3"></th>
+                    <th  class="col col-sm-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                     {% for qstat in statistics %}
                         <tr>
-                            <td>{{ qstat.description }}</td>
-                            <td>{{ qstat.subtype }}</td>
-                            <td>{{ qstat.value }}</td>
+                            <td class="col col-sm-6">{{ qstat.description }}</td>
+                            <td class="col col-sm-3">{{ qstat.subtype }}</td>
+                            <td class="col col-sm-3">{{ qstat.value }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
