@@ -24,16 +24,21 @@ def _sortAuthorPair(pairList):
     # see: http://stackoverflow.com/questions/13964152/not-a-valid-choice-for-dynamic-select-field-wtforms#13964913
     return sorted(map(lambda au: (str(au.id), str(au)), pairList),key=lambda p: str(p[1]))
 
+class ExportDataForm(FlaskForm):
+    includeauthors = BooleanField('includeauthors', default = True)
+    includemetadata=BooleanField('includemetadata', default=True)
+    house=SelectField('house')
+    submit = SubmitField('Export')
+
+    def setHouses(self,hoPairList,default):
+        self.house.choices=[('','(Include all houses)')]+_sortNameDescPair(hoPairList)
+        self.house.data=default
+
 class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired(),AsciiOnly()])
     password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
     login = SubmitField('Log In')
     remember_me = BooleanField('remember_me', default=False)
-
-class BTestForm(FlaskForm):
-    text=StringField('Text')
-    yesButton=SubmitField('Yes')
-    noButton=SubmitField('No')
 
 class EditAuthorForm(FlaskForm):
     force = BooleanField('force',default=False)

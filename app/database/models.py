@@ -43,13 +43,13 @@ class Book(AutoModel):
     lasteditdate=str
     house=str
 
-    def exportableDict(self, resolveParams, userList):
+    def exportableDict(self, resolveParams, userList, form='long'):
         '''
             returns a serializable dict object for export.
             Resolves all referential data.
         '''
         self.resolveReferences(**resolveParams)
-        return {
+        retObject={
             'title': self.title,
             'authors': [
                 {
@@ -60,14 +60,20 @@ class Book(AutoModel):
             ],
             'notes': self.notes,
             'booktype': self.resBooktype.name,
-            'inhouse': bool(int(self.inhouse)),
             'languages': [
                 lang.name for lang in self.resLanguages
             ],
-            'house': self.resHouse.name,
-            'lasteditor': userList[self.lasteditor].name,
-            'lasteditdate': self.lasteditdate,
         }
+        if form=='long':
+            retObject.update(
+                {
+                    'inhouse': bool(int(self.inhouse)),
+                    'house': self.resHouse.name,
+                    'lasteditor': userList[self.lasteditor].name,
+                    'lasteditdate': self.lasteditdate,
+                }
+            )
+        return retObject
 
     def resolveReferences(self,authors={},languages={},booktypes={},houses={}):
         self.resAuthors=sorted([authors[int(aID)] for aID in self.authors.split(',') if len(aID)>0 and int(aID) in authors])

@@ -16,7 +16,7 @@ from .forms import (
                         ChangePasswordForm,
                         SearchBookForm,
                         SearchAuthorForm,
-                        BTestForm,
+                        ExportDataForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -819,30 +819,60 @@ def ep_advanced():
                                 user=user,
                             )
 
-@app.route('/exportdata')
+@app.route('/exportdata', methods=['GET','POST'])
 @login_required
 def ep_exportdata():
     user=g.user
     resParams=resolveParams()
-    userList=dbMakeDict(dbGetAll('user'))
-    # prepare and export the whole structure
-    exportedFileName='exportedBiblio_%s.json' % datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
-    bookList=[bk.exportableDict(resolveParams=resParams, userList=userList) for bk in sorted(dbGetAll('book'))]
-    authorList=[au.exportableDict(resolveParams=resParams) for au in sorted(dbGetAll('author'))]
-    exportableStructure={'books': bookList, 'authors': authorList}
-    bIO = BytesIO()
-    bIO.write(json.dumps(exportableStructure,indent=4).encode('utf-8'))
-    bIO.seek(0)
-    return send_file    (
-                            bIO,
-                            attachment_filename=exportedFileName,
-                            as_attachment=True,
-                        )
+    form=ExportDataForm()
+    houses=sorted(list(dbGetAll('house')))
+    form.setHouses(houses,default=user.house if user.defaulthousesearch else '')
+    if form.validate_on_submit():
+        userList=dbMakeDict(dbGetAll('user'))
+        # prepare and export the whole structure
+        exportedFileName='exportedBiblio_%s.json' % datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
+        if form.house.data=='':
+            bookFilter=lambda bo: True
+        else:
+            bookFilter=lambda bo: bo.house==form.house.data
+        if form.includemetadata.data:
+            exportForm='long'
+        else:
+            exportForm='short'
+        bookList=[
+            bk.exportableDict(resolveParams=resParams, userList=userList, form=exportForm)
+            for bk in sorted(dbGetAll('book'))
+            if bookFilter(bk)
+        ]
+        exportableStructure={'books': bookList}
+        if form.includeauthors.data:
+            authorList=[au.exportableDict(resolveParams=resParams) for au in sorted(dbGetAll('author'))]
+            exportableStructure['authors']=authorList
+        bIO = BytesIO()
+        bIO.write(json.dumps(exportableStructure,indent=4).encode('utf-8'))
+        bIO.seek(0)
+        return send_file    (
+                                bIO,
+                                attachment_filename=exportedFileName,
+                                as_attachment=True,
+                            )
+    else:
+        return render_template  (
+                                    'exportdataform.html',
+                                    form=form,
+                                    user=user,
+                                    title='Export data',
+                                )
 
 @app.route('/importdata')
 @login_required
 def ep_importdata():
-    return 'ToDo'
+    return 'ToDo Import'
+
+@app.route('/emptyhouse')
+@login_required
+def ep_emptyhouse():
+    return 'ToDo Empty'
 
 @app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
 @login_required

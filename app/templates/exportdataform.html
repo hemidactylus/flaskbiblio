@@ -1,0 +1,52 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+<div class="container">
+  <h2>
+    <i class="fa fa-download fa-lg" aria-hidden="true"></i>
+    {{ title }}
+  </h2>
+  <hr>
+  <form class="form form-horizontal" method="post" role="form" name="{{ url_for('ep_usersettings') }}">
+    <div class="form-group">
+      {{ form.hidden_tag() }}
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="includeauthors">
+            Include author list
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.includeauthors(tabindex=1) }}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="includemetadata">
+            Provide book metadata
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.includemetadata(tabindex=2) }}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label class="control-label" for="house">
+            Fetch books from house
+          </label>
+        </div>
+        <div class="col-sm-4">
+          {{ form.house(class_="form-control",tabindex=3) }}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-2">
+          {{ form.submit(class_='btn btn-primary',tabindex=4) }}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
