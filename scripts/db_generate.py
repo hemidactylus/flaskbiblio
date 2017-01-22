@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+import stat
 import sys
 import sqlite3 as lite
 from operator import itemgetter
@@ -47,6 +48,13 @@ def clearToProceed(dbfilename):
             return False
     else:
         return True
+
+def setRWAttributeForAll(filename):
+    '''
+        Set rw-rw-rw attribute to database file
+    '''
+    attrConstant=stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+    os.chmod(filename, attrConstant )
 
 def generate_db(dbFile):
     '''
@@ -116,6 +124,7 @@ if __name__=='__main__':
     if clearToProceed(dbFile):
         db=logDo(lambda: generate_db(dbFile),'Generating DB')
         logDo(lambda: populate_db(db),'Populating DB')
+        logDo(lambda: setRWAttributeForAll(dbFile),'Setting file attributes')
         print('Finished.')
     else:
         print('Operation aborted.')
