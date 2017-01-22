@@ -100,6 +100,10 @@ multi-checkbox widgets down to the individual checkbox html code.
     * sample conf file for lighttpd, see docs directory
 > To do for apache with htaccess
 
+**BookStats** are handled in an unified manner, through functions that make each book/author/...
+into a vector of counters. Those are applied algebraically and displayed in a sorted-grouped manner on the
+index page.
+
 ## Major/Future TODOs
 
 StructuredImport
@@ -121,16 +125,6 @@ AddreplaceAutomate
 > in the two `addreplace` calls, when updating: the list of attributes must be cleverly handled instead
 > of doing, as is done now, a lot of explicit member copies.
 
-MoreStats
-> More advanced statistics (all transactionally handled) in the logged users' homepage.
-> E.g. book breakdown per genre, or percentage and number of books that are out,
-> per house and overall
-> Stats are handled in a bundle-function that computes pairs of (stat_id,delta)
-> and a uniform function that applies them. There's one such function for book-addreplace
-> and one for author-addreplace.
-> Statistics are rows with name, description, value, but how to group them smartly
->   (e.g. nbooks is overall, but books-per-genre is a list of rows to be grouped, and so on)
-
 SimilaritySlider
 > The threshold for author/book similarity can become a slider one day.
 
@@ -139,14 +133,3 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-
-Stats are handled in a bundle-function that computes pairs of (stat_id,delta)
-and a uniform function that applies them. There's one such function for book-addreplace
-and one for author-addreplace.
-Statistics are rows with name, description, value, but how to group them smartly
-  (e.g. nbooks is overall, but books-per-genre is a list of rows to be grouped, and so on)
-
-Missing:
-* an ordered map from stat 2uple indices to description
-* real stat extractor functions
-* function to extract, group, sort and provide labels for display on index

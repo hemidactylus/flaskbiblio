@@ -72,7 +72,8 @@ def statFromBook(qBook):
     statList[('G_booktype',qBook.booktype)]=1
     # language(s)
     for lang in qBook.languages.split(','):
-        statList[('G_language',lang)]=1
+        if lang!='':
+            statList[('G_language',lang)]=1
     # inhouse
     statList[('G_inhouse',str(bool(qBook.inhouse)))]=1
     # house
@@ -124,15 +125,18 @@ def sortStatistics(statIterator,resolveParams):
         else:
             # sort by decreasing value within a group, apply formatting function,
             # add a header
-            statList.append({
-                'description': qDesc['description'](sItem.name),
-                'subtype': '',
-                'value': '',
-            })
-            for sItem in sorted(sGList['items'],key=lambda elem: elem.value,reverse=True):
+            itemList=list(filter(lambda it: it.value>0,sGList['items']))
+            #
+            if len(itemList)>0:
                 statList.append({
-                    'description': '',
-                    'subtype': qDesc['subtype'](sItem.subtype,resolveParams),
-                    'value': sItem.value,
+                    'description': qDesc['description'](sItem.name),
+                    'subtype': '',
+                    'value': '',
                 })
+                for sItem in sorted(itemList,key=lambda elem: elem.value,reverse=True):
+                    statList.append({
+                        'description': '',
+                        'subtype': qDesc['subtype'](sItem.subtype,resolveParams),
+                        'value': sItem.value,
+                    })
     return statList
