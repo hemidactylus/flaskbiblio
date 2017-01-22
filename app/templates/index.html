@@ -21,6 +21,7 @@
                     {% for qstat in statistics %}
                         <tr>
                             <td>{{ qstat.description }}</td>
+                            <td>{{ qstat.subtype }}</td>
                             <td>{{ qstat.value }}</td>
                         </tr>
                     {% endfor %}

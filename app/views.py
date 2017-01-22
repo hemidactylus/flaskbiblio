@@ -55,6 +55,7 @@ from app import (
                     booktypes,
                     booktypesDict,
                 )
+from app.statistics.statistics import sortStatistics
 
 def flashMessage(msgType,msgHeading,msgBody):
     '''
@@ -78,7 +79,8 @@ def load_user(id):
 def ep_index():
     user = g.user
     if user is not None:
-        message=[{'description': ('%s (%s)' % (qStat.name,qStat.subtype)), 'value': qStat.value} for qStat in dbGetAll('statistic')]
+        rawStats=dbGetAll('statistic')
+        message=sortStatistics(rawStats,resolveParams())
     else:
         message=None
     return render_template(
@@ -368,11 +370,14 @@ def resolveParams():
     # refresh authors list
     authors=list(dbGetAll('author'))
     authorsDict=dbMakeDict(authors)
+    houses=list(dbGetAll('house'))
+    housesDict=dbMakeDict(houses,fieldname='name')
     # pack the rest
     return {
                 'authors': authorsDict,
                 'languages': languagesDict,
-                'booktypes': booktypesDict
+                'booktypes': booktypesDict,
+                'houses': housesDict,
             }
 
 @app.route('/authorsearch',methods=['GET','POST'])
