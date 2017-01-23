@@ -105,7 +105,7 @@ into a vector of counters. Those are applied algebraically and displayed in a so
 index page.
 
 **Export Biblio Data** done to a single-file json structure with all references resolved.
-> To do: select whether to export from my-house-only or all-houses
+> To Do: a proper import
 
 ## Major/Future TODOs
 
@@ -137,3 +137,4 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
+import: two-step operations, unified with the scripted import from the (one) json onward; step 2 is fix warnings and so on

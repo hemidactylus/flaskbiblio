@@ -500,7 +500,7 @@ def registerLogin(userId):
     except:
         return ''
 
-def dbDeleteAuthor(id,db=None,user=None):
+def dbDeleteAuthor(id,db=None,userHouse=None):
     '''
         attempts deletion of an author. If deletion succeeds, returns its id
         Always a 2-uple (success,stuff)
@@ -520,12 +520,12 @@ def dbDeleteAuthor(id,db=None,user=None):
     Author.db=db
     try:
         dAuthor=Author.manager(db).get(id)
-        # if a user is provided, check the my-books-only constraint
+        # if a userHouse is provided, check the my-books-only constraint
         Book.db=db
-        if user is not None:
+        if userHouse is not None:
             for bookId in unrollStringList(dAuthor.booklist):
                 qBook=Book.manager(db).get(bookId)
-                if qBook.house!=user.house:
+                if qBook.house!=userHouse:
                     return (0,'Author has books in other houses')
         # browse through all books authored by this author
         for bookId in unrollStringList(dAuthor.booklist):

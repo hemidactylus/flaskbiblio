@@ -1,0 +1,42 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+<div class="container">
+  <h2>
+    <i class="fa fa-bomb fa-lg" aria-hidden="true"></i>
+    {{ title }}
+  </h2>
+  <div>
+    Please think carefully before pressing any button.
+  </div>
+  <div>
+    <small>
+      Have you <a href="{{url_for('ep_exportdata')}}">exported your data</a> recently?
+    </small>
+  </div>
+  <hr>
+  <div class="row row-grid">
+    <div class="col-sm-4">
+      Delete <strong>all books</strong> from the house
+    </div>
+    <div class="col-sm-4">
+      <a class="btn btn-danger" href="{{url_for('ep_deletedata',authors='n')}}" role="button">
+        <i class="fa fa-bomb fa-lg" aria-hidden="true"></i>
+        Delete books
+      </a>
+    </div>
+  </div>
+  <div class="row row-grid">
+    <div class="col-sm-4">
+      Delete <strong>all books and all authors</strong> from the house
+    </div>
+    <div class="col-sm-4">
+      <a class="btn btn-danger" href="{{url_for('ep_deletedata',authors='y')}}" role="button">
+        <i class="fa fa-bomb fa-lg" aria-hidden="true"></i>
+        Delete all
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

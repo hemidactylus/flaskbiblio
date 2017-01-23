@@ -238,7 +238,7 @@ def ep_deleteauthor(id,confirm=None):
                                         )
                                 )
             else:
-                status,delId=dbDeleteAuthor(int(id),user=user)
+                status,delId=dbDeleteAuthor(int(id),userHouse=user.house)
                 if status:
                     flashMessage('info','Success','author successfully deleted.')
                 else:
@@ -880,7 +880,66 @@ def ep_importdata():
 @app.route('/emptyhouse')
 @login_required
 def ep_emptyhouse():
-    return 'ToDo Empty'
+    return render_template(
+        'deletedataform.html',
+        title='Delete data',
+    )
+
+@app.route('/deletedata')
+@app.route('/deletedata/<authors>')
+@login_required
+def ep_deletedata(authors='n'):
+    user=g.user
+    report={}
+    db=dbGetDatabase()
+    if authors=='y':
+        report['au_kept']=0
+        report['au_deleted']=0
+        report['au_errors']=0
+        # delete those authors whose only books belong to user's house
+        for qAu in dbGetAll('author'):
+            if any([
+                dbGetBook(bookId).house!=user.house
+                for bookId in unrollStringList(qAu.booklist)
+            ]):
+                report['au_kept']+=1
+            else:
+                success,_=dbDeleteAuthor(qAu.id,db=db,userHouse=user.house)
+                if success:
+                    report['au_deleted']+=1
+                else:
+                    report['au_errors']+=1
+    # now deal with books
+    report['bo_deleted']=0
+    report['bo_errors']=0
+    for qBo in dbGetAll('book'):
+        if qBo.house==user.house:
+            success,_=dbDeleteBook(qBo.id,db=db,userHouse=user.house)
+            if success:
+                report['bo_deleted']+=1
+            else:
+                report['bo_errors']+=1
+    # done.
+    db.commit()
+    # return final counters - (mandatory_msg, key, description)
+    reportDesc=[
+        (True,'bo_deleted','Books deleted'),
+        (False,'bo_errors','Book with errors'),
+        (True,'au_deleted','Authors deleted'),
+        (False,'au_kept','Authors kept'),
+        (False,'au_errors','Authors with errors'),
+    ]
+    #
+    flashMessage(
+        'info',
+        'Delete succeeded',
+        '. '.join([
+            '%s: %i' % (desc, report[key])
+            for mandatory,key,desc in reportDesc
+            if key in report and (mandatory or report[key]>0)
+        ])
+    )
+    return redirect(url_for('ep_advanced'))
 
 @app.route('/confirm/<operation>/<value>',methods=['GET','POST'])
 @login_required
