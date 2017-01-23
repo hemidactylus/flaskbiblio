@@ -500,13 +500,17 @@ def registerLogin(userId):
     except:
         return ''
 
-def dbDeleteAuthor(id,db=None):
+def dbDeleteAuthor(id,db=None,user=None):
     '''
         attempts deletion of an author. If deletion succeeds, returns its id
         Always a 2-uple (success,stuff)
 
         It must deregister author as author of all its books before deleting it,
         transactionally.
+
+        If an user ID is provided, an additional constraint has to be honoured,
+        namely no book authored by author can belong to a different house
+        than the one the user belongs to.
     '''
     if db is None:
         doCommit=True
@@ -516,8 +520,14 @@ def dbDeleteAuthor(id,db=None):
     Author.db=db
     try:
         dAuthor=Author.manager(db).get(id)
-        # browse through all books authored by this author
+        # if a user is provided, check the my-books-only constraint
         Book.db=db
+        if user is not None:
+            for bookId in unrollStringList(dAuthor.booklist):
+                qBook=Book.manager(db).get(bookId)
+                if qBook.house!=user.house:
+                    return (0,'Author has books in other houses')
+        # browse through all books authored by this author
         for bookId in unrollStringList(dAuthor.booklist):
             qBook=Book.manager(db).get(bookId)
             qBook.authors,_=expungeFromStringList(qBook.authors,id)

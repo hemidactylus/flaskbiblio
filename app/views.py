@@ -224,6 +224,13 @@ def ep_deleteauthor(id,confirm=None):
         rAuthor=dbGetAuthor(int(id))
         #
         if rAuthor:
+            # check that all books are in the user's house before proceeding
+            for bookId in unrollStringList(rAuthor.booklist):
+                qBook=dbGetBook(bookId)
+                if qBook.house!=user.house:
+                    flashMessage('warning','Cannot delete','author has books in other houses')
+                    return redirect(url_for('ep_authors',restore='y'))
+            #
             if user.requireconfirmation and rAuthor.bookcount>0 and not confirm:
                 return redirect(url_for('ep_confirm',
                                         operation='deleteauthor',
@@ -231,7 +238,7 @@ def ep_deleteauthor(id,confirm=None):
                                         )
                                 )
             else:
-                status,delId=dbDeleteAuthor(int(id))
+                status,delId=dbDeleteAuthor(int(id),user=user)
                 if status:
                     flashMessage('info','Success','author successfully deleted.')
                 else:
@@ -242,6 +249,7 @@ def ep_deleteauthor(id,confirm=None):
     else:
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_authors',restore='y'))
+
 '''
     This call, similarly to the editbook below,
     handles both 'new' and 'edit' operations. It supports
