@@ -340,6 +340,7 @@ def ep_editauthor():
                                     booklist=booklist,
                                     showforce=True,
                                     user=user,
+                                    editable=user.canedit,
                                   )
         else:
             #
@@ -372,6 +373,7 @@ def ep_editauthor():
                                 bookcount=bookcount,
                                 booklist=booklist,
                                 user=user,
+                                editable=user.canedit,
                               )
 
 def retrieveUsers():
@@ -875,11 +877,19 @@ def ep_exportdata():
 @app.route('/importdata')
 @login_required
 def ep_importdata():
+    user=g.user
+    if not user.canedit:
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        return redirect(url_for('ep_advanced'))
     return 'ToDo Import'
 
 @app.route('/emptyhouse')
 @login_required
 def ep_emptyhouse():
+    user=g.user
+    if not user.canedit:
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        return redirect(url_for('ep_advanced'))
     return render_template(
         'deletedataform.html',
         title='Delete data',
@@ -890,6 +900,9 @@ def ep_emptyhouse():
 @login_required
 def ep_deletedata(authors='n'):
     user=g.user
+    if not user.canedit:
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        return redirect(url_for('ep_advanced'))
     report={}
     db=dbGetDatabase()
     if authors=='y':

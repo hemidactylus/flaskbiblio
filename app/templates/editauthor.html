@@ -38,7 +38,11 @@
           </label>
         </div>
         <div class="col-sm-4">
-          {{ form.firstname(size=30, class_="form-control", tabindex=2) }}
+          {% if editable %}
+            {{ form.firstname(size=30, class_="form-control", tabindex=2) }}
+          {% else %}
+            {{ form.firstname(size=30, class_="form-control", readonly='readonly', tabindex=2) }}
+          {% endif %}
           {% for error in form.firstname.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}      </div>
@@ -50,7 +54,11 @@
           </label>
         </div>
         <div class="col-sm-4">
-          {{ form.lastname(size=30, class_="form-control", tabindex=3) }}
+          {% if editable %}
+            {{ form.lastname(size=30, class_="form-control", tabindex=3) }}
+          {% else %}
+            {{ form.lastname(size=30, class_="form-control", readonly='readonly', tabindex=3) }}
+          {% endif %}
           {% for error in form.lastname.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}
@@ -63,7 +71,11 @@
           </label>
         </div>
         <div class="col-sm-4">
-          {{ form.notes(size=30, class_="form-control", tabindex=4) }}
+          {% if editable %}
+            {{ form.notes(size=30, class_="form-control", tabindex=4) }}
+          {% else %}
+            {{ form.notes(size=30, class_="form-control", readonly='readonly', tabindex=4) }}
+          {% endif %}
           {% for error in form.notes.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}
@@ -71,7 +83,7 @@
       </div>
       <div class="row row-grid">
         <div class="col-sm-2">
-          {% if user.canedit %}
+          {% if editable %}
             {{ form.submit(class_="btn btn-primary", tabindex=4) }}
           {% endif %}
         </div>
