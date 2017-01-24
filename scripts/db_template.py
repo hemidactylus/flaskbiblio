@@ -1,7 +1,12 @@
-# db test values to populate (minimally) the DB
+'''
+    db_template.py
+
+    Start values for generation of empty DB
+    (with users, booktypes, languages, and so on, but no authors/books)
+'''
 
 # tablename -> list-of-rows
-_testvalues={
+dbInitValues={
     'statistic': [
             ],
     'house':[
@@ -46,28 +51,6 @@ _testvalues={
                     'checksimilarity': 1,
                     'house': 'Mansarda',
                     'defaulthousesearch': 0,
-                },
-            ],
-    'author': [
-                {
-                    'firstname': 'Jose',
-                    'lastname': 'Saramago',
-                    'notes': '',
-                },
-                {
-                    'firstname': 'Lev',
-                    'lastname': 'Tolstoj',
-                    'notes': '',
-                },
-                {
-                    'firstname': 'Gennaro',
-                    'lastname': 'Sbucciapesche',
-                    'notes': 'Inventato',
-                },
-                {
-                    'firstname': 'Filippo',
-                    'lastname': 'Roditorsoli',
-                    'notes': 'Erfunden',
                 },
             ],
     'language': [
@@ -130,30 +113,6 @@ _testvalues={
                     'name': '(Other)',
                 },
             ],
-    'book': [
-                {
-                    'title':         'Tutti i nomi',
-                    'authors':       'Saramago',
-                    'booktype':      'FIC',
-                    'inhouse':       True,
-                    'inhousenotes':  '',
-                    'notes':         'Carino',
-                    'languages':     'PT,IT',
-                    'lasteditor':    'Stefano',
-                    'lasteditdate':  '',
-                    'house':         'VillaMu',
-                },
-                {
-                    'title':         'Guida alle bucce',
-                    'authors':       'Tolstoj,Sbucciapesche',
-                    'booktype':      'ESS',
-                    'inhouse':       False,
-                    'inhousenotes':  'Nel frutteto',
-                    'notes':         'Mediocre',
-                    'languages':     'IT',
-                    'lasteditor':    'Stefano',
-                    'lasteditdate':  '',
-                    'house':         'Mansarda',
-                },
-            ],
+    'author': [],
+    'book': [],
 }
