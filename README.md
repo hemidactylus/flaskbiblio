@@ -137,4 +137,18 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-import: two-step operations, unified with the scripted import from the (one) json onward; step 2 is fix warnings and so on
+Import: moving the tools to external lib separated from the cmdline tool, in order to reuse it
+from the web app.
+A first step is the (optional) csv to book-json step. No similarity checks yet.
+Some warnings are issued already, namely those independent of authorlist, other books.
+(problem in translating status, booktype, issues with notes etc).
+The result is a 'books'-only json structure.
+THE SIMILARITY CODE FOR BOOKS IS THERE ALL COMMENTED AND NEEDS TO BE RE-POSITIONED IN NEXT STEP
+ALSO IN THE SCRIPT (phase csv-to-json) STATS ARE COMMENTED OUT
+
+next step:
+from a (warning-cleared) book-only-json:
+    - authors are cleverly extracted
+    - authorlist is similarity-checked
+    - boooklist is author-proofed
+    ? ...
