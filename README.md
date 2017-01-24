@@ -98,6 +98,7 @@ multi-checkbox widgets down to the individual checkbox html code.
     * the biblio.db file must be writable by the right user (www-data for lighty) or read-only-error
         would be raised upon DB write operations.
     * sample conf file for lighttpd, see docs directory
+
 > To do for apache with htaccess
 
 **BookStats** are handled in an unified manner, through functions that make each book/author/...
@@ -105,6 +106,7 @@ into a vector of counters. Those are applied algebraically and displayed in a so
 index page.
 
 **Export Biblio Data** done to a single-file json structure with all references resolved.
+
 > To Do: a proper import
 
 ## Major/Future TODOs
@@ -143,12 +145,38 @@ A first step is the (optional) csv to book-json step. No similarity checks yet.
 Some warnings are issued already, namely those independent of authorlist, other books.
 (problem in translating status, booktype, issues with notes etc).
 The result is a 'books'-only json structure.
+
+Second step: massaging the book-list into:
+    - a new book list
+    - an author list
+But:
+    *   authors are collected from all insertee books and filtered by:
+            - present in DB (not in new-au-list)
+            - similar to either a just-inserted or a prev-existing (warning and added)
+            - totally new (added)
+
+DONE SO FAR. IT IS UP TO THE UPLOADING USER TO CONSISTENTLY FIX THE RESULT (i.e. when
+resolving a similarity clash, all books have to be fixed so that they point to the proper author!)
+
+        -> All authors to appear in future books must be found in this list! (and inherit the warnings)
+    *   books are compared (and warnings raised) if the insertee book is similar to either
+        an already inserted one or a db-pre-existing one.
+
 THE SIMILARITY CODE FOR BOOKS IS THERE ALL COMMENTED AND NEEDS TO BE RE-POSITIONED IN NEXT STEP
 ALSO IN THE SCRIPT (phase csv-to-json) STATS ARE COMMENTED OUT
 
-next step:
-from a (warning-cleared) book-only-json:
-    - authors are cleverly extracted
-    - authorlist is similarity-checked
-    - boooklist is author-proofed
-    ? ...
+
+
+                    #     print('Similarity:')
+                    #     # clashing books explicit print
+                    #     def _boFormatMaster(bo,addendum):
+                    #         titString=bo['title'] if len(bo['title'])<50 else '%s ...' % bo['title'][:46]
+                    #         return '%-50s %s' % (titString,addendum) if addendum else '%-50s' % titString
+                    #     _boformatPlain=lambda bo: _boFormatMaster(bo,None)
+                    #     _boformatPlus=lambda bo: _boFormatMaster(bo,'%4.2f' % bo['_norm'])
+                    #     for bo in parsedCSV['booklist']:
+                    #         if '_warnings' in bo and 'similarity' in bo['_warnings']:
+                    #             print('    %s' % _boformatPlain(bo))
+                    #             for wbo in bo['_warnings']['similarity']:
+                    #                 print('        %s' % _boformatPlus(wbo))
+

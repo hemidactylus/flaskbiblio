@@ -17,7 +17,10 @@ from app.database.dbtools import    (
                                     )
 
 # import tools are all in this subpackage:
-from app.importlibrary.importlibrary import read_and_parse_csv
+from app.importlibrary.importlibrary import (
+                                                read_and_parse_csv,
+                                                process_book_list,
+                                            )
 
 def clearToExtract(inFile,outFile):
     '''
@@ -57,10 +60,10 @@ if __name__=='__main__':
 
     _helpMsg='''Usage: python script.py ARGS.
     Args can specify the import mode:
-        (1) -e input.csv outputBooks.json [-h for skipping a one-line header]
+        (1) -e input.csv books.json [-h for skipping a one-line header]
             EXTRACT: from csv to book list as 'userName'
-        (2) -a inputBooks.csv outputAuthors.json userName
-            AUTHORLIST: check and normalize the authors found throughout books as 'userName'
+        (2) -p books.json fixedlibrary.json
+            PROCESS: from the books-only to a books/author bilist, checked for consistency
         (3) -i inputBooks.json inputAuthors.json userName
             INSERT: read books/authors's jsons and insert data into the DB as 'userName'
 '''
@@ -69,6 +72,7 @@ if __name__=='__main__':
     if len(sys.argv)>1:
         if sys.argv[1]=='-e':
             print('-e or EXTRACT mode.')
+            # from a csv to a books-only-json, with book-local minimal parsing-and-warnings
             if len(sys.argv)>=4:
                 inFile=sys.argv[2]
                 outFile=sys.argv[3]
@@ -84,35 +88,28 @@ if __name__=='__main__':
                             lambda: open(outFile,'w').write('%s\n' % json.dumps(parsedCSV,indent=4,sort_keys=True)),
                             'Saving to json "%s"' % outFile
                     )
-                    # stats
-                    # warningBooks=len(list(filter(lambda bs: '_warnings' in bs,parsedCSV['booklist'])))
-                    # if warningBooks:
-                    #     print('Books with warning: %s. Go and fix them.' % warningBooks)
-                    #     print('Similarity:')
-                    #     # clashing books explicit print
-                    #     def _boFormatMaster(bo,addendum):
-                    #         titString=bo['title'] if len(bo['title'])<50 else '%s ...' % bo['title'][:46]
-                    #         return '%-50s %s' % (titString,addendum) if addendum else '%-50s' % titString
-                    #     _boformatPlain=lambda bo: _boFormatMaster(bo,None)
-                    #     _boformatPlus=lambda bo: _boFormatMaster(bo,'%4.2f' % bo['_norm'])
-                    #     for bo in parsedCSV['booklist']:
-                    #         if '_warnings' in bo and 'similarity' in bo['_warnings']:
-                    #             print('    %s' % _boformatPlain(bo))
-                    #             for wbo in bo['_warnings']['similarity']:
-                    #                 print('        %s' % _boformatPlus(wbo))
+                    warningBooks=len(list(filter(lambda bs: '_warnings' in bs,parsedCSV['books'])))
+                    if warningBooks:
+                        print('Books with warning: %s. Go and fix them.' % warningBooks)
                     print('Finished.')
                 else:
                     print('Operation aborted.')
             else:
                 print('At least three cmdline args are required.')
                 print(_helpMsg)
-        elif sys.argv[1]=='-a':
-            print('-a or AUTHORLIST mode.')
-            if len(sys.argv)>4:
+        elif sys.argv[1]=='-p':
+            print('-p or PROCESS mode.')
+            if len(sys.argv)>3:
                 inFile=sys.argv[2]
                 outFile=sys.argv[3]
-                importingUser=sys.argv[4]
                 if clearToExtract(inFile,outFile):
+                    inFileHandle=open(inFile)
+                    bilistStructure=logDo(
+                            lambda: process_book_list(inFileHandle),
+                            'Processing book list from "%s"' % inFile
+                    )
+                    print('stop here')
+
                     authorList=logDo(lambda: extract_author_list(inFile),'Extracting authors from "%s"' % inFile)
                     logDo(lambda: open(outFile,'w').write('%s\n' % authorList['json']),'Saving to json "%s"' % outFile)
                     # stats
@@ -141,7 +138,8 @@ if __name__=='__main__':
                     print('Operation aborted.')
                     print(_helpMsg)
             else:
-                print('Three cmdline args are required: inputBookJSON, outputAuthorsJSON, userName.')
+                print('At least three cmdline args are required.')
+                print(_helpMsg)
         elif sys.argv[1]=='-i':
             print('-i or INSERT mode.')
 

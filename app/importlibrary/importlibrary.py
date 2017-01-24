@@ -6,6 +6,7 @@ import csv, re
 from operator import itemgetter
 from datetime import datetime
 from collections import Counter
+import json
 
 from app import languagesDict, booktypesDict
 from config import DATETIME_STR_FORMAT, SIMILAR_AUTHOR_THRESHOLD, SIMILAR_BOOK_THRESHOLD
@@ -14,7 +15,9 @@ from app.database.models import (
                                     Book,
                                     Author,
                                 )
-
+from app.database.dbtools import    (
+                                        dbGetAll,
+                                    )
 from app.utils.ascii_checks import  (
                                         validCharacters,
                                         translatedCharacters,
@@ -28,6 +31,27 @@ from app.utils.string_vectorizer import (
 # tools
 langFinder=re.compile('\[([A-Z]{2,2})\]')
 abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
+
+def process_book_list(inFileHandle):
+    '''
+        main driver of the booklist-to-structuredlists conversion.
+
+        Handles the author extraction from books,
+        the validation of authors with warnings,
+        the generation of the annotated book list
+    '''
+    # db-listings of authors and books are needed at this point
+    def _auObjCopy(auO):
+        return {
+            'firstname': auO.firstname,
+            'lastname': auO.lastname,
+            'notes': auO.notes,
+        }
+    authorFromDB=[_auObjCopy(au) for au in list(dbGetAll('author'))]
+    #
+    inputContents=inFileHandle.read()
+    auList=extract_author_list(inputContents,authorFromDB)
+    return auList
 
 def read_and_parse_csv(inFileHandle,skipHeader=False):
     '''
@@ -290,7 +314,7 @@ def makeBookIntoVector(bTitle):
         '_normTitle': makeIntoVector(bTitle),
     }
 
-def insert_author_to_list(newA,aList,linenumber=None):
+def insert_author_to_list(newA,aList,preexistingList,linenumber=None):
     '''
         checks for duplicates against firstname and lastname
         and returns True if duplicate found
@@ -300,47 +324,66 @@ def insert_author_to_list(newA,aList,linenumber=None):
             if linenumber:
                 pAu['_books'].append(linenumber)
             return True
+    for pAu in preexistingList:
+        if all([pAu[fld].lower()==newA[fld].lower() for fld in ['firstname','lastname']]):
+            return True
     return False
 
-def extract_author_list(inFile):
+def extract_author_list(inputContents, preexistingAuthors):
     '''
         this opens a json with the book list and extracts all authors found there.
         It raises warnings for no-lastname authors and for authors suspiciously similar (but not identical)
         to already-inserted authors.
+
+        'preexistingAuthors' is a list of Author objects retrieved from DB: they are also to be checked
+        (both for duplicates and similarity checks)
+
     '''
+    def _copyAu(au):
+        return {    
+            'firstname': au['firstname'],
+            'lastname': au['lastname'],
+            'notes': au['notes'],
+        }
+    # parse the pre-existing authors into a standard structure
+    preexistingList=[
+        _copyAu(au)
+        for au in preexistingAuthors
+    ]
+    for au in preexistingList:
+        au.update(makeAuthorIntoVector(au['lastname'],au['firstname']))
+    #
     authorList=[]
-    bookList=json.load(open(inFile))
-    for bStr in bookList:
+    bookList=json.loads(inputContents)
+    for bStr in bookList['books']:
         for au in bStr['authors']:
             au['notes']=au.get('notes','')
             # handle insertion of author 'au' to the full list
             # found=False
-            found=insert_author_to_list(au,authorList,bStr['_linenumber'])
+            found=insert_author_to_list(au,authorList,preexistingList,bStr['_linenumber'])
             if not found:
                 au.update(makeAuthorIntoVector(au['lastname'],au['firstname']))
                 au['_books']=[bStr['_linenumber']]
                 # check if the new author is too similar to any existing one
                 scalsA=[]
-                def _copyAu(au):
-                    return {    
-                        'firstname': au['firstname'],
-                        'lastname': au['lastname'],
-                    }
-                for pAu in authorList:
-                    scalsA.append((
-                        max(
-                            scalProd(pAu['_normLast'],au['_normLast']),
-                            scalProd(pAu['_normFull'],au['_normFull']),
-                        ),
-                        _copyAu(pAu)
-                    ))
+                for origin,aulist in zip(['new','present'],[authorList,preexistingList]):
+                    for pAu in aulist:
+                        scalsA.append((
+                            max(
+                                scalProd(pAu['_normLast'],au['_normLast']),
+                                scalProd(pAu['_normFull'],au['_normFull']),
+                            ),
+                            _copyAu(pAu),
+                            origin,
+                        ))
                 scalsA=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsA,key=itemgetter(0),reverse=True)))
                 if len(scalsA) > 0:
                     finalWarnings=[]
-                    for normVal,wAu in scalsA:
-                        if not insert_author_to_list(wAu,finalWarnings):
+                    for normVal,wAu,wOrigin in scalsA:
+                        if not insert_author_to_list(wAu,finalWarnings,[]):
                             auToInsert=_copyAu(wAu)
                             auToInsert['_norm']=normVal
+                            auToInsert['_origin']=wOrigin
                             finalWarnings.append(auToInsert)
                     for wau in finalWarnings:
                         addWarningToStruct(au,'similarity',wau)
@@ -356,27 +399,25 @@ def extract_author_list(inFile):
         del au['_normFull']
 
     return {
-        'authorlist': authorList,
-        'json': json.dumps(authorList,indent=4),
-        'count': len(authorList),
+        'authors': authorList,
     }
 
-def erase_db_table(db,tableName):
-    '''
-        Deletes *all* records from a table of the given DB
-    '''
-    tObject=tableToModel[tableName]
-    tObject.db=db
-    idList=[obj.id for obj in tObject.manager(db).all()]
-    deleteds=[]
-    for oId in idList:
-        if tableName=='book':
-            dbDeleteBook(oId,db=db)
-        elif tableName=='author':
-            dbDeleteAuthor(oId,db=db)
-        deleteds.append(oId)
-    db.commit()
-    return {'deleted_%s' % tableName: deleteds}
+# def erase_db_table(db,tableName):
+#     '''
+#         Deletes *all* records from a table of the given DB
+#     '''
+#     tObject=tableToModel[tableName]
+#     tObject.db=db
+#     idList=[obj.id for obj in tObject.manager(db).all()]
+#     deleteds=[]
+#     for oId in idList:
+#         if tableName=='book':
+#             dbDeleteBook(oId,db=db)
+#         elif tableName=='author':
+#             dbDeleteAuthor(oId,db=db)
+#         deleteds.append(oId)
+#     db.commit()
+#     return {'deleted_%s' % tableName: deleteds}
 
 def insert_authors_from_json(inFile,db):
     '''

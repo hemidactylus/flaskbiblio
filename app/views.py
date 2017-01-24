@@ -859,7 +859,7 @@ def ep_exportdata():
             authorList=[au.exportableDict(resolveParams=resParams) for au in sorted(dbGetAll('author'))]
             exportableStructure['authors']=authorList
         bIO = BytesIO()
-        bIO.write(json.dumps(exportableStructure,indent=4).encode('utf-8'))
+        bIO.write(json.dumps(exportableStructure,indent=4,sort_keys=True).encode('utf-8'))
         bIO.seek(0)
         return send_file    (
                                 bIO,

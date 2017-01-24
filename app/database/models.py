@@ -68,6 +68,7 @@ class Book(AutoModel):
             retObject.update(
                 {
                     'inhouse': bool(int(self.inhouse)),
+                    'inhousenotes': self.inhousenotes,
                     'house': self.resHouse.name,
                     'lasteditor': userList[self.lasteditor].name,
                     'lasteditdate': self.lasteditdate,
