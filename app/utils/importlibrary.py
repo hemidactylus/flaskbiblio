@@ -16,6 +16,8 @@ from app.database.models import (
                                     Author,
                                 )
 from app.database.dbtools import    (
+                                        dbAddReplaceAuthor,
+                                        dbAddReplaceBook,
                                         dbGetAll,
                                     )
 from app.utils.ascii_checks import  (
@@ -32,6 +34,31 @@ from app.utils.string_vectorizer import (
 langFinder=re.compile('\[([A-Z]{2,2})\]')
 abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
 
+def import_from_bilist_json(inFileHandle,importingUser,db):
+    '''
+        main driver of the edited-json to DB import, last act (actual DB import/insert)
+
+        Handles insertion of the author list and the book list, adjusting similarities in case
+        it is needed. Gets the text to de-jsonize and the db on which to act.
+
+        DOES NOT DO DB-COMMIT BY ITSELF
+
+    '''
+    #
+    editdate=datetime.now().strftime(DATETIME_STR_FORMAT)
+    #
+    inputContents=inFileHandle.read()
+    inputBilist=json.loads(inputContents)    
+    authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
+    db.commit()
+    newAuthorMap={
+        (au.lastname,au.firstname): au.id
+        for au in dbGetAll('author')
+    }
+    bookInsertionReport=insert_books_from_structure(inputBilist['books'],newAuthorMap,importingUser,db,editdate)
+    db.commit()
+    return {'authors_insertion': authorInsertionReport, 'books_insertion': bookInsertionReport}
+
 def process_book_list(inFileHandle):
     '''
         main driver of the booklist-to-structuredlists conversion.
@@ -47,11 +74,115 @@ def process_book_list(inFileHandle):
             'lastname': auO.lastname,
             'notes': auO.notes,
         }
-    authorFromDB=[_auObjCopy(au) for au in list(dbGetAll('author'))]
-    #
+    def _boObjCopy(boO):
+        return {
+            'title': boO.title,
+        }
+    authorsFromDB=[_auObjCopy(au) for au in list(dbGetAll('author'))]
+    booksFromDB=[_boObjCopy(bo) for bo in list(dbGetAll('book'))]
+    # cache the input stream
     inputContents=inFileHandle.read()
-    auList=extract_author_list(inputContents,authorFromDB)
-    return auList
+    # prepare author list with annotations
+    auList=extract_author_list(inputContents,authorsFromDB)
+    # prepare book list with annotations
+    boList=check_books_list(inputContents,booksFromDB,authorsFromDB,auList)
+    # merge the two
+    fullList=auList
+    fullList.update(boList)
+    # return the full structure
+    return fullList
+
+def check_books_list(inputContents,dbBooks,dbAuthors,newAuthors):
+    '''
+        This reads book-objects from inputContents
+        and makes them into a validated book list.
+        Warnings added here involve similarity checks:
+            * book with similar/equal title are marked with warnings
+            * authors for each book, if the author is new and
+              has similar authors in turn, are equipped
+              with a warning as well.
+    '''
+    def _copyBo(bo):
+        boS = {    
+            'title': bo['title'],
+        }
+        if '_linenumber' in bo:
+            boS['_linenumber'] = bo['_linenumber']
+        return boS
+    def _copyFullBo(bo):
+        boS = _copyBo(bo)
+        if '_normTitle' in bo:
+            boS['_normTitle'] = bo['_normTitle']
+        return boS
+    # prepare a helper authorname-to-similarAuthors dict for later lookup
+    similarAuthorMap={}
+    for au in newAuthors['authors']:
+        auKey=(au['lastname'],au['firstname'])
+        similarAuthorMap[auKey]=[
+            '%s, %s (%s)' % (sAu['lastname'],sAu['firstname'],sAu['_origin'])
+            for sAu in au.get('_warnings',{}).get('similarity',[])
+        ]
+    # parse the pre-existing books into a standard structure
+    preexistingBookList=[
+        _copyFullBo(bo)
+        for bo in dbBooks
+    ]
+    for bo in preexistingBookList:
+        bo.update(makeBookIntoVector(bo['title']))
+    #
+    bookList=[]
+    sourceList=json.loads(inputContents)
+    for bStr in sourceList['books']:
+        bStr.update(makeBookIntoVector(bStr['title']))
+        scalsT=[]
+
+        # similarity checks:
+        for origin,srcList in zip(['present','new'],[preexistingBookList,bookList]):
+            for pBo in srcList:
+                scalsT.append((
+                    scalProd(pBo['_normTitle'],bStr['_normTitle']),
+                    _copyBo(pBo),
+                    origin,
+                ))
+        simScalsT=list(filter(
+            lambda t: t[0]>=SIMILAR_BOOK_THRESHOLD,
+            sorted(
+                scalsT,
+                key=itemgetter(0),
+                reverse=True
+            )
+        ))
+        if len(simScalsT) > 0:
+            finalSimWarnings=[]
+            finalCopyWarnings=[]
+            for normVal,wBo,origin in simScalsT:
+                if normVal<1.0:
+                    # just similar
+                    boToInsert=_copyBo(wBo)
+                    boToInsert['_similarity']=normVal
+                    boToInsert['_origin']=origin
+                    finalSimWarnings.append(boToInsert)
+                else:
+                    # identical
+                    boToInsert=_copyBo(wBo)
+                    boToInsert['_origin']=origin
+                    finalCopyWarnings.append(boToInsert)
+            for wbo in finalSimWarnings:
+                addWarningToStruct(bStr,'similarity',wbo)
+            for wbo in finalCopyWarnings:
+                addWarningToStruct(bStr,'possible_duplicate',wbo)
+        # add warnings *within* the author list of the book, if necessary
+        for bAu in bStr['authors']:
+            if len(similarAuthorMap.get((bAu['lastname'],bAu['firstname']),[]))>0:
+                bAu['_warnings']={
+                    '_similarAuthors': similarAuthorMap[(bAu['lastname'],bAu['firstname'])]
+                }
+        bookList.append(bStr)
+    # cleanups
+    for bo in bookList:
+        if '_normTitle' in bo:
+            del bo['_normTitle']
+    return {'books' : bookList}
 
 def read_and_parse_csv(inFileHandle,skipHeader=False):
     '''
@@ -76,7 +207,7 @@ def read_and_parse_csv(inFileHandle,skipHeader=False):
         raise ValueError('Some untreated special chars to check: "%s"' % ''.join(sorted(list(untreatedCharSet))))
     # 2. apply a normalisation function to each line
     importDate=datetime.now().strftime(DATETIME_STR_FORMAT)
-    normalizer=lambda pL,listSoFar: normalizeParsedLine(pL,listSoFar)
+    normalizer=lambda pL,listSoFar: normalizeParsedBookLine(pL,listSoFar)
     # the book list is built incrementally so that similarities are detectable
     bookList=[]
     for pLi in parsedLines:
@@ -163,7 +294,7 @@ def guessKVFromDict(kvDict):
 guessLanguage=guessKVFromDict(languagesDict)
 guessBooktype=guessKVFromDict(booktypesDict)
 
-def normalizeParsedLine(pLine,bListSoFar):
+def normalizeParsedBookLine(pLine,bListSoFar):
     '''
         converts a base structure into a proper structure, modulo references among tables.
         Returns a structure encoding errors/warnings as well as the result.
@@ -236,25 +367,6 @@ def normalizeParsedLine(pLine,bListSoFar):
         addWarningToStruct(bookStructure,'original_title',pLine['title'])
     else:
         bookStructure['title']=pLine['title']
-    # # similarity checks:
-    # bookStructure.update(makeBookIntoVector(bookStructure['title']))
-    # scalsT=[]
-    # def _copyBo(bo):
-    #     return {
-    #         'title': bo['title'],
-    #         '_linenumber': bo['_linenumber'],
-    #     }
-    # for pBo in bListSoFar:
-    #     scalsT.append((scalProd(pBo['_normTitle'],bookStructure['_normTitle']),_copyBo(pBo)))
-    # scalsT=list(filter(lambda t: t[0]>=SIMILAR_BOOK_THRESHOLD,sorted(scalsT,key=itemgetter(0),reverse=True)))
-    # if len(scalsT) > 0:
-    #     finalWarnings=[]
-    #     for normVal,wBo in scalsT:
-    #         boToInsert=_copyBo(wBo)
-    #         boToInsert['_norm']=normVal
-    #         finalWarnings.append(boToInsert)
-    #     for wbo in finalWarnings:
-    #         addWarningToStruct(bookStructure,'similarity',wbo)
     # author(s)
     if _author is not None:
         bookStructure['authors']+=parseAuthor(_author)
@@ -376,13 +488,13 @@ def extract_author_list(inputContents, preexistingAuthors):
                             _copyAu(pAu),
                             origin,
                         ))
-                scalsA=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsA,key=itemgetter(0),reverse=True)))
-                if len(scalsA) > 0:
+                simScalsA=list(filter(lambda t: t[0]>=SIMILAR_AUTHOR_THRESHOLD,sorted(scalsA,key=itemgetter(0),reverse=True)))
+                if len(simScalsA) > 0:
                     finalWarnings=[]
-                    for normVal,wAu,wOrigin in scalsA:
+                    for normVal,wAu,wOrigin in simScalsA:
                         if not insert_author_to_list(wAu,finalWarnings,[]):
                             auToInsert=_copyAu(wAu)
-                            auToInsert['_norm']=normVal
+                            auToInsert['_similarity']=normVal
                             auToInsert['_origin']=wOrigin
                             finalWarnings.append(auToInsert)
                     for wau in finalWarnings:
@@ -419,42 +531,38 @@ def extract_author_list(inputContents, preexistingAuthors):
 #     db.commit()
 #     return {'deleted_%s' % tableName: deleteds}
 
-def insert_authors_from_json(inFile,db):
+def insert_authors_from_structure(auList,db):
     '''
         Reads an author list off a json file
         and inserts all authors to DB.
         Returns a dictionary from the 2-uple (lastname,firstname) to the database ID
     '''
-    auList=json.load(open(inFile))
-    report={}
+    report={'success': {}, 'errors': {}}
     for nAu in auList:
         # insert new author
         newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'],notes=nAu.get('notes',''))
         status,nObj=dbAddReplaceAuthor(newAuthor,db=db)
         # register the map
         if status:
-            report[(nAu['lastname'],nAu['firstname'])]=nObj.id
+            report['success'][(nAu['lastname'],nAu['firstname'])]=nObj
         else:
-            raise ValueError()
-    db.commit()
+            report['errors'][(nAu['lastname'],nAu['firstname'])]=nObj
     return report
 
-def insert_books_from_json(inFile,authorMap,importingUser,db):
+def insert_books_from_structure(boList,authorMap,importingUser,db,editdate):
     '''
         Given a map (lastname,firstname)->authorId, book insertions are done.
         Returned is a list of IDs in the insertion order.
     '''
     fieldsToKill=['_linenumber','_warnings']
-    boList=json.load(open(inFile))
-    report=[]
+    report={'success': {}, 'errors': {}}
     for nBo in boList:
         # resolve references, adjust fields
-        insertorUser=dbGetUser(importingUser)
-        nBo['lasteditor']=insertorUser.id
-        nBo['house']=insertorUser.house
+        nBo['lasteditor']=importingUser.id
+        nBo['house']=importingUser.house
         _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
         nBo['authors']=_auList
-        nBo['lasteditdate']=datetime.strptime(nBo['lasteditdate'],DATETIME_STR_FORMAT)
+        nBo['lasteditdate']=editdate
         nBo['languages']=','.join(nBo['languages'])
         nBo['id']=None
         #
@@ -466,8 +574,7 @@ def insert_books_from_json(inFile,authorMap,importingUser,db):
         #
         status,nBookReturned=dbAddReplaceBook(newBookObject,db=db)
         if status:
-            report.append(nBookReturned.id)
+            report['success'][nBookReturned.title]=nBookReturned
         else:
-            raise ValueError('Could not insert book "%s" (error: %s' % (newBookObject.title,nBookReturned))
-    db.commit()
+            report['errors'][newBookObject.title]=nBookReturned
     return report
