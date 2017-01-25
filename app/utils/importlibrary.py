@@ -31,6 +31,13 @@ from app.utils.string_vectorizer import (
                                         )
 
 # tools
+def reverseDict(qdict):
+    '''
+        reverses a tag -> name dict
+    '''
+    return {v.name: k for k,v in qdict.items()}
+reverseBooktypesDict=reverseDict(booktypesDict)
+reverseLanguagesDict=reverseDict(languagesDict)
 langFinder=re.compile('\[([A-Z]{2,2})\]')
 abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
 
@@ -563,14 +570,20 @@ def insert_books_from_structure(boList,authorMap,importingUser,db,editdate):
         _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
         nBo['authors']=_auList
         nBo['lasteditdate']=editdate
-        nBo['languages']=','.join(nBo['languages'])
-        nBo['id']=None
-        #
+        nBo['languages']=','.join   (
+                                        reverseLanguagesDict[lang]
+                                        for lang in nBo['languages']
+                                        if lang in reverseLanguagesDict
+                                    )
+        nBo['booktype']=reverseBooktypesDict.get(nBo['booktype'])
+        if nBo['booktype'] is None:
+            nBo['booktype']=booktypesDict.keys()[0]
         for fld in fieldsToKill:
             if fld in nBo:
                 del nBo[fld]
         #
         newBookObject=Book(**nBo)
+        newBookObject.id=None
         #
         status,nBookReturned=dbAddReplaceBook(newBookObject,db=db)
         if status:

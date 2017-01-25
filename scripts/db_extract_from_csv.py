@@ -131,8 +131,9 @@ if __name__=='__main__':
                         inFileHandle=open(inFile)
                         result=logDo(lambda: import_from_bilist_json(inFileHandle,actingUser,db), 'Importing from "%s"' % inFile)
 
-                        print('MUST REFIX LANGUAGES AND BOOKTYPES AND SO ON UPON B INSERTIONS')
-                        print('Insertions: %i authors, %i books.' % tuple(map(len,[authorToId,bookInsertLog])))
+                        print('Insertions: %s' % result)
+
+                        print('\n\n\tMUST FORMAT A SUMMARY OF THE OUTCOME HERE')
 
                         print('Finished.')
                     else:

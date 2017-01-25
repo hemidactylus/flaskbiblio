@@ -154,13 +154,12 @@ But:
             - present in DB (not in new-au-list)
             - similar to either a just-inserted or a prev-existing (warning and added)
             - totally new (added)
-
-DONE SO FAR. IT IS UP TO THE UPLOADING USER TO CONSISTENTLY FIX THE RESULT (i.e. when
-resolving a similarity clash, all books have to be fixed so that they point to the proper author!)
-
         -> All authors to appear in future books must be found in this list! (and inherit the warnings)
     *   books are compared (and warnings raised) if the insertee book is similar to either
         an already inserted one or a db-pre-existing one.
+Import done to the third step (modulo some display of insert outcome for step three)
+
+Must work this into the pages' flow.
 
 THE SIMILARITY CODE FOR BOOKS IS THERE ALL COMMENTED AND NEEDS TO BE RE-POSITIONED IN NEXT STEP
 ALSO IN THE SCRIPT (phase csv-to-json) STATS ARE COMMENTED OUT

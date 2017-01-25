@@ -925,6 +925,7 @@ def ep_deletedata(authors='n'):
     # now deal with books
     report['bo_deleted']=0
     report['bo_errors']=0
+    report['bo_kept']=0
     for qBo in dbGetAll('book'):
         if qBo.house==user.house:
             success,_=dbDeleteBook(qBo.id,db=db,userHouse=user.house)
@@ -932,11 +933,14 @@ def ep_deletedata(authors='n'):
                 report['bo_deleted']+=1
             else:
                 report['bo_errors']+=1
+        else:
+            report['bo_kept']+=1
     # done.
     db.commit()
     # return final counters - (mandatory_msg, key, description)
     reportDesc=[
         (True,'bo_deleted','Books deleted'),
+        (False,'bo_kept','Book kept'),
         (False,'bo_errors','Book with errors'),
         (True,'au_deleted','Authors deleted'),
         (False,'au_kept','Authors kept'),
@@ -946,11 +950,13 @@ def ep_deletedata(authors='n'):
     flashMessage(
         'info',
         'Delete succeeded',
-        '. '.join([
-            '%s: %i' % (desc, report[key])
-            for mandatory,key,desc in reportDesc
-            if key in report and (mandatory or report[key]>0)
-        ])
+        '%s.' % (
+            '. '.join([
+                '%s: %i' % (desc, report[key])
+                for mandatory,key,desc in reportDesc
+                if key in report and (mandatory or report[key]>0)
+            ])
+        )
     )
     return redirect(url_for('ep_advanced'))
 
