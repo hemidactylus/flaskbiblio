@@ -618,3 +618,29 @@ def dbAddReplaceAuthor(newAuthor, db=None):
     if doCommit:
         db.commit()
     return (1,nAuthor)
+
+def erase_db_table(db,tableName):
+    '''
+        Deletes *all* records from a (book,author) table of the given DB
+    '''
+    if db is None:
+        doCommit=True
+        db=dbGetDatabase()
+    else:
+        doCommit=False
+
+    tObject=tableToModel[tableName]
+    tObject.db=db
+    idList=[obj.id for obj in tObject.manager(db).all()]
+    deleteds=[]
+    for oId in idList:
+        if tableName=='book':
+            dbDeleteBook(oId,db=db)
+        elif tableName=='author':
+            dbDeleteAuthor(oId,db=db)
+        else:
+            raise NotImplementedError
+        deleteds.append(oId)
+    if doCommit:
+        db.commit()
+    return {'deleted_%s' % tableName: deleteds}

@@ -40,6 +40,8 @@ reverseBooktypesDict=reverseDict(booktypesDict)
 reverseLanguagesDict=reverseDict(languagesDict)
 langFinder=re.compile('\[([A-Z]{2,2})\]')
 abbreviationFinder=re.compile('[A-Za-z]{1,3}\.')
+# these are for finding authors in book notes of the form "(xxxyyyzzz, with James Ararra)"
+conIntroducers=['mit ', 'con ','with ','avec '] # these must be LOWERCASE
 
 def import_from_bilist_json(inFileHandle,importingUser,db):
     '''
@@ -51,20 +53,23 @@ def import_from_bilist_json(inFileHandle,importingUser,db):
         DOES NOT DO DB-COMMIT BY ITSELF
 
     '''
-    #
-    editdate=datetime.now().strftime(DATETIME_STR_FORMAT)
-    #
-    inputContents=inFileHandle.read()
-    inputBilist=json.loads(inputContents)    
-    authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
-    db.commit()
-    newAuthorMap={
-        (au.lastname,au.firstname): au.id
-        for au in dbGetAll('author')
-    }
-    bookInsertionReport=insert_books_from_structure(inputBilist['books'],newAuthorMap,importingUser,db,editdate)
-    db.commit()
-    return {'authors_insertion': authorInsertionReport, 'books_insertion': bookInsertionReport}
+    if importingUser.canedit:
+        #
+        editdate=datetime.now().strftime(DATETIME_STR_FORMAT)
+        #
+        inputContents=inFileHandle.read()
+        inputBilist=json.loads(inputContents)    
+        authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
+        db.commit()
+        newAuthorMap={
+            (au.lastname,au.firstname): au.id
+            for au in dbGetAll('author')
+        }
+        bookInsertionReport=insert_books_from_structure(inputBilist['books'],newAuthorMap,importingUser,db,editdate)
+        db.commit()
+        return {'authors_insertion': authorInsertionReport, 'books_insertion': bookInsertionReport}
+    else:
+        return {'errors': 'user_cannot_write_to_DB'}
 
 def process_book_list(inFileHandle):
     '''
@@ -255,6 +260,14 @@ def addWarningToStruct(bStruct,wField,wContents):
         bStruct['_warnings'][wField]=[]
     bStruct['_warnings'][wField].append(wContents)
 
+def addNoteToReport(reportDict,key,msg):
+    '''
+        adds a msg to the list of notes for a key
+    '''
+    if key not in reportDict:
+        reportDict[key]=[]
+    reportDict[key].append(msg)
+
 def parseAuthor(auString,comma=True):
     '''
         Author strings are usually in the form 'Lastname, first_name_and_other'.
@@ -379,10 +392,11 @@ def normalizeParsedBookLine(pLine,bListSoFar):
         bookStructure['authors']+=parseAuthor(_author)
     if len(bookStructure['notes'])>0:
         # there might be some more authors hidden here
-        if 'con ' in bookStructure['notes']:
-            conpos=bookStructure['notes'].lower().find('con ')
+        if any(sep in bookStructure['notes'].lower() for sep in conIntroducers):
+            thisSep=list(filter(lambda sep: sep in bookStructure['notes'].lower(), conIntroducers))[0]
+            conpos=bookStructure['notes'].lower().find(thisSep)
             if conpos>=0:
-                notesRest=(bookStructure['notes']+' ')[conpos+len('con '):]
+                notesRest=(bookStructure['notes']+' ')[conpos+len(thisSep):]
                 bookStructure['authors']+=guessAuthors(notesRest)
         # 
         addWarningToStruct(bookStructure,'notes_may_contain_authors',bookStructure['notes'])
@@ -521,23 +535,6 @@ def extract_author_list(inputContents, preexistingAuthors):
         'authors': authorList,
     }
 
-# def erase_db_table(db,tableName):
-#     '''
-#         Deletes *all* records from a table of the given DB
-#     '''
-#     tObject=tableToModel[tableName]
-#     tObject.db=db
-#     idList=[obj.id for obj in tObject.manager(db).all()]
-#     deleteds=[]
-#     for oId in idList:
-#         if tableName=='book':
-#             dbDeleteBook(oId,db=db)
-#         elif tableName=='author':
-#             dbDeleteAuthor(oId,db=db)
-#         deleteds.append(oId)
-#     db.commit()
-#     return {'deleted_%s' % tableName: deleteds}
-
 def insert_authors_from_structure(auList,db):
     '''
         Reads an author list off a json file
@@ -551,9 +548,17 @@ def insert_authors_from_structure(auList,db):
         status,nObj=dbAddReplaceAuthor(newAuthor,db=db)
         # register the map
         if status:
-            report['success'][(nAu['lastname'],nAu['firstname'])]=nObj
+                addNoteToReport(
+                    report['success'],
+                    '%s, %s' % (nAu['lastname'],nAu['firstname']),
+                    'inserted.',
+                )
         else:
-            report['errors'][(nAu['lastname'],nAu['firstname'])]=nObj
+                addNoteToReport(
+                    report['errors'],
+                    '%s, %s' % (nAu['lastname'],nAu['firstname']),
+                    'could not insert (%s).' % nObj,
+                )
     return report
 
 def insert_books_from_structure(boList,authorMap,importingUser,db,editdate):
@@ -567,7 +572,22 @@ def insert_books_from_structure(boList,authorMap,importingUser,db,editdate):
         # resolve references, adjust fields
         nBo['lasteditor']=importingUser.id
         nBo['house']=importingUser.house
-        _auList=','.join([str(authorMap[(au['lastname'],au['firstname'])]) for au in nBo['authors']])
+        #
+        _auIndices=[]
+        for au in nBo['authors']:
+            _aKey=(au['lastname'],au['firstname'])
+            if _aKey in authorMap:
+                _auIndices.append(authorMap[_aKey])
+            else:
+                # issue a warning and skip this author
+                addNoteToReport(
+                    report['errors'],
+                    nBo['title'],
+                    'Did not find author "%s, %s": dropping it from author list.' %
+                        (au['lastname'],au['firstname']),
+                )
+        _auList=','.join(map(str, sorted(_auIndices)))
+        #
         nBo['authors']=_auList
         nBo['lasteditdate']=editdate
         nBo['languages']=','.join   (
@@ -587,7 +607,15 @@ def insert_books_from_structure(boList,authorMap,importingUser,db,editdate):
         #
         status,nBookReturned=dbAddReplaceBook(newBookObject,db=db)
         if status:
-            report['success'][nBookReturned.title]=nBookReturned
+            addNoteToReport(
+                report['success'],
+                nBo['title'],
+                'inserted.',
+            )
         else:
-            report['errors'][newBookObject.title]=nBookReturned
+            addNoteToReport(
+                report['errors'],
+                nBo['title'],
+                'error upon insertion (%s).' % nBookReturned,
+            )
     return report

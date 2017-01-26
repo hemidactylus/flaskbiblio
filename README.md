@@ -160,22 +160,8 @@ But:
 Import done to the third step (modulo some display of insert outcome for step three)
 
 Must work this into the pages' flow.
-
-THE SIMILARITY CODE FOR BOOKS IS THERE ALL COMMENTED AND NEEDS TO BE RE-POSITIONED IN NEXT STEP
-ALSO IN THE SCRIPT (phase csv-to-json) STATS ARE COMMENTED OUT
-
-
-
-                    #     print('Similarity:')
-                    #     # clashing books explicit print
-                    #     def _boFormatMaster(bo,addendum):
-                    #         titString=bo['title'] if len(bo['title'])<50 else '%s ...' % bo['title'][:46]
-                    #         return '%-50s %s' % (titString,addendum) if addendum else '%-50s' % titString
-                    #     _boformatPlain=lambda bo: _boFormatMaster(bo,None)
-                    #     _boformatPlus=lambda bo: _boFormatMaster(bo,'%4.2f' % bo['_norm'])
-                    #     for bo in parsedCSV['booklist']:
-                    #         if '_warnings' in bo and 'similarity' in bo['_warnings']:
-                    #             print('    %s' % _boformatPlain(bo))
-                    #             for wbo in bo['_warnings']['similarity']:
-                    #                 print('        %s' % _boformatPlus(wbo))
-
+The three-step procedure is done and oiled.
+Must:
+    - put this in the pages
+    - equip with minimal explanation/guide
+    - check that exporting and import format are fully compatible.

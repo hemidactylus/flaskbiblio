@@ -23,7 +23,7 @@ def clearToExtract(inFile,outFile):
     '''
         Asks for confirmation of the extraction CSV -> structure in plain text
     '''
-    # if it does exist, erase it
+    # if it does exist, get confirmation
     if os.path.isfile(inFile):
         if os.path.isfile(outFile):
             overwritePrompt='Are you sure you want to extract data from "%s" onto EXISTING file "%s"?'
@@ -127,15 +127,23 @@ if __name__=='__main__':
                 if clearToImport(inFile,importingUser):
                     actingUser=logDo(lambda:dbGetUser(importingUser),'Checking for user validity')
                     if actingUser is not None:
-                        db=logDo(lambda: dbGetDatabase(),'Opening DB')
-                        inFileHandle=open(inFile)
-                        result=logDo(lambda: import_from_bilist_json(inFileHandle,actingUser,db), 'Importing from "%s"' % inFile)
-
-                        print('Insertions: %s' % result)
-
-                        print('\n\n\tMUST FORMAT A SUMMARY OF THE OUTCOME HERE')
-
-                        print('Finished.')
+                        if actingUser.canedit:
+                            db=logDo(lambda: dbGetDatabase(),'Opening DB')
+                            inFileHandle=open(inFile)
+                            result=logDo(lambda: import_from_bilist_json(inFileHandle,actingUser,db), 'Importing from "%s"' % inFile)
+                            print('Insertion log:')
+                            for k,v in sorted(result.items()):
+                                print('  # %s' % k)
+                                for k2,v2 in sorted(v.items()):
+                                    if len(v2):
+                                        print('    * %s' % k2)
+                                        for it,lst in sorted(v2.items()):
+                                            print('      - "%s"' % it)
+                                            for msg in lst:
+                                                print('        %s' % msg)
+                            print('Finished.')
+                        else:
+                            print('User <%s> has no write privileges on the DB. Operation failed' % importingUser)
                     else:
                         print('User <%s> not recognised in the DB. Operation failed' % importingUser)
                 else:
