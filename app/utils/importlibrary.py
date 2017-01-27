@@ -60,13 +60,13 @@ def import_from_bilist_json(inFileHandle,importingUser,db):
         inputContents=inFileHandle.read()
         inputBilist=json.loads(inputContents)    
         authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
-        db.commit()
         newAuthorMap={
             (au.lastname,au.firstname): au.id
             for au in dbGetAll('author')
         }
+        newAuthorMap.update(authorInsertionReport['authoridmap'])
+        del authorInsertionReport['authoridmap']
         bookInsertionReport=insert_books_from_structure(inputBilist['books'],newAuthorMap,importingUser,db,editdate)
-        db.commit()
         return {'authors_insertion': authorInsertionReport, 'books_insertion': bookInsertionReport}
     else:
         return {'errors': 'user_cannot_write_to_DB'}
@@ -493,10 +493,11 @@ def extract_author_list(inputContents, preexistingAuthors):
             au['notes']=au.get('notes','')
             # handle insertion of author 'au' to the full list
             # found=False
-            found=insert_author_to_list(au,authorList,preexistingList,bStr['_linenumber'])
+            found=insert_author_to_list(au,authorList,preexistingList,bStr.get('_linenumber'))
             if not found:
                 au.update(makeAuthorIntoVector(au['lastname'],au['firstname']))
-                au['_books']=[bStr['_linenumber']]
+                if '_linenumber' in bStr:
+                    au['_books']=[bStr['_linenumber']]
                 # check if the new author is too similar to any existing one
                 scalsA=[]
                 for origin,aulist in zip(['new','present'],[authorList,preexistingList]):
@@ -541,7 +542,7 @@ def insert_authors_from_structure(auList,db):
         and inserts all authors to DB.
         Returns a dictionary from the 2-uple (lastname,firstname) to the database ID
     '''
-    report={'success': {}, 'errors': {}}
+    report={'success': {}, 'errors': {}, 'authoridmap': {}}
     for nAu in auList:
         # insert new author
         newAuthor=Author(id=None,firstname=nAu['firstname'],lastname=nAu['lastname'],notes=nAu.get('notes',''))
@@ -553,6 +554,8 @@ def insert_authors_from_structure(auList,db):
                     '%s, %s' % (nAu['lastname'],nAu['firstname']),
                     'inserted.',
                 )
+                auKey=(nObj.lastname,nObj.firstname)
+                report['authoridmap'][auKey]=nObj.id
         else:
                 addNoteToReport(
                     report['errors'],

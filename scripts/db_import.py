@@ -141,6 +141,7 @@ if __name__=='__main__':
                                             print('      - "%s"' % it)
                                             for msg in lst:
                                                 print('        %s' % msg)
+                            db.commit()
                             print('Finished.')
                         else:
                             print('User <%s> has no write privileges on the DB. Operation failed' % importingUser)
