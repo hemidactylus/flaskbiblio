@@ -937,7 +937,7 @@ def ep_importstep(_step):
                     'filename': storedFileName,
                     'reportname': None,
                 }
-                return redirect(url_for('ep_importsucceeded',step=step))
+                return redirect(url_for('ep_importsucceeded',_step=step))
             elif step==2:
                 # bookJson to fullJson
                 fullJson=process_book_list(fileString)
@@ -964,7 +964,7 @@ def ep_importstep(_step):
                     'filename': storedFileName,
                     'reportname': reportFileName,
                 }
-                return redirect(url_for('ep_importsucceeded',step=step))
+                return redirect(url_for('ep_importsucceeded',_step=step))
             elif step==3:
                 # fullJson to database
                 db=dbGetDatabase()
@@ -979,7 +979,7 @@ def ep_importstep(_step):
                     'reportname': reportFileName,
                 }
                 db.commit()
-                return redirect(url_for('ep_importsucceeded',step=step))
+                return redirect(url_for('ep_importsucceeded',_step=step))
             else:
                 flashMessage('critical','Malformed request','inconsistent value of "step".')
                 return redirect(url_for('ep_importdata'))
@@ -988,11 +988,11 @@ def ep_importstep(_step):
             return redirect(url_for('ep_importdata'))
     else:
         # finalise the appearance of the dialog and display it
-        showCheckbox=[True,False,True][step-1]
+        showCheckbox=[True,False,False][step-1]
         checkboxLabel=[
             'Skip a first header line',
             '(none)',
-            'Do not stop on warnings',
+            '(none)',
         ][step-1]
         formTitle=[
             'CSV to book-JSON conversion',
@@ -1009,19 +1009,47 @@ def ep_importstep(_step):
                                     checkboxLabel=checkboxLabel,
                                 )
 
-@app.route('/importsucceeded/<step>')
+@app.route('/importsucceeded/<_step>')
 @login_required
-def ep_importsucceeded(step):
+def ep_importsucceeded(_step):
     user=g.user
-    if 'returnfile' in session:
+    if 'returnfile' in session and _step in ['1','2','3']:
         # here the user lands after submitting a file for one of the import steps
         # Display a report and provide a download link
         # prepare the report
+        step=int(_step)
         if session['returnfile']['reportname'] is not None:
             # load report-file to display it
             reportFileName=os.path.join(TEMP_DIRECTORY,session['returnfile']['reportname'])
             loadedReport=json.load(open(reportFileName))
-            report=' + '.join(loadedReport.keys())
+            # prepare report to display
+            report=[] # a triple for each line to display in the page
+            if step==3:
+                # compile a list of report items
+                report.append(('Authors inserted (%i)' % len(loadedReport['authors_insertion']['success']),'',''))
+                for eAu,eErrList in loadedReport['authors_insertion']['success'].items():
+                    report.append(('',eAu,', '.join(eErrList)))
+                report.append(('Books inserted (%i)' % len(loadedReport['books_insertion']['success']),'',''))
+                for bAu,bErrList in loadedReport['books_insertion']['success'].items():
+                    report.append(('',bAu,', '.join(bErrList)))
+                if len(loadedReport['authors_insertion']['errors'])>0:
+                    report.append(('Error while inserting authors:','',''))
+                    for eAu,eErrList in loadedReport['authors_insertion']['errors'].items():
+                        report.append(('',eAu,', '.join(eErrList)))
+                if len(loadedReport['books_insertion']['errors'])>0:
+                    report.append(('Error while inserting books:','',''))
+                    for bAu,bErrList in loadedReport['books_insertion']['errors'].items():
+                        report.append(('',bAu,', '.join(bErrList)))
+            elif step==2:
+                report.append(('Authors with warnings (%i)' % len(loadedReport['authors']),'',''))
+                for au in loadedReport['authors']:
+                    report.append(('',au,''))
+                report.append(('Books with warnings (%i)' % len(loadedReport['books']),'',''))
+                for bo in loadedReport['books']:
+                    report.append(('',bo,''))
+            else:
+                #should never happen
+                report=('report',('',('',json.dumps(loadedReport))))
             os.remove(reportFileName)
         else:
             report=None
@@ -1045,7 +1073,10 @@ def ep_getimportresults(step):
     if 'returnfile' in session:
         servedFileName=os.path.join(TEMP_DIRECTORY,session['returnfile']['filename'])
         loadedFile=open(servedFileName).read()
-        fileTitle='retStep_%i.json' % session['returnfile']['step']
+        fileTitle='import-Step%i-%s.json' % (
+            session['returnfile']['step'],
+            datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
+        )
         bIO = BytesIO()
         bIO.write(loadedFile.encode())
         bIO.seek(0)

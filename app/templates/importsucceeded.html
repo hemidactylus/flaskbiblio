@@ -8,19 +8,52 @@
     {{ title }}
   </h2>
   <hr>
-  <div class="row row-grid">
-    {% if nextstep %}
-      Download the resulting file <a href="{{ url_for('ep_getimportresults',step=step) }}">here</a>.
+  {% if nextstep %}
+      <div class="row row-grid">
+        Download the resulting file for further processing.
+      </div>
+      <div class="row row-grid">    
+        <a class="btn btn-success" href="{{ url_for('ep_getimportresults',step=step) }}">Download file</a>
+      </div>
     {% else %}
-      The import operation has succeeded. Go to the <a href="{{ url_for('ep_index') }}">main page</a>.
+      <div class="row row-grid">
+        The import operation has succeeded
+      </div>
+      <div class="row row-grid">    
+        <a class="btn btn-success" href="{{ url_for('ep_index') }}">Close import</a>
+      </div>
     {% endif %}
-  </div>
-  <div>
-    Back to the <a href="{{ url_for('ep_importdata') }}">import menu</a>
+  <div class="row row-grid">
+    <a class="btn btn-primary" href="{{ url_for('ep_importdata') }}">Back to Import menu</a>
   </div>
   {% if report %}
   <div class="row row-grid">
-    {{ report }}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th class="col col-sm-4">Operation report:</th>
+          <th class="col col-sm-4"></th>
+          <th class="col col-sm-4"></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for triple in report %}
+        <tr>
+          <td>
+            <strong>
+              {{ triple[0] }}
+            </strong>
+          </td>
+          <td>
+            {{ triple[1] }}
+          </td>
+          <td>
+            {{ triple[2] }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
   </div>
   {% endif %}
 </div>

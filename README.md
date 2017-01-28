@@ -167,10 +167,7 @@ Status:
                 B3 -> upload button, noWarnings_checkbox, proceed button
                         -> (does) -> user gets a detailed on-screen report.
 
-            It'd be nice to give the user a new 'report' page + the download prompt!
+            * DONE It'd be nice to give the user a new 'report' page + the download prompt!
 
-* file naming with date etc
-* nice page on report/download
-* report
-* in step 3 implement using the 'do not stop on warnings' checkbox (i.e. whether to commit or not)
 * align the script-import to work on input as list of (rows, i.e.) strings
+* a minimal guide on the main import page
