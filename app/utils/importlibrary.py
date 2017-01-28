@@ -57,7 +57,7 @@ def import_from_bilist_json(inFileHandle,importingUser,db):
         #
         editdate=datetime.now().strftime(DATETIME_STR_FORMAT)
         #
-        inputContents=inFileHandle.read()
+        inputContents='\n'.join(inFileHandle)
         inputBilist=json.loads(inputContents)    
         authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
         newAuthorMap={
@@ -93,7 +93,7 @@ def process_book_list(inFileHandle):
     authorsFromDB=[_auObjCopy(au) for au in list(dbGetAll('author'))]
     booksFromDB=[_boObjCopy(bo) for bo in list(dbGetAll('book'))]
     # cache the input stream
-    inputContents=inFileHandle.read()
+    inputContents='\n'.join(inFileHandle)
     # prepare author list with annotations
     auList=extract_author_list(inputContents,authorsFromDB)
     # prepare book list with annotations
@@ -239,14 +239,16 @@ def parseBookLine(csvLine):
     '''
         csvLine[0] is the line number, csvLine[1] the actual list of entries
     '''
-    if len(csvLine[1])>=5:
+    if len(csvLine[1])>=2:
+        # add dummy empty items to handle absence of languages and following fields
+        _line=csvLine[1]+['']*3
         return plainifyStruct({
             'linenumber': str(csvLine[0]+1),
-            'author': csvLine[1][0],
-            'title': csvLine[1][1],
-            'languages': csvLine[1][2],
-            'inhouse': csvLine[1][3],
-            'notes': csvLine[1][4],
+            'author': _line[0],
+            'title': _line[1],
+            'languages': _line[2],
+            'inhouse': _line[3],
+            'notes': _line[4],
         })
     else:
         return None

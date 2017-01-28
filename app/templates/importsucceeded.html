@@ -1,0 +1,27 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+ <div class="container">
+  <h2>
+    <i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true"></i>
+    {{ title }}
+  </h2>
+  <hr>
+  <div class="row row-grid">
+    {% if nextstep %}
+      Download the resulting file <a href="{{ url_for('ep_getimportresults',step=step) }}">here</a>.
+    {% else %}
+      The import operation has succeeded. Go to the <a href="{{ url_for('ep_index') }}">main page</a>.
+    {% endif %}
+  </div>
+  <div>
+    Back to the <a href="{{ url_for('ep_importdata') }}">import menu</a>
+  </div>
+  {% if report %}
+  <div class="row row-grid">
+    {{ report }}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

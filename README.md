@@ -169,31 +169,8 @@ Status:
 
             It'd be nice to give the user a new 'report' page + the download prompt!
 
-@app.route('/importdata')
-@login_required
-def ep_importdata():
-    user=g.user
-    if not user.canedit:
-        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
-        return redirect(url_for('ep_advanced'))
-    # temp return file
-    session['reportfile']=b'Ah,ah,ah\n'
-    # end temp
-    return render_template('importdata.html')
-
-@app.route('/importdone')
-@login_required
-def ep_importdone():
-    if 'reportfile' in session:
-        bIO = BytesIO()
-        bIO.write(session['reportfile'])
-        bIO.seek(0)
-        del session['reportfile']
-        return send_file    (
-                                bIO,
-                                attachment_filename='aaa.txt',
-                                as_attachment=True,
-                            )
-    else:
-        flashMessage('critical','NO','Dove vai?')
-        return redirect(url_for('ep_importdata'))
+* file naming with date etc
+* nice page on report/download
+* report
+* in step 3 implement using the 'do not stop on warnings' checkbox (i.e. whether to commit or not)
+* align the script-import to work on input as list of (rows, i.e.) strings

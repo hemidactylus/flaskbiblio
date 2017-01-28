@@ -27,3 +27,6 @@ else:
 
 # Are multiple books with the same title allowed? (suggested: yes)
 ALLOW_DUPLICATE_BOOKS=True
+
+# temporary directory for storing import-related files
+TEMP_DIRECTORY=os.path.join(basedir,'app/temp')

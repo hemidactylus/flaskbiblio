@@ -1,10 +1,22 @@
-from flask import render_template, flash, redirect, session, url_for, request, g, send_file
+from flask import   (
+                        render_template,
+                        flash,
+                        redirect,
+                        session,
+                        url_for,
+                        request,
+                        g,
+                        send_file,
+                        send_from_directory,
+                    )
 from flask_login import  login_user, logout_user, current_user, login_required
 from datetime import datetime
 from werkzeug.datastructures import MultiDict
 from markupsafe import Markup
 from io import BytesIO
 import json
+import uuid
+import os
 
 from app import app, lm
 from .forms import (
@@ -27,6 +39,7 @@ from config import (
                         SIMILAR_AUTHOR_THRESHOLD,
                         SIMILAR_BOOK_THRESHOLD,
                         FILENAME_DATETIME_STR_FORMAT,
+                        TEMP_DIRECTORY,
                     )
 
 from app.utils.string_vectorizer import makeIntoVector, scalProd
@@ -898,7 +911,7 @@ def ep_importstep(_step):
     # validation of parameter:
     # Steps 1,2,3 -> csv-to-bookjson, bookjson-to-fulljson, fulljson-to-DB
     if _step not in ['1','2','3']:
-        flashMessage('critical','Malformed link','the provided link is invalid.')
+        flashMessage('critical','Malformed link','this link is invalid.')
         return(redirect(url_for('ep_index')))
     else:
         step=int(_step)
@@ -916,9 +929,60 @@ def ep_importstep(_step):
             if step==1:
                 # csv to json
                 parsedCSV=read_and_parse_csv(fileString,skipHeader=form.checkbox.data)
-                return json.dumps(parsedCSV,indent=4,sort_keys=True)
+                # store the response in a local file, ready to serve it.
+                storedFileName='step%i_%s.json' % (step,uuid.uuid4())
+                json.dump(parsedCSV,open(os.path.join(TEMP_DIRECTORY,storedFileName),'w'),indent=4,sort_keys=True)
+                session['returnfile']={
+                    'step': step,
+                    'filename': storedFileName,
+                    'reportname': None,
+                }
+                return redirect(url_for('ep_importsucceeded',step=step))
+            elif step==2:
+                # bookJson to fullJson
+                fullJson=process_book_list(fileString)
+                storedFileName='step%i_%s.json' % (step,uuid.uuid4())
+                json.dump(fullJson,open(os.path.join(TEMP_DIRECTORY,storedFileName),'w'),indent=4,sort_keys=True)
+                # prepare a report
+                warningJson={
+                    'books': [
+                        bs['title']
+                        for bs in fullJson['books']
+                        if '_warnings' in bs
+                    ],
+                    'authors': [
+                        '%s, %s' % (au['lastname'],au['firstname'])
+                        for au in fullJson['authors']
+                        if '_warnings' in au
+                    ],
+                }
+                reportFileName='report_step%i_%s.json' % (step,uuid.uuid4())
+                json.dump(warningJson,open(os.path.join(TEMP_DIRECTORY,reportFileName),'w'),indent=4,sort_keys=True)
+                #
+                session['returnfile']={
+                    'step': step,
+                    'filename': storedFileName,
+                    'reportname': reportFileName,
+                }
+                return redirect(url_for('ep_importsucceeded',step=step))
+            elif step==3:
+                # fullJson to database
+                db=dbGetDatabase()
+                resultReport=import_from_bilist_json(fileString,user,db)
+                # store the report
+                reportFileName='report_step%i_%s.json' % (step,uuid.uuid4())
+                json.dump(resultReport,open(os.path.join(TEMP_DIRECTORY,reportFileName),'w'),indent=4,sort_keys=True)
+                # done
+                session['returnfile']={
+                    'step': step,
+                    'filename': None,
+                    'reportname': reportFileName,
+                }
+                db.commit()
+                return redirect(url_for('ep_importsucceeded',step=step))
             else:
-                return('Not Implemented Yet.')
+                flashMessage('critical','Malformed request','inconsistent value of "step".')
+                return redirect(url_for('ep_importdata'))
         except Exception as e:
             flashMessage('critical','Error during operation','exception "%s" occurred.' % e)
             return redirect(url_for('ep_importdata'))
@@ -944,6 +1008,56 @@ def ep_importstep(_step):
                                     showCheckbox=showCheckbox,
                                     checkboxLabel=checkboxLabel,
                                 )
+
+@app.route('/importsucceeded/<step>')
+@login_required
+def ep_importsucceeded(step):
+    user=g.user
+    if 'returnfile' in session:
+        # here the user lands after submitting a file for one of the import steps
+        # Display a report and provide a download link
+        # prepare the report
+        if session['returnfile']['reportname'] is not None:
+            # load report-file to display it
+            reportFileName=os.path.join(TEMP_DIRECTORY,session['returnfile']['reportname'])
+            loadedReport=json.load(open(reportFileName))
+            report=' + '.join(loadedReport.keys())
+            os.remove(reportFileName)
+        else:
+            report=None
+        # display everything
+        title='Operation successful'
+        return render_template  (
+                                    'importsucceeded.html',
+                                    user=user,
+                                    step=step,
+                                    title=title,
+                                    nextstep=int(step)!=3,
+                                    report=report,
+                                )
+    else:
+        flashMessage('critical','Malformed link','this link is invalid.')
+        return redirect(url_for('ep_importdata'))
+
+@app.route('/getimportresults/<step>')
+@login_required
+def ep_getimportresults(step):
+    if 'returnfile' in session:
+        servedFileName=os.path.join(TEMP_DIRECTORY,session['returnfile']['filename'])
+        loadedFile=open(servedFileName).read()
+        fileTitle='retStep_%i.json' % session['returnfile']['step']
+        bIO = BytesIO()
+        bIO.write(loadedFile.encode())
+        bIO.seek(0)
+        os.remove(servedFileName)
+        return send_file    (
+                                bIO,
+                                attachment_filename=fileTitle,
+                                as_attachment=True,
+                            )
+    else:
+        flashMessage('critical','Malformed link','this link is invalid.')
+        return redirect(url_for('ep_importdata'))
 
 @app.route('/emptyhouse')
 @login_required
