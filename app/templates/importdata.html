@@ -1,0 +1,67 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+<div class="container">
+  <h2>
+    <i class="fa fa-upload fa-lg" aria-hidden="true"></i>
+    Import data to the library
+  </h2>
+  <hr>
+  <div>
+    Explanation HERE
+        <ol>
+            <li>
+                Step one (optional): convert a <strong>CSV</strong>
+                into a book-<strong>JSON</strong>
+            </li>
+            <li>
+                Step two: convert a book-<strong>JSON</strong> into
+                a full-<strong>JSON</strong>
+            </li>
+            <li>
+                Step three: actual <strong>import</strong> of books and authors
+                into the library
+            </li>
+        </ol>
+  </div>
+  <hr>
+  <div class="row row-grid">
+    <div class="col-sm-4">
+      1. <strong>CSV</strong> to book-<strong>JSON</strong>
+    </div>
+    <div class="col-sm-2">
+      <a class="btn btn-success btn-block" href="{{url_for('ep_importstep',_step=1)}}" role="button">
+        <i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true"></i>
+        Convert ...
+      </a>
+    </div>
+  </div>
+  {% if user.canedit %}
+    <div class="row row-grid">
+      <div class="col-sm-4">
+        2. Book-<strong>JSON</strong> to full-<strong>JSON</strong>
+      </div>
+      <div class="col-sm-2">
+        <a class="btn btn-success btn-block" href="{{url_for('ep_importstep',_step=2)}}" role="button">
+          <i class="fa fa-hand-peace-o fa-lg" aria-hidden="true"></i>
+          Convert ...
+        </a>
+      </div>
+    </div>
+  {% endif %}
+  {% if user.canedit %}
+    <div class="row row-grid">
+      <div class="col-sm-4">
+        3. Actual <strong>import</strong>
+      </div>
+      <div class="col-sm-2">
+        <a class="btn btn-success btn-block" href="{{url_for('ep_importstep',_step=3)}}" role="button">
+          <i class="fa fa-hand-spock-o fa-lg" aria-hidden="true"></i>
+          Import ...
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

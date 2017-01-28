@@ -881,7 +881,27 @@ def ep_importdata():
     if not user.canedit:
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_advanced'))
-    return 'ToDo Import'
+    return render_template  (
+                                'importdata.html',
+                                user=user,
+                            )
+
+@app.route('/importstep/<_step>')
+@login_required
+def ep_importstep(_step):
+    # validation of parameter
+    if _step not in ['1','2','3']:
+        flashMessage('critical','Malformed link','the provided link is invalid.')
+        return(redirect(url_for('ep_index')))
+    else:
+        step=int(_step)
+    #
+    user=g.user
+    if not user.canedit:
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        return redirect(url_for('ep_advanced'))
+    
+    return('Step %i' % step)
 
 @app.route('/emptyhouse')
 @login_required

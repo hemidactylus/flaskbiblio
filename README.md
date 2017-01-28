@@ -139,29 +139,61 @@ SimilaritySlider
 * The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
 
 ## Currently doing:
-Import: moving the tools to external lib separated from the cmdline tool, in order to reuse it
-from the web app.
-A first step is the (optional) csv to book-json step. No similarity checks yet.
-Some warnings are issued already, namely those independent of authorlist, other books.
-(problem in translating status, booktype, issues with notes etc).
-The result is a 'books'-only json structure.
 
-Second step: massaging the book-list into:
-    - a new book list
-    - an author list
-But:
-    *   authors are collected from all insertee books and filtered by:
-            - present in DB (not in new-au-list)
-            - similar to either a just-inserted or a prev-existing (warning and added)
-            - totally new (added)
-        -> All authors to appear in future books must be found in this list! (and inherit the warnings)
-    *   books are compared (and warnings raised) if the insertee book is similar to either
-        an already inserted one or a db-pre-existing one.
-Import done to the third step (modulo some display of insert outcome for step three)
+IMPORT:
 
-Must work this into the pages' flow.
-The three-step procedure is done and oiled.
-Must:
-    - put this in the pages
-    - equip with minimal explanation/guide
-    - check that exporting and import format are fully compatible.
+Procedure is three-steps
+(1) optionally from csv to json with books. Basic validation within single book only
+(2) from book-json to book/author json: similarity checks, within and wrt DB items.
+    Warnings issued are to fix now
+(3) actual (transactional) import into actual DB. Detailed report, some fallbacks
+    and omissions.
+
+The exported structure coming from the export can be used directly at step 3 if it is books/authors,
+in step 2 if it is books only (in which case author notes are lost, obviously)
+
+Status:
+    * tools: finished
+    * scripts using the tools: finished
+    * web interface for the procedure: to do.
+        -   checkbox 'ignore warnings and just go ahead'
+        -   one screen per each step, all from a single page
+            with a minimal guide and buttons to individual steps
+        
+            * base screen has buttons B1, B2, B3:
+
+                B1 -> upload_button, proceed_button -> (does the thing) -> user gets to download book-json
+                B2 -> upload button, proceed button -> (does) -> user gets to download full-json
+                B3 -> upload button, noWarnings_checkbox, proceed button
+                        -> (does) -> user gets a detailed on-screen report.
+
+            It'd be nice to give the user a new 'report' page + the download prompt!
+
+@app.route('/importdata')
+@login_required
+def ep_importdata():
+    user=g.user
+    if not user.canedit:
+        flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
+        return redirect(url_for('ep_advanced'))
+    # temp return file
+    session['reportfile']=b'Ah,ah,ah\n'
+    # end temp
+    return render_template('importdata.html')
+
+@app.route('/importdone')
+@login_required
+def ep_importdone():
+    if 'reportfile' in session:
+        bIO = BytesIO()
+        bIO.write(session['reportfile'])
+        bIO.seek(0)
+        del session['reportfile']
+        return send_file    (
+                                bIO,
+                                attachment_filename='aaa.txt',
+                                as_attachment=True,
+                            )
+    else:
+        flashMessage('critical','NO','Dove vai?')
+        return redirect(url_for('ep_importdata'))

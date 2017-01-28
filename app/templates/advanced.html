@@ -10,10 +10,10 @@
   <hr>
   <div class="row row-grid">
     <div class="col-sm-4">
-      Export data to a json file
+      Export data to a <strong>JSON</strong> file
     </div>
-    <div class="col-sm-4">
-      <a class="btn btn-success" href="{{url_for('ep_exportdata')}}" role="button">
+    <div class="col-sm-2">
+      <a class="btn btn-success btn-block" href="{{url_for('ep_exportdata')}}" role="button">
         <i class="fa fa-download fa-lg" aria-hidden="true"></i>
         Export ...
       </a>
@@ -22,10 +22,10 @@
   {% if user.canedit %}
     <div class="row row-grid">
       <div class="col-sm-4">
-        Import data from a json file
+        Import data from a <strong>CSV</strong> or a <strong>JSON</strong> file
       </div>
-      <div class="col-sm-4">
-        <a class="btn btn-success" href="{{url_for('ep_importdata')}}" role="button">
+      <div class="col-sm-2">
+        <a class="btn btn-success btn-block" href="{{url_for('ep_importdata')}}" role="button">
           <i class="fa fa-upload fa-lg" aria-hidden="true"></i>
           Import ...
         </a>
@@ -35,10 +35,10 @@
   {% if user.canedit %}
     <div class="row row-grid">
       <div class="col-sm-4">
-        Delete data from the house
+        Permanently delete data from the house
       </div>
-      <div class="col-sm-4">
-        <a class="btn btn-danger" href="{{url_for('ep_emptyhouse')}}" role="button">
+      <div class="col-sm-2">
+        <a class="btn btn-danger btn-block" href="{{url_for('ep_emptyhouse')}}" role="button">
           <i class="fa fa-bomb fa-lg" aria-hidden="true"></i>
           Delete ...
         </a>
