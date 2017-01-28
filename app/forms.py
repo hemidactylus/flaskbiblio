@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms import (
                         StringField,
                         BooleanField,
@@ -33,6 +34,11 @@ class ExportDataForm(FlaskForm):
     def setHouses(self,hoPairList,default):
         self.house.choices=[('','(Include all houses)')]+_sortNameDescPair(hoPairList)
         self.house.data=default
+
+class UploadDataForm(FlaskForm):
+    file=FileField(validators=[FileRequired()])
+    checkbox=BooleanField('checkbox', default=False)
+    submit = SubmitField('Process data')
 
 class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired(),AsciiOnly()])

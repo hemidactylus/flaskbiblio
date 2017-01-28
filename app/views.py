@@ -17,6 +17,7 @@ from .forms import (
                         SearchBookForm,
                         SearchAuthorForm,
                         ExportDataForm,
+                        UploadDataForm,
                     )
 from app.utils.stringlists import unrollStringList
 
@@ -29,6 +30,11 @@ from config import (
                     )
 
 from app.utils.string_vectorizer import makeIntoVector, scalProd
+from app.utils.importlibrary import (
+                                        read_and_parse_csv,
+                                        process_book_list,
+                                        import_from_bilist_json,
+                                    )
 from app.database.dbtools import    (
                                         dbGetDatabase,
                                         dbGetAll,
@@ -886,22 +892,58 @@ def ep_importdata():
                                 user=user,
                             )
 
-@app.route('/importstep/<_step>')
+@app.route('/importstep/<_step>',methods=['GET','POST'])
 @login_required
 def ep_importstep(_step):
-    # validation of parameter
+    # validation of parameter:
+    # Steps 1,2,3 -> csv-to-bookjson, bookjson-to-fulljson, fulljson-to-DB
     if _step not in ['1','2','3']:
         flashMessage('critical','Malformed link','the provided link is invalid.')
         return(redirect(url_for('ep_index')))
     else:
         step=int(_step)
-    #
     user=g.user
     if not user.canedit:
         flashMessage('error','Cannot proceed','user "%s" has no write privileges.' % user.name)
         return redirect(url_for('ep_advanced'))
-    
-    return('Step %i' % step)
+    #
+    form=UploadDataForm()
+    if form.validate_on_submit():
+        # actual handling of uploaded data according to the processing step
+        try:
+            # make the uploaded file into a string and pass it to the full import procedure
+            fileString=form.file.data.read().decode('utf-8').split('\n')
+            if step==1:
+                # csv to json
+                parsedCSV=read_and_parse_csv(fileString,skipHeader=form.checkbox.data)
+                return json.dumps(parsedCSV,indent=4,sort_keys=True)
+            else:
+                return('Not Implemented Yet.')
+        except Exception as e:
+            flashMessage('critical','Error during operation','exception "%s" occurred.' % e)
+            return redirect(url_for('ep_importdata'))
+    else:
+        # finalise the appearance of the dialog and display it
+        showCheckbox=[True,False,True][step-1]
+        checkboxLabel=[
+            'Skip a first header line',
+            '(none)',
+            'Do not stop on warnings',
+        ][step-1]
+        formTitle=[
+            'CSV to book-JSON conversion',
+            'book-JSON to full-JSON conversion',
+            'Import full-JSON',
+        ][step-1]
+        return render_template  (
+                                    'uploaddataform.html',
+                                    form=form,
+                                    user=user,
+                                    step=step,
+                                    title=formTitle,
+                                    showCheckbox=showCheckbox,
+                                    checkboxLabel=checkboxLabel,
+                                )
 
 @app.route('/emptyhouse')
 @login_required

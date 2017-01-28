@@ -1,0 +1,68 @@
+{% extends "bootbase.html" %}
+
+<!-- step=1,2,3 for csv-to-bookjson, bookjson-to-fulljson, fulljson-to-DB operations -->
+
+{% block content %}
+  {{ super() }}
+ <div class="container">
+  <h2>
+    <i class="fa 
+              {{ 
+                [
+                  'fa-refresh',
+                  'fa-check-square-o',
+                  'fa-flag-checkered',
+                ][step-1]
+              }}
+              fa-lg" aria-hidden="true"></i>
+    {{ title }}
+  </h2>
+  <hr>
+  <form action="" method="post" name="uploaddataform" enctype="multipart/form-data">
+    <div class="form-group">
+     {{ form.hidden_tag() }}
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="file">
+            {{ 
+              [
+                'Select a CSV file',
+                'Select a book-JSON',
+                'Select a full-JSON',
+              ][step-1]
+            }}
+          </label>
+        </div>
+        <div class="col-sm-4">
+          <label class="btn btn-success btn-file">
+            Browse ...
+            {{ form.file(style="display: none;",tabindex=2) }}
+          </label>
+          {% for error in form.file.errors %}
+            <span style="color: red;">{{ error }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% if showCheckbox %}
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          <label for="checkbox">
+              {{ 
+                checkboxLabel
+              }}
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.checkbox(tabindex=4) }}
+        </div>
+      </div>
+      {% endif %}
+      <div class="row row-grid">
+        <div class="col-sm-4">
+          {{ form.submit(class_='btn btn-primary',tabindex=5) }}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

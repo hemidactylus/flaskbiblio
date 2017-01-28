@@ -204,7 +204,7 @@ def read_and_parse_csv(inFileHandle,skipHeader=False):
 
     '''
     # 1. make valid lines into base structures
-    parsedLines=list(
+    _parsedLines=list(
         map(
             parseBookLine,
             [
@@ -212,6 +212,7 @@ def read_and_parse_csv(inFileHandle,skipHeader=False):
             ][(1 if skipHeader else 0):]
         )
     )
+    parsedLines=[pl for pl in _parsedLines if pl is not None]
     # 1b. must check for non-ascii chars here already and if necessary treat the various warnings
     passingCharacters=set(list(validCharacters)) | set(translatedCharacters.keys())
     untreatedCharSet=list(filter(lambda c: c not in passingCharacters, collectCharacters(parsedLines)))
@@ -238,14 +239,17 @@ def parseBookLine(csvLine):
     '''
         csvLine[0] is the line number, csvLine[1] the actual list of entries
     '''
-    return plainifyStruct({
-        'linenumber': str(csvLine[0]+1),
-        'author': csvLine[1][0],
-        'title': csvLine[1][1],
-        'languages': csvLine[1][2],
-        'inhouse': csvLine[1][3],
-        'notes': csvLine[1][4],
-    })
+    if len(csvLine[1])>=5:
+        return plainifyStruct({
+            'linenumber': str(csvLine[0]+1),
+            'author': csvLine[1][0],
+            'title': csvLine[1][1],
+            'languages': csvLine[1][2],
+            'inhouse': csvLine[1][3],
+            'notes': csvLine[1][4],
+        })
+    else:
+        return None
 
 def plainifyStruct(inStruct):
     return {k:ascifiiString(v) for k,v in inStruct.items()}
