@@ -169,5 +169,4 @@ Status:
 
             * DONE It'd be nice to give the user a new 'report' page + the download prompt!
 
-* align the script-import to work on input as list of (rows, i.e.) strings
 * a minimal guide on the main import page

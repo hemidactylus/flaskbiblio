@@ -78,12 +78,6 @@
                     Houses
                   </a>
                 </li>
-                <li>
-                  <a href="{{ url_for('ep_advanced') }}">
-                    <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
-                    Advanced
-                  </a>
-                </li>
               {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -104,6 +98,13 @@
                       <i class="fa fa-key fa-lg" aria-hidden="true"></i>
                       Change Password
                     </a></li>
+                    <li role="separator" class="divider"></li>
+                    <li>
+                      <a href="{{ url_for('ep_advanced') }}">
+                        <i class="fa fa-cogs fa-lg" aria-hidden="true"></i>
+                        Advanced
+                      </a>
+                    </li>
                     <li role="separator" class="divider"></li>
                     <li><a href="{{ url_for('ep_logout') }}">
                       <i class="fa fa-power-off fa-lg" aria-hidden="true"></i>
