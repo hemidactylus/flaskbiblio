@@ -129,3 +129,15 @@
 {% block content %}
   {{util.flashed_messages(dismissible=True)}}
 {% endblock %}
+
+{% block footer %}
+  <hr>
+  <div align="center">
+    <small>
+      BiblioMansarda (flaskbiblio):
+      <a href="{{url_for('ep_about')}}">about</a>
+      -
+      <a href="https://github.com/hemidactylus/flaskbiblio">github</a>
+    </small>
+  </div>
+{% endblock %}

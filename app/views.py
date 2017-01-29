@@ -1106,6 +1106,10 @@ def ep_getimportresults(step):
         flashMessage('critical','Malformed link','this link is invalid.')
         return redirect(url_for('ep_importdata'))
 
+@app.route('/about')
+def ep_about():
+    return 'About TODO'
+
 @app.route('/emptyhouse')
 @login_required
 def ep_emptyhouse():
