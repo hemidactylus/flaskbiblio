@@ -1,0 +1,97 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+<div class="container">
+  <h2>
+    <i class="fa fa-upload fa-lg" aria-hidden="true"></i>
+    Import data to the library
+  </h2>
+  <hr>
+  <div>
+    Back to the <a href="{{  url_for('ep_importdata') }}">Import page</a>
+  </div>
+  <hr>
+  <div>
+    <h3>How to proceed</h3>
+    <ol>
+        <li>
+            First (optional) step: convert a <strong>CSV</strong>
+            into a &ldquo;book-<strong>JSON</strong>&rdquo;.
+            <ul>
+                <li>
+                    Some basic validations are performed, after which
+                    a file is downloaded which is ready for the next step.
+                    Each item in the file is a book with structured fields.
+                </li>
+                <li>
+                    Each line in the input file has a comma-separated structure such as:
+                    <div style="text-indent: 25px;">
+                        <code>
+                            "Steinbeck, John", The Grapes of Wrath
+                            (paperback; with James Another),[EN][IT],V,Given to a friend
+                        </code>
+                    </div>
+                    i.e. author, title possibly with notes in parentheses,
+                    list of languages in brackets, V or M (for out- or in-house respectively)
+                    and additional status notes for the V case.
+                </li>
+                <li>
+                    Educated guesses are made at additional authors
+                    mentioned in the book notes and in the parsing of other fields.
+                </li>
+                <li>
+                    The <strong>JSON</strong> thus obtained requires fixes to the
+                    provided &ldquo;_warnings&rdquo; before being fed to the next step.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Second step: convert a book-<strong>JSON</strong> into
+            a &ldquo;full-<strong>JSON</strong>&rdquo;.
+            <ul>
+                <li>
+                    The book list is made into a double list
+                    of authors and books, ready for the next step.
+                </li>
+                <li>
+                    Both lists are validated, checking for exact and approximate
+                    duplicates within the list and against items already in the library.
+                </li>
+                <li>
+                    If necessary, items are annotated with &ldquo;_warnings&rdquo;,
+                    which sould be fixed before feeding the <strong>JSON</strong> to the third step.
+                </li>
+                <li>
+                    Books and authors requiring attention are reported to the user.
+                </li>
+            </ul>
+        </li>
+        <li>
+            Third step: actual <strong>import</strong> of books and authors
+            into the library
+            <ul>
+                <li>
+                    The double list with books and authors is used
+                    to populate the library.
+                </li>
+                <li>
+                    New books are inserted in the importing user's house,
+                    adding required authors as described in the &ldquo;authors&rdquo;
+                    section of the full-<strong>JSON</strong>.
+                </li>
+                <li>
+                    A detailed report of the insertion process is provided at the end of
+                    the procedure.
+                </li>
+            </ul>
+        </li>
+    </ol>
+  </div>
+  <hr>
+  <div>
+    Back to the <a href="{{  url_for('ep_importdata') }}">Import page</a>
+  </div>
+  <hr>
+</div>
+{% endblock %}

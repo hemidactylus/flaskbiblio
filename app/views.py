@@ -893,6 +893,15 @@ def ep_exportdata():
                                     title='Export data',
                                 )
 
+@app.route('/importhelp')
+@login_required
+def ep_importhelp():
+    user=g.user
+    return render_template  (
+                                'importhelp.html',
+                                user=user,
+                            )
+
 @app.route('/importdata')
 @login_required
 def ep_importdata():
@@ -1051,6 +1060,7 @@ def ep_importsucceeded(_step):
                 #should never happen
                 report=('report',('',('',json.dumps(loadedReport))))
             os.remove(reportFileName)
+            session['returnfile']['reportname']=None
         else:
             report=None
         # display everything
@@ -1070,22 +1080,28 @@ def ep_importsucceeded(_step):
 @app.route('/getimportresults/<step>')
 @login_required
 def ep_getimportresults(step):
-    if 'returnfile' in session:
+    if 'returnfile' in session and session['returnfile']['filename'] is not None:
         servedFileName=os.path.join(TEMP_DIRECTORY,session['returnfile']['filename'])
-        loadedFile=open(servedFileName).read()
-        fileTitle='import-Step%i-%s.json' % (
-            session['returnfile']['step'],
-            datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
-        )
-        bIO = BytesIO()
-        bIO.write(loadedFile.encode())
-        bIO.seek(0)
-        os.remove(servedFileName)
-        return send_file    (
-                                bIO,
-                                attachment_filename=fileTitle,
-                                as_attachment=True,
-                            )
+        if os.path.isfile(servedFileName):
+            loadedFile=open(servedFileName).read()
+            fileTitle='import-Step%i-%s.json' % (
+                session['returnfile']['step'],
+                datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
+            )
+            bIO = BytesIO()
+            bIO.write(loadedFile.encode())
+            bIO.seek(0)
+            os.remove(servedFileName)
+            session['returnfile']['filename']=None
+            return send_file    (
+                                    bIO,
+                                    attachment_filename=fileTitle,
+                                    as_attachment=True,
+                                )
+            del session['returnfile']
+        else:
+            flashMessage('critical','Malformed link','this link is invalid.')
+            return redirect(url_for('ep_importdata'))
     else:
         flashMessage('critical','Malformed link','this link is invalid.')
         return redirect(url_for('ep_importdata'))

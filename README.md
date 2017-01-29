@@ -107,16 +107,13 @@ index page.
 
 **Export Biblio Data** done to a single-file json structure with all references resolved.
 
-> To Do: a proper import
+**ImportData**
+A full-fledged import procedure integrated into the app,
+with validation and a three-step generation of reports and json structures
+to fix and then re-submit up to the final step, the actual DB insertion.
+(The import libraries are shared by the scripts and the web interface).
 
 ## Major/Future TODOs
-
-StructuredImport
-> Split the erase-books-and-authors and the import-stuff functions and think carefully
-> about the authorlist phase, so that several lists of books can be imported
-> sequentially, possibly belonging to different houses.
-> Make this an import/export feature of the app
-> This is now to be aligned with the export one-json format!
 
 RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears
@@ -134,39 +131,4 @@ AddreplaceAutomate
 SimilaritySlider
 > The threshold for author/book similarity can become a slider one day.
 
-## Cleanups to do
-
-* The `remember_me` checkbox: either it disappears or it gets implemented (how exactly?).
-
 ## Currently doing:
-
-IMPORT:
-
-Procedure is three-steps
-(1) optionally from csv to json with books. Basic validation within single book only
-(2) from book-json to book/author json: similarity checks, within and wrt DB items.
-    Warnings issued are to fix now
-(3) actual (transactional) import into actual DB. Detailed report, some fallbacks
-    and omissions.
-
-The exported structure coming from the export can be used directly at step 3 if it is books/authors,
-in step 2 if it is books only (in which case author notes are lost, obviously)
-
-Status:
-    * tools: finished
-    * scripts using the tools: finished
-    * web interface for the procedure: to do.
-        -   checkbox 'ignore warnings and just go ahead'
-        -   one screen per each step, all from a single page
-            with a minimal guide and buttons to individual steps
-        
-            * base screen has buttons B1, B2, B3:
-
-                B1 -> upload_button, proceed_button -> (does the thing) -> user gets to download book-json
-                B2 -> upload button, proceed button -> (does) -> user gets to download full-json
-                B3 -> upload button, noWarnings_checkbox, proceed button
-                        -> (does) -> user gets a detailed on-screen report.
-
-            * DONE It'd be nice to give the user a new 'report' page + the download prompt!
-
-* a minimal guide on the main import page
