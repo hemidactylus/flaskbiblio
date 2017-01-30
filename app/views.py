@@ -1108,7 +1108,11 @@ def ep_getimportresults(step):
 
 @app.route('/about')
 def ep_about():
-    return 'About TODO'
+    user=g.user
+    return render_template  (
+                                'about.html',
+                                user=user,
+                            )
 
 @app.route('/emptyhouse')
 @login_required

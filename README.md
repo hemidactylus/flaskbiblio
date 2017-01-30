@@ -132,5 +132,4 @@ SimilaritySlider
 > The threshold for author/book similarity can become a slider one day.
 
 ## Currently doing:
-    About page, to do
-    Footer line, to add to each template!
+    About page, make a bit better

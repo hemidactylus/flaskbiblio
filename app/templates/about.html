@@ -1,0 +1,36 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+  {{ super() }}
+<div class="container">
+  <h2>
+    <i class="fa fa-commenting-o fa-lg" aria-hidden="true"></i>
+    About BiblioMansarda
+  </h2>
+  <hr>
+  <div>
+    <h3>&ldquo;BiblioMansarda&rdquo;, a simple Flask application to manage a multi-tenant library.</h3>
+    <ol class="list-unstyled">
+        <li>
+            Designed by hemidactylus
+        </li>
+        <li>
+            Developed across 2016-2017
+        </li>
+        <li>
+            Source code hosted on <a href="https://github.com/hemidactylus/flaskbiblio" target="_blank">github</a>
+        </li>
+    </ol>
+  </div>
+  <hr>
+  <div>
+    Back to <a href="{{  url_for('ep_index') }}">Index</a>
+  </div>
+  <hr>
+</div>
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}
+
+{% endblock %}
