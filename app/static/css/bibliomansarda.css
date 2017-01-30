@@ -6,12 +6,3 @@
 body {
     padding-bottom: 30px;
 }
-
-.vertical-align {
-    display: flex;
-    align-items: center;
-}
-
-.highlyspaced {
-    line-height:250%;
-}
