@@ -5,26 +5,44 @@
 <div class="container">
   <h2>
     <i class="fa fa-commenting-o fa-lg" aria-hidden="true"></i>
-    About BiblioMansarda
+    About &ldquo;BiblioMansarda&rdquo;
   </h2>
   <hr>
   <div>
-    <h3>&ldquo;BiblioMansarda&rdquo;, a simple Flask application to manage a multi-tenant library.</h3>
-    <ol class="list-unstyled">
-        <li>
-            Designed by hemidactylus
-        </li>
-        <li>
-            Developed across 2016-2017
-        </li>
-        <li>
-            Source code hosted on <a href="https://github.com/hemidactylus/flaskbiblio" target="_blank">github</a>
-        </li>
-    </ol>
-  </div>
+    <div class="row row-grid vertical-align">
+        <div class="col-sm-6">
+            <div align="center" class="highlyspaced"><strong>
+                a simple Flask application to manage a delocalised library
+            </strong></div>
+            <ol class="list-unstyled">
+                <li>
+                  Designed and developed by hemidactylus
+                </li>
+                <li>
+                  Created in December 2016 - January 2017
+                </li>
+                <li>
+                  Uses
+                    <a href="http://flask.pocoo.org/">flask</a>,
+                    <a href="http://getbootstrap.com/">bootstrap</a>,
+                    <a href="http://jinja.pocoo.org/">jinja2</a>,
+                    <a href="http://fontawesome.io/">font-awesome</a> (...)
+                </li>
+                <li>
+                  Source code hosted on <a href="https://github.com/hemidactylus/flaskbiblio" target="_blank">github</a>
+                </li>
+            </ol>
+        </div>
+        <div class="col-sm-6">
+            <img class=".img-responsive" src="/static/images/fox.jpg" alt="Fox" width="100%">
+        </div>
+    </div>
   <hr>
   <div>
-    Back to <a href="{{  url_for('ep_index') }}">Index</a>
+    <a href="{{  url_for('ep_index') }}">
+        <i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+        Back to Index
+    </a>
   </div>
   <hr>
 </div>
