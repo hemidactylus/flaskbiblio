@@ -536,7 +536,6 @@ def ep_login():
         return redirect(url_for('ep_index'))
     form = LoginForm()
     if form.validate_on_submit():
-        session['remember_me'] = form.remember_me.data
         qUser=dbGetUser(form.username.data)
         if qUser and qUser.checkPassword(form.password.data):
             login_user(load_user(qUser.id))

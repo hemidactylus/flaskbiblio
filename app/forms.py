@@ -44,7 +44,6 @@ class LoginForm(FlaskForm):
     username = StringField('UserName', validators=[DataRequired(),AsciiOnly()])
     password = PasswordField('Password', validators=[DataRequired(),AsciiOnly()])
     login = SubmitField('Log In')
-    remember_me = BooleanField('remember_me', default=False)
 
 class EditAuthorForm(FlaskForm):
     force = BooleanField('force',default=False)
