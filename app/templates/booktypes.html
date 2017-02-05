@@ -11,11 +11,14 @@
   <table class="table table-hover">
     <thead>
       <tr>
-        <th class="col col-sm-4">
+        <th class="col col-sm-3">
           Code
         </th>
-        <th class="col col-sm-8">
+        <th class="col col-sm-3">
           Booktype
+        </th>
+        <th class="col col-sm-6">
+          Description
         </th>
       </tr>
     </thead>
@@ -27,6 +30,9 @@
             <a href="{{ url_for('ep_books',booktype=booktype.tag) }}">
               {{ booktype.name }}
             </a>
+          </td>
+          <td>
+            {{ booktype.description }}
           </td>
       </tr>
     {% endfor %}

@@ -175,6 +175,7 @@ class Language(AutoModel):
 class Booktype(AutoModel):
     tag=str
     name=str
+    description=str
 
     def __lt__(self,other):
         return self.name.lower() < other.name.lower()
