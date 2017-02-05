@@ -5,3 +5,4 @@ __pycache__
 sensible_config.py
 app/database/biblio.db
 tests_utils/BibliotecaMansarda.csv
+scripts/db_template.py
