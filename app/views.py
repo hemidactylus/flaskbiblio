@@ -151,7 +151,23 @@ def ep_houses():
                         'strong': qU.name==user.name,
                     })
         else:
-            hObj.users=len([u for u in allUsers if u.house==hObj.name])
+            nUsers=len([u for u in allUsers if u.house==hObj.name and u.name!=user.name])
+            hObj.users=[
+                {
+                    'name': user.name,
+                    'strong': True,
+                }
+            ] if hObj.name==user.house else []
+            hObj.users.append(
+                {
+                    'name': '%s%i user%s' % (
+                            '+ ' if hObj.name==user.house else '',
+                            nUsers,
+                            's' if nUsers>1 else '',
+                        ),
+                    'strong': False,
+                }
+            )
     #
     return render_template  (
                                 "houses.html",

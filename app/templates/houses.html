@@ -29,23 +29,19 @@
             {{ house.description }}
           </td>
           <td>
-            {% if user.canedit %}
-              <ul class="list-unstyled">
-                {% for quser in house.users %}
-                  <li>
-                    {% if quser.strong %}
-                      <strong>
-                    {% endif %}
-                    {{ quser.name }}
-                    {% if quser.strong %}
-                      </strong>
-                    {% endif %}
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              {{ house.users }}
-            {% endif %}
+            <ul class="list-unstyled">
+              {% for quser in house.users %}
+                <li>
+                  {% if quser.strong %}
+                    <strong>
+                  {% endif %}
+                  {{ quser.name }}
+                  {% if quser.strong %}
+                    </strong>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
           </td>
           <td>
             {{ house.nbooks }}
