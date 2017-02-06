@@ -115,6 +115,10 @@ to fix and then re-submit up to the final step, the actual DB insertion.
 
 ## Major/Future TODOs
 
+TimeZones
+> Each user has a timezone field to store their own representation format for time.
+> (easy for the last-login, some conversions on utc-stored required for the last-edit on books etc)
+
 RewriteEdits
 > The whole handling of the edit endpoints is very cumbersome and bears
 > some code duplication. Consider rewriting the whole of it (also
