@@ -3,10 +3,16 @@
 from orm import Database
 import os
 from werkzeug.datastructures import ImmutableMultiDict
-
+from pytz import timezone
 from datetime import datetime
 
-from config import DB_DIRECTORY, DB_NAME, DATETIME_STR_FORMAT, ALLOW_DUPLICATE_BOOKS
+from config import (
+    DB_DIRECTORY,
+    DB_NAME,
+    DATETIME_STR_FORMAT,
+    ALLOW_DUPLICATE_BOOKS,
+    USERS_TIMEZONE,
+)
 from app.utils.stringlists import   (
                                         rollStringList,
                                         unrollStringList,
@@ -491,9 +497,10 @@ def registerLogin(userId):
     '''
     db=dbGetDatabase()
     User.db=db
+    localTimezone=timezone(USERS_TIMEZONE)
     try:
         qUser=User.manager(db).get(userId)
-        qUser.lastlogindate=datetime.now().strftime(DATETIME_STR_FORMAT)
+        qUser.lastlogindate=datetime.now(localTimezone).strftime(DATETIME_STR_FORMAT)
         qUser.update()
         db.commit()
         return qUser.lastlogindate

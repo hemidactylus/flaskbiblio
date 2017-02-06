@@ -14,6 +14,7 @@ from sensible_config import SECRET_KEY
 DATETIME_STR_FORMAT = '%Y-%m-%d %H:%M:%S'
 SHORT_DATETIME_STR_FORMAT = '%d/%m/%y'
 FILENAME_DATETIME_STR_FORMAT = '%Y_%m_%d'
+USERS_TIMEZONE='Europe/Rome'
 
 # similarity thresholds for author (last- and complete-) names
 SIMILAR_USE_DIGRAMS=True # otherwise: use single-letter grams
