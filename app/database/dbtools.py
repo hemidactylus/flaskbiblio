@@ -5,6 +5,7 @@ import os
 from werkzeug.datastructures import ImmutableMultiDict
 from pytz import timezone
 from datetime import datetime
+import time
 
 from config import (
     DB_DIRECTORY,
@@ -183,6 +184,13 @@ def makeBookSorter(sName):
         def btsorter(bo):
             return bo.booktype
         return btsorter
+    elif sName=='lastedit':
+        def lesorter(bo):
+            try:
+                return -time.mktime(datetime.strptime(bo.lasteditdate,DATETIME_STR_FORMAT).timetuple())
+            except:
+                return 0
+        return lesorter
     else:
         return None
 

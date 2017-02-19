@@ -80,7 +80,10 @@ class SearchAuthorForm(FlaskForm):
     firstname=StringField('firstname',validators=[AsciiOnly()])
     lastname=StringField('lastname',validators=[AsciiOnly()])
     # sorting options
-    sortby=SelectField('sortby', choices=[('lastname','Last name'),('firstname','First name')])
+    sortby=SelectField('sortby', choices=[
+        ('lastname','Last name'),
+        ('firstname','First name'),
+    ])
     #
     submit=SubmitField('Search')
 
@@ -95,7 +98,11 @@ class SearchBookForm(FlaskForm):
     def setHouses(self,hoPairList):
         self.house.choices=[('-1','<Optional>'),('-2','(Include all houses)')]+_sortNameDescPair(hoPairList)
     # sorting options
-    sortby=SelectField('sortby', choices=[('title','Title'),('booktype','Booktype')])
+    sortby=SelectField('sortby', choices=[
+        ('title','Title'),
+        ('booktype','Booktype'),
+        ('lastedit','Last edit'),
+    ])
     #
     submit=SubmitField('Search')
 
