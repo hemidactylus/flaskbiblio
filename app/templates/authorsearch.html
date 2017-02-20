@@ -39,15 +39,25 @@
       </div>
       <div class="row row-grid">
         <div class="col-sm-2">
+          <label for="similarity">
+            Search similar
+          </label>
+        </div>
+        <div class="col-sm-4">
+            {{ form.similarity(tabindex=3) }}
+        </div>
+      </div>
+      <div class="row row-grid">
+        <div class="col-sm-2">
           <label for="sortby">
             Sort by
           </label>
         </div>
         <div class="col-sm-2">
-          {{ form.sortby(class_="form-control",width="50%",tabindex=3) }}
+          {{ form.sortby(class_="form-control",width="50%",tabindex=4) }}
         </div>
         <div class="col-sm-1">
-          {{ form.submit(class_='btn btn-primary',tabindex=4) }}
+          {{ form.submit(class_='btn btn-primary',tabindex=5) }}
         </div>
         <div class="col-sm-1">
           <a class="btn btn-warning" href="{{url_for('ep_authors')}}" role="button" tabindex=5>

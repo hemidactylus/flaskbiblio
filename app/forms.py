@@ -79,6 +79,7 @@ class SearchAuthorForm(FlaskForm):
     # search criteria
     firstname=StringField('firstname',validators=[AsciiOnly()])
     lastname=StringField('lastname',validators=[AsciiOnly()])
+    similarity=BooleanField('similarity')
     # sorting options
     sortby=SelectField('sortby', choices=[
         ('lastname','Last name'),
@@ -95,6 +96,7 @@ class SearchBookForm(FlaskForm):
     language=SelectField('language')
     inhouse=SelectField('inhouse',choices=[('-1','<Optional>'),('1','In-house'),('0','Out')])
     house=SelectField('house')
+    similarity=BooleanField('similarity')
     def setHouses(self,hoPairList):
         self.house.choices=[('-1','<Optional>'),('-2','(Include all houses)')]+_sortNameDescPair(hoPairList)
     # sorting options

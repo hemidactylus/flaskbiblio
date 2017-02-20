@@ -25,6 +25,8 @@ if SIMILAR_USE_DIGRAMS:
 else:
     SIMILAR_AUTHOR_THRESHOLD=0.90
     SIMILAR_BOOK_THRESHOLD=0.93
+# what are the smallest tokens to employ in similar-search in book titles?
+MINIMUM_SIMILAR_BOOK_TOKEN_SIZE=4
 
 # Are multiple books with the same title allowed? (suggested: yes)
 ALLOW_DUPLICATE_BOOKS=True

@@ -18,11 +18,17 @@
             Title:
           </label>
         </div>
-        <div class="col-sm-10">
+        <div class="col-sm-8">
           {{ form.title(size=30, class_="form-control", placeholder="Not mandatory", tabindex=1) }}
           {% for error in form.title.errors %}
             <span style="color: red;">{{ error }}</span>
           {% endfor %}     
+        </div>
+        <div class="col-sm-2">
+          <label for="similarity">
+            Similar
+          </label>
+            {{ form.similarity(tabindex=2) }}
         </div>
       </div>
       <div class="row row-grid">
@@ -32,7 +38,7 @@
           </label>
         </div>
         <div class="col-sm-10">
-          {{ form.author(class_="form-control",width="50%",tabindex=2) }}
+          {{ form.author(class_="form-control",width="50%",tabindex=3) }}
         </div>
       </div>
 
@@ -46,25 +52,25 @@
           <label for="booktype">
             Booktype:
           </label>
-          {{ form.booktype(class_="form-control",width="50%",tabindex=3) }}
+          {{ form.booktype(class_="form-control",width="50%",tabindex=4) }}
         </div>
         <div class="col-sm-3">
           <label for="language">
             Language:
           </label>
-          {{ form.language(class_="form-control",tabindex=4) }}
+          {{ form.language(class_="form-control",tabindex=5) }}
         </div>
         <div class="col-sm-3">
           <label for="house">
             House:
           </label>
-          {{ form.house(class_="form-control",width="75%",tabindex=5) }}
+          {{ form.house(class_="form-control",width="75%",tabindex=6) }}
         </div>
         <div class="col-sm-2">
           <label for="inhouse">
             In-House:
           </label>
-          {{ form.inhouse(class_="form-control",width="75%",tabindex=6) }}
+          {{ form.inhouse(class_="form-control",width="75%",tabindex=7) }}
         </div>
       </div>
 
@@ -75,10 +81,10 @@
           </label>
         </div>
         <div class="col-sm-2">
-          {{ form.sortby(class_="form-control",tabindex=7) }}
+          {{ form.sortby(class_="form-control",tabindex=8) }}
         </div>
         <div class="col-sm-1 col-sm-offset-4">
-          {{ form.submit(class_='btn btn-primary',tabindex=8) }}
+          {{ form.submit(class_='btn btn-primary',tabindex=9) }}
         </div>
         <div class="col-sm-1">
           <a class="btn btn-warning"

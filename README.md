@@ -16,7 +16,8 @@ Books have a _in-house_ attribute, marking whether the book is in its rightful l
 or if it is elsewhere. Also, the system includes several "houses", representing different
 libraries.
 
-Searches can combine a number of search criteria and results are presented paginated.
+Searches can combine a number of search criteria and results are presented paginated. Searches for author name
+and book title can be set to look for "similar-looking" words or whole fields.
 
 ## Installation and setup
 

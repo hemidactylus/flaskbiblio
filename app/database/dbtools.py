@@ -13,6 +13,9 @@ from config import (
     DATETIME_STR_FORMAT,
     ALLOW_DUPLICATE_BOOKS,
     USERS_TIMEZONE,
+    SIMILAR_AUTHOR_THRESHOLD,
+    SIMILAR_BOOK_THRESHOLD,
+    MINIMUM_SIMILAR_BOOK_TOKEN_SIZE,
 )
 from app.utils.stringlists import   (
                                         rollStringList,
@@ -20,6 +23,10 @@ from app.utils.stringlists import   (
                                         addToStringList,
                                         expungeFromStringList,
                                     )
+from app.utils.string_vectorizer import (
+                                            makeIntoVector,
+                                            scalProd,
+                                        )
 from app.database.models import (
                                     tableToModel, 
                                     User,
@@ -113,7 +120,7 @@ def dbTableFilterQuery( tableName, startfrom=0,
         result['firstitem']=-1
     return (result,trimmedlist)
 
-def makeBookFilter(fName,fValue):
+def makeBookFilter(fName,fValue,useSimilarity=False):
     '''
         Interprets an argument name/vale in the query string
         and produces a corresponding boolean filter
@@ -123,10 +130,22 @@ def makeBookFilter(fName,fValue):
             return int(v) in unrollStringList(bo.authors)
         return aufinder
     elif fName=='title':
-        def tifinder(bo,v=fValue):
-            #return v.lower() in bo.title.lower()
-            return any(vpart.lower() in bo.title.lower() for vpart in v.split(' '))
-        return tifinder
+        if useSimilarity:
+            # prepare and store vector
+            vVector=makeIntoVector(fValue)
+            if sum(vVector.values()):
+                def tifinder(bo,vec=vVector):
+                    return (scalProd(vec,makeIntoVector(bo.title))>=SIMILAR_BOOK_THRESHOLD) or \
+                        any(scalProd(vec,makeIntoVector(tok))>=SIMILAR_BOOK_THRESHOLD
+                            for tok in bo.title.split(' ')
+                            if len(tok)>=MINIMUM_SIMILAR_BOOK_TOKEN_SIZE)
+                return tifinder
+            else:
+                return makeBookFilter(fName,fValue,useSimilarity=False)
+        else:
+            def tifinder(bo,v=fValue):
+                return any(vpart.lower() in bo.title.lower() for vpart in v.split(' '))
+            return tifinder
     elif fName=='booktype':
         def btfinder(bo,v=fValue):
             return bo.booktype.upper()==v.upper()
@@ -151,18 +170,38 @@ def makeBookFilter(fName,fValue):
     else:
         return lambda: True
 
-def makeAuthorFilter(fName, fValue):
+def makeAuthorFilter(fName, fValue, useSimilarity=False):
     '''
         Same as above but for the 'author' objects
     '''
     if fName=='firstname':
-        def fnfinder(au,v=fValue):
-            return v.lower() in au.firstname.lower()
-        return fnfinder
+        if useSimilarity:
+            # prepare and store vector
+            vVector=makeIntoVector(fValue)
+            if sum(vVector.values()):
+                def fnfinder(au,vec=vVector):
+                    return scalProd(vec,makeIntoVector(au.firstname))>=SIMILAR_AUTHOR_THRESHOLD
+                return fnfinder
+            else:
+                return makeAuthorFilter(fName,fValue,useSimilarity=False)
+        else:
+            def fnfinder(au,v=fValue):
+                return v.lower() in au.firstname.lower()
+            return fnfinder
     elif fName=='lastname':
-        def lnfinder(au,v=fValue):
-            return v.lower() in au.lastname.lower()
-        return lnfinder
+        if useSimilarity:
+            # prepare and store vector
+            vVector=makeIntoVector(fValue)
+            if sum(vVector.values()):
+                def lnfinder(au,vec=vVector):
+                    return scalProd(vec,makeIntoVector(au.lastname))>=SIMILAR_AUTHOR_THRESHOLD
+                return lnfinder
+            else:
+                return makeAuthorFilter(fName,fValue,useSimilarity=False)
+        else:
+            def lnfinder(au,v=fValue):
+                return v.lower() in au.lastname.lower()
+            return lnfinder
     elif fName=='name':
         def nafinder(au,v=fValue):
             return  (v.lower() in au.firstname.lower()) or \
@@ -224,6 +263,14 @@ def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
     startfrom=0
     sorter=None
     # queryArgs is in principle a multidict:
+    # first determine if searches are by-similarity
+    useSimilarity=False
+    if 'similarity' in queryArgs:
+        for v in queryArgs.getlist('similarity'):
+            try:
+                useSimilarity=bool(int(v))
+            except:
+                pass
     for k in queryArgs.keys():
         for v in queryArgs.getlist(k):
             # first deal with the non-filtering arguments
@@ -231,8 +278,10 @@ def dbQueryBooks(   queryArgs=ImmutableMultiDict(), resultsperpage=100,
                 startfrom=int(v)
             elif k=='sortby':
                 sorter=makeBookSorter(v)
+            elif k=='similarity':
+                pass # already dealt with
             else:
-                filters.append(makeBookFilter(k,v))
+                filters.append(makeBookFilter(k,v,useSimilarity=useSimilarity))
     #
     result,booklist=dbTableFilterQuery('book',startfrom,resultsperpage,filters,sorter)
     if resolve:
@@ -252,6 +301,14 @@ def dbQueryAuthors( queryArgs=ImmutableMultiDict(), resultsperpage=100):
     startfrom=0
     sorter=None
     # queryArgs is in principle a multidict:
+    # first determine if searches are by-similarity
+    useSimilarity=False
+    if 'similarity' in queryArgs:
+        for v in queryArgs.getlist('similarity'):
+            try:
+                useSimilarity=bool(int(v))
+            except:
+                pass
     for k in queryArgs.keys():
         for v in queryArgs.getlist(k):
             # first deal with the non-filtering arguments
@@ -259,8 +316,10 @@ def dbQueryAuthors( queryArgs=ImmutableMultiDict(), resultsperpage=100):
                 startfrom=int(v)
             elif k=='sortby':
                 sorter=makeAuthorSorter(v)
+            elif k=='similarity':
+                pass # already dealt with
             else:
-                filters.append(makeAuthorFilter(k,v))
+                filters.append(makeAuthorFilter(k,v,useSimilarity=useSimilarity))
     #
     result,authorlist=dbTableFilterQuery('author',startfrom,resultsperpage,filters,sorter)
     return result,authorlist

@@ -442,6 +442,7 @@ def ep_authorsearch():
         if form.lastname.data:
             authorSearchArgs['lastname']=form.lastname.data
         authorSearchArgs['sortby']=form.sortby.data
+        authorSearchArgs['similarity']=int(form.similarity.data)
         return redirect(url_for('ep_authors',**authorSearchArgs))
     else:
         return render_template  (
@@ -479,6 +480,7 @@ def ep_booksearch():
         if form.inhouse.data!='-1':
             bookSearchArgs['inhouse']=form.inhouse.data
         bookSearchArgs['sortby']=form.sortby.data
+        bookSearchArgs['similarity']=int(form.similarity.data)
         return redirect(url_for('ep_books',**bookSearchArgs))
     else:
         return render_template  (
