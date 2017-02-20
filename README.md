@@ -116,9 +116,6 @@ to fix and then re-submit up to the final step, the actual DB insertion.
 
 ## Major/Future TODOs
 
-SimilaritySearches
-> Title/author searches may be exact or similarity-vector based! (this would be changed in user settings)
-
 Location within house
 > A field, alongside Notes, with location information: shelf, room, row, and so on. (not structured internally)
 > Possibly AUTOMATICALLY SUGGESTED
