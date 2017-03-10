@@ -31,6 +31,9 @@ class House(AutoModel):
     def __lt__(self,other):
         return self.name.lower() < other.name.lower()
 
+    def __str__(self):
+        return '%s(%s)' % (self.name,self.description)
+
 class Book(AutoModel):
     title=str
     authors=str
