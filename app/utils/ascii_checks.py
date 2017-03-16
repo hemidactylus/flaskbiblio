@@ -8,6 +8,7 @@ translatedCharacters={
     u'ä': 'ae',
     u'æ': 'ae',
     u'ç': 'c',
+    u'č': 'c',
     u'è': 'e',
     u'é': 'e',
     u'í': 'i',
