@@ -56,7 +56,7 @@
               {% if editable %}
                 {{ form.booktype(class_="form-control",tabindex=3) }}
               {% else %}
-                {{ form.booktype(class_="form-control",disabled='disabled',tabindex=3) }}
+                {{ form.booktype(class_="form-control normalcursor",disabled='disabled',tabindex=3) }}
               {% endif %}
               {% for error in form.booktype.errors %}
                 <span style="color: red;">{{ error }}</span>
@@ -144,7 +144,7 @@
                   {% if editable %}
                     {{ form.languages(size=80, class_="list-inline",tabindex=9) }}
                   {% else %}
-                    {{ form.languages(size=80, class_="list-inline",disabled='disabled',tabindex=9) }}
+                    {{ form.languages(size=80, class_="list-inline normalcursor",disabled='disabled',tabindex=9) }}
                   {% endif %}
                   {% for error in form.languages.errors %}
                     <span style="color: red;">{{ error }}</span>
@@ -171,14 +171,14 @@
                   {% if editable %}
                     {{ form.house(class_="form-control",tabindex=10) }}
                   {% else %}
-                    {{ form.house(class_="form-control",disabled='disabled',tabindex=10) }}
+                    {{ form.house(class_="form-control normalcursor",disabled='disabled',tabindex=10) }}
                   {% endif %}
             </div>
             <div class="col col-sm-2">
                   {% if editable %}
                     {{ form.inhouse(tabindex=11) }}
                   {% else %}
-                    {{ form.inhouse(disabled='disabled',tabindex=11) }}
+                    {{ form.inhouse(disabled='disabled',tabindex=11,class_='normalcursor') }}
                   {% endif %}
                 <label for="inhouse">
                   In-house

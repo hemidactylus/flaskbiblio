@@ -31,6 +31,8 @@ class MultiCheckboxField(SelectMultipleField):
         if 'disabled' in kwargs:
             disDict['disabled']=kwargs['disabled']
             del kwargs['disabled']
+        if 'class_' in kwargs:
+            disDict['class']=kwargs['class_']
         if 'tabindex' in kwargs:
             disDict['tabindex']=kwargs['tabindex']
             del kwargs['tabindex']

@@ -6,3 +6,7 @@
 body {
     padding-bottom: 30px;
 }
+
+*.normalcursor {
+    cursor: default !important;
+}
