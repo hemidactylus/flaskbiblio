@@ -31,8 +31,9 @@ class ExportDataForm(FlaskForm):
     house=SelectField('house')
     submit = SubmitField('Export')
 
-    def setHouses(self,hoPairList,default):
+    def setHouses(self,hoPairList):
         self.house.choices=[('','(Include all houses)')]+_sortNameDescPair(hoPairList)
+    def setDefaultHouse(self,default):
         self.house.data=default
 
 class UploadDataForm(FlaskForm):

@@ -872,14 +872,16 @@ def ep_exportdata():
     resParams=resolveParams()
     form=ExportDataForm()
     houses=sorted(list(dbGetAll('house')))
-    form.setHouses(houses,default=user.house if user.defaulthousesearch else '')
+    form.setHouses(houses)
     if form.validate_on_submit():
         userList=dbMakeDict(dbGetAll('user'))
         # prepare and export the whole structure
         exportedFileName='exportedBiblio_%s.json' % datetime.now().strftime(FILENAME_DATETIME_STR_FORMAT)
         if form.house.data=='':
+            print('setting TrueFilter')
             bookFilter=lambda bo: True
         else:
+            print('setting House==%s' % form.house.data)
             bookFilter=lambda bo: bo.house==form.house.data
         if form.includemetadata.data:
             exportForm='long'
@@ -890,6 +892,9 @@ def ep_exportdata():
             for bk in sorted(dbGetAll('book'))
             if bookFilter(bk)
         ]
+        #
+
+        #
         exportableStructure={'books': bookList}
         if form.includeauthors.data:
             authorList=[au.exportableDict(resolveParams=resParams) for au in sorted(dbGetAll('author'))]
@@ -903,6 +908,7 @@ def ep_exportdata():
                                 as_attachment=True,
                             )
     else:
+        form.setDefaultHouse(user.house if user.defaulthousesearch else '')
         return render_template  (
                                     'exportdataform.html',
                                     form=form,
