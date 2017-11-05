@@ -58,7 +58,16 @@ def import_from_bilist_json(inFileHandle,importingUser,db):
         editdate=datetime.now().strftime(DATETIME_STR_FORMAT)
         #
         inputContents='\n'.join(inFileHandle)
-        inputBilist=json.loads(inputContents)    
+        inputBilist=json.loads(inputContents)
+        # add some default for missing items in books
+        for tBook in inputBilist['books']:
+            if 'inhouse' not in tBook:
+                tBook['inhouse']=True
+            if 'inhousenotes' not in tBook:
+                tBook['inhousenotes']=''
+            if 'notes' not in tBook:
+                tBook['notes']=''
+        #  
         authorInsertionReport=insert_authors_from_structure(inputBilist['authors'],db)
         newAuthorMap={
             (au.lastname,au.firstname): au.id
