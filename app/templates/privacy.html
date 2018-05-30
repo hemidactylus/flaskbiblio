@@ -1,0 +1,35 @@
+{% extends "bootbase.html" %}
+
+{% block content %}
+    {{ super() }}
+
+<div class="container" style="margin-bottom: 40px;">
+  <h2>{{ title_on_page }}</h2>
+  <hr>
+    {% for par in paragraphs %}
+        {% if par.type == 'par' %}
+          <h3>
+            {{ par.title }}
+          </h3>
+          <p>
+            {{ par.body }}
+          </p>
+        {% endif %}
+        {% if par.type == 'img' %}
+          <p align="center">
+            <img src="static/biblio/images/{{ par.image }}" height="{{ par.height }}"/>
+          </p>
+        {% endif %}
+    {% endfor %}
+    <p align="center">
+        <a href="{{ url_for('ep_index') }}" class="btn btn-success">{{ home_button }}</a>
+    </p>
+
+</div>
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}
+
+{% endblock %}
+

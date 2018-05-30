@@ -78,6 +78,7 @@ from app import (
                     booktypesDict,
                 )
 from app.statistics.statistics import sortStatistics
+from app.privacy_policy import privacy_policy
 
 def flashMessage(msgType,msgHeading,msgBody):
     '''
@@ -1242,3 +1243,12 @@ def ep_confirm(operation,value):
                                         operation=operation,
                                         message=tOpe['message'](value),
                                     )
+
+@app.route('/privacy')
+def ep_privacy():
+    user=g.user
+    return render_template(
+        'privacy.html',
+        user=user,
+        **privacy_policy,
+    )
