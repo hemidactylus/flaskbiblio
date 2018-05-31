@@ -6,3 +6,5 @@ sensible_config.py
 app/database/biblio.db
 tests_utils/BibliotecaMansarda.csv
 scripts/db_template.py
+app/static/biblio/images/dpo_email.png
+
