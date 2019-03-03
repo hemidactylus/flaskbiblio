@@ -1,5 +1,7 @@
 # dbtools.py : library to interface with the database
 
+from functools import reduce
+from operator import mul
 from orm import Database
 import os
 from werkzeug.datastructures import ImmutableMultiDict
@@ -96,16 +98,18 @@ def dbTableFilterQuery( tableName, startfrom=0,
                 [nextstartfrom  = startfrom for the next batch]
                 [prevstartfrom  = startfrom for the prev batch]
     '''
+    # whole filters combined
+    wholeFilters = lambda obj: reduce(mul,(ffunc(obj) for ffunc in filterList),1.0)
     # perform query and filters
-    qlist=list(filter(  lambda obj: all([ffunc(obj) for ffunc in filterList]),
-                        (dbGetAll(tableName))
-                     )
-               )
+    qlist=list(filter(
+        lambda obj: wholeFilters(obj)>0,
+        (dbGetAll(tableName))
+    ))
     # sort results (either with default or explicit sorting key)
     if sorter is None:
         reslist=sorted(qlist)
     else:
-        reslist=list(sorted(qlist,key=sorter))
+        reslist=list(sorted(qlist,key= lambda bk: sorter(bk,wholeFilters)))
     # determine numbers
     result={'ntotal': len(reslist)}
     result['firstitem']=startfrom
@@ -127,7 +131,7 @@ def makeBookFilter(fName,fValue,useSimilarity=False):
     '''
     if fName=='author':
         def aufinder(bo,v=fValue):
-            return int(v) in unrollStringList(bo.authors)
+            return 1.0 if int(v) in unrollStringList(bo.authors) else 0.0
         return aufinder
     elif fName=='title':
         if useSimilarity:
@@ -135,40 +139,60 @@ def makeBookFilter(fName,fValue,useSimilarity=False):
             vVector=makeIntoVector(fValue)
             if sum(vVector.values()):
                 def tifinder(bo,vec=vVector):
-                    return (scalProd(vec,makeIntoVector(bo.title))>=SIMILAR_BOOK_THRESHOLD) or \
-                        any(scalProd(vec,makeIntoVector(tok))>=SIMILAR_BOOK_THRESHOLD
-                            for tok in bo.title.split(' ')
-                            if len(tok)>=MINIMUM_SIMILAR_BOOK_TOKEN_SIZE)
+                    matchSum=0.0
+                    if scalProd(vec,makeIntoVector(bo.title))>=SIMILAR_BOOK_THRESHOLD:
+                        matchSum += (1.0+scalProd(vec,makeIntoVector(bo.title)))*(1+len(bo.title.split(' ')))
+                    for tok in bo.title.split(' '):
+                        if scalProd(vec,makeIntoVector(tok))>=SIMILAR_BOOK_THRESHOLD and \
+                        len(tok)>=MINIMUM_SIMILAR_BOOK_TOKEN_SIZE:
+                            matchSum+=(1.0+scalProd(vec,makeIntoVector(tok)))
+                    #
+                    return matchSum
                 return tifinder
             else:
                 return makeBookFilter(fName,fValue,useSimilarity=False)
         else:
             def tifinder(bo,v=fValue):
-                return any(vpart.lower() in bo.title.lower() for vpart in v.split(' '))
+                matchSum=0.0
+                botoks = bo.title.lower().split(' ')
+                if len(botoks):
+                    for vpart in v.split(' '):
+                        #
+                        maxMatch = max(
+                            (len(vpart)+ ((1.0+len(vpart))/len(btok)) ) if vpart in btok else 0
+                            for btok in botoks
+                        )
+                        matchSum+=maxMatch
+                return matchSum
+                # return sum(
+                #     (3*len(vpart)+0.1+(len(vpart)/len(tpart))) if vpart in tpart else 0.0
+                #     for vpart in v.split(' ')
+                #     for tpart in bo.title.lower().split(' ')
+                # )
             return tifinder
     elif fName=='booktype':
         def btfinder(bo,v=fValue):
-            return bo.booktype.upper()==v.upper()
+            return 1.0 if bo.booktype.upper()==v.upper() else 0.0
         return btfinder
     elif fName=='language':
         def lafinder(bo,v=fValue):
-            return v.upper() in bo.languages.split(',')
+            return 1.0 if v.upper() in bo.languages.split(',') else 0.0
         return lafinder
     elif fName=='inhouse':
         def ihfinder(bo,v=fValue):
-            return bool(bo.inhouse)==bool(int(v))
+            return 1.0 if bool(bo.inhouse)==bool(int(v)) else 0.0
         return ihfinder
     elif fName=='house':
         if fValue!='-2':
             def hofinder(bo,v=fValue):
-                return bo.house==v
+                return 1.0 if bo.house==v else 0.0
         else:
             # special all-house filter
             def hofinder(bo,v=fValue):
-                return True
+                return 1.0
         return hofinder
     else:
-        return lambda: True
+        return lambda: 1.0
 
 def makeAuthorFilter(fName, fValue, useSimilarity=False):
     '''
@@ -216,20 +240,24 @@ def makeBookSorter(sName):
         to use when sorting results.
     '''
     if sName=='title':
-        def tisorter(bo):
+        def tisorter(bo,filtering):
             return bo.title
         return tisorter
     elif sName=='booktype':
-        def btsorter(bo):
+        def btsorter(bo,filtering):
             return bo.booktype
         return btsorter
     elif sName=='lastedit':
-        def lesorter(bo):
+        def lesorter(bo,filtering):
             try:
                 return -time.mktime(datetime.strptime(bo.lasteditdate,DATETIME_STR_FORMAT).timetuple())
             except:
                 return 0
         return lesorter
+    elif sName=='relevance':
+        def resorter(bo,filtering):
+            return -filtering(bo)
+        return resorter
     else:
         return None
 

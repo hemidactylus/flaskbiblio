@@ -102,6 +102,7 @@ class SearchBookForm(FlaskForm):
         self.house.choices=[('-1','<Optional>'),('-2','(Include all houses)')]+_sortNameDescPair(hoPairList)
     # sorting options
     sortby=SelectField('sortby', choices=[
+        ('relevance','Relevance'),
         ('title','Title'),
         ('booktype','Booktype'),
         ('lastedit','Last edit'),
