@@ -164,11 +164,6 @@ def makeBookFilter(fName,fValue,useSimilarity=False):
                         )
                         matchSum+=maxMatch
                 return matchSum
-                # return sum(
-                #     (3*len(vpart)+0.1+(len(vpart)/len(tpart))) if vpart in tpart else 0.0
-                #     for vpart in v.split(' ')
-                #     for tpart in bo.title.lower().split(' ')
-                # )
             return tifinder
     elif fName=='booktype':
         def btfinder(bo,v=fValue):
