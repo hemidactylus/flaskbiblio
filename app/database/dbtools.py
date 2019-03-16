@@ -262,11 +262,11 @@ def makeAuthorSorter(sName):
         to use when sorting results.
     '''
     if sName=='firstname':
-        def fnsorter(au):
+        def fnsorter(au,filtering):
             return au.firstname
         return fnsorter
     elif sName=='lastname':
-        def lnsorter(au):
+        def lnsorter(au,filtering):
             return au.lastname
         return lnsorter
     else:
