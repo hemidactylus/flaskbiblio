@@ -136,13 +136,15 @@ def makeBookFilter(fName,fValue,useSimilarity=False):
     elif fName=='title':
         if useSimilarity:
             # prepare and store vector
-            vVector=makeIntoVector(fValue)
+            vVector=makeIntoVector(fValue.lower())
             if sum(vVector.values()):
                 def tifinder(bo,vec=vVector):
                     matchSum=0.0
-                    if scalProd(vec,makeIntoVector(bo.title))>=SIMILAR_BOOK_THRESHOLD:
-                        matchSum += (1.0+scalProd(vec,makeIntoVector(bo.title)))*(1+len(bo.title.split(' ')))
-                    for tok in bo.title.split(' '):
+                    boTitleVector=makeIntoVector(bo.title.lower())
+                    boTitleTokens=[t.lower() for t in bo.title.lower().split(' ')]
+                    if scalProd(vec,boTitleVector)>=SIMILAR_BOOK_THRESHOLD:
+                        matchSum += (1.0+scalProd(vec,boTitleVector))*(1+len(boTitleTokens))
+                    for tok in boTitleTokens:
                         if scalProd(vec,makeIntoVector(tok))>=SIMILAR_BOOK_THRESHOLD and \
                         len(tok)>=MINIMUM_SIMILAR_BOOK_TOKEN_SIZE:
                             matchSum+=(1.0+scalProd(vec,makeIntoVector(tok)))
@@ -156,7 +158,7 @@ def makeBookFilter(fName,fValue,useSimilarity=False):
                 matchSum=0.0
                 botoks = bo.title.lower().split(' ')
                 if len(botoks):
-                    for vpart in v.split(' '):
+                    for vpart in v.lower().split(' '):
                         #
                         maxMatch = max(
                             (len(vpart)+ ((1.0+len(vpart))/len(btok)) ) if vpart in btok else 0
