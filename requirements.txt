@@ -13,5 +13,5 @@ pytz==2016.10
 six==1.10.0
 sqlite-orm==0.0.1b0
 visitor==0.1.3
-Werkzeug==0.14.1
+Werkzeug==0.15.3
 WTForms==2.1
