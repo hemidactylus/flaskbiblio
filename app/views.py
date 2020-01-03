@@ -806,9 +806,9 @@ def ep_usersettings():
     houses=sorted(list(dbGetAll('house')))
     form.setHouses(houses)
     if form.validate_on_submit():
-        user.requireconfirmation=bool(form.requireconfirmation.data)
-        user.checksimilarity=bool(form.checksimilarity.data)
-        user.defaulthousesearch=bool(form.defaulthousesearch.data)
+        user.requireconfirmation=int(form.requireconfirmation.data)
+        user.checksimilarity=int(form.checksimilarity.data)
+        user.defaulthousesearch=int(form.defaulthousesearch.data)
         user.resultsperpage=int(form.resultsperpage.data)
         user.house=form.house.data
         result,newuser=dbReplaceUser(user)
